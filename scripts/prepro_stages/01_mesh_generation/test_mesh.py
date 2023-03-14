@@ -14,7 +14,8 @@ config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
 
 MAIN_PATH = config['main_path']
-sys.path.append(MAIN_PATH)
+fice_tools = config['ficetoos_path']
+sys.path.append(fice_tools)
 
 from ficetools.backend import MPI, Mesh, MeshFunction, MeshValueCollection, XDMFFile, File
 

@@ -62,11 +62,11 @@ mesh_outfile = os.path.join(output_path, 'ase_variable_ocean')
 
 lc_params = {}
 for key in config['mesh_lc_params'].keys():
-    lc_params = np.float64(config['mesh_lc_params'][key])
+    lc_params[key] = np.float64(config['mesh_lc_params'][key])
 
 mesh_extent = {}
 for key in config['mesh_extent'].keys():
-    mesh_extent = np.float64(config['mesh_extent'][key])
+    mesh_extent[key] = np.float64(config['mesh_extent'][key])
 
 meshtools.set_mmg_lib(config['mmg_path'])
 
