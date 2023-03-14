@@ -55,7 +55,8 @@ config = ConfigObj(os.path.expanduser(config_file))
 
 # Define main repository path
 MAIN_PATH = config['main_path']
-sys.path.append(MAIN_PATH)
+fice_tools = config['ficetoos_path']
+sys.path.append(fice_tools)
 
 from ficetools import velocity as vel_tools
 

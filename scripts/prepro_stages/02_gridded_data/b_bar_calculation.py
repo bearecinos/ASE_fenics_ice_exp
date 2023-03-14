@@ -1,6 +1,7 @@
 """
-Reads data from Frank Pattyn's Temp.mat and Z.mat files, computes B_bar and writes
-an output in .h5 format in the same grid as ase_glacier_bedmachine.h5.
+Reads data from Frank Pattyn's Temp.mat and Z.mat files,
+computes B_bar and writes an output in .h5 format
+in the same grid as ase_glacier_bedmachine.h5.
 Stores the output in fenics_ice ready format.
 """
 import os
@@ -14,7 +15,10 @@ import argparse
 from configobj import ConfigObj
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-conf", type=str, default="../../../config.ini", help="pass config file")
+parser.add_argument("-conf",
+                    type=str,
+                    default="../../../config.ini",
+                    help="pass config file")
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
@@ -23,9 +27,11 @@ config = ConfigObj(os.path.expanduser(config_file))
 # Main directory path
 # This needs changing in bow
 MAIN_PATH = config['main_path']
-sys.path.append(MAIN_PATH)
+fice_tools = config['ficetoos_path']
+sys.path.append(fice_tools)
+
 output_path = os.path.join(MAIN_PATH,
-                            'output/02_gridded_data')
+                           'output/02_gridded_data')
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
@@ -47,11 +53,11 @@ zeta = z['zeta']
 # when zeta=0.25, this is 25 % of the ice thickness from the surface.
 # also zeta spacing is IRREGULAR (see below)
 
-#temperature CONVERTED TO C
+# Temperature CONVERTED TO C
 T = C['temp507'] - 273.15
-# rearrange dimensions to be in line with
+# re-arrange dimensions to be in line with
 # python convention -- 1st axis is vertical
-T = np.transpose(T,(2,0,1))
+T = np.transpose(T, (2, 0, 1))
 
 print(np.shape(T))
 print(np.shape(zeta))
@@ -66,19 +72,18 @@ Bglen = A**(-1/3)
 print(np.shape(Bglen))
 
 # IMPORTANT!!!!
-#NEED TO FIND OUT THE UNITS EXPECTED BY FENICS_ICE.
-#Above will have units Pa s^(1/3), is Pa yr^(1/3) needed???
-
+# NEED TO FIND OUT THE UNITS EXPECTED BY FENICS_ICE.
+# Above will have units Pa s^(1/3), is Pa yr^(1/3) needed???
 # NEED TO AVERAGE B IN VERTICAL --
 # BUT CANNOT USE np.mean() because of irregular coordinates.
-Bbar = np.trapz(Bglen,zeta[0,:],axis=0)
+Bbar = np.trapz(Bglen, zeta[0, :], axis=0)
 
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 
-## Dealing with Frank's Patterson x and y
+# Dealing with Frank's Patterson x and y
 x_p = np.int32(C['X'][:][0])*1000
 y_p = np.int32(C['Y'][:].T[0])*1000
 
@@ -104,13 +109,13 @@ sel = B.loc[y_s, x_s].values
 mask = np.zeros(np.shape(sel))
 mask[~np.isnan(sel)] = 1.0
 
-x_r, y_r = np.meshgrid(x_s,y_s)
+x_r, y_r = np.meshgrid(x_s, y_s)
 
 xnn = x_r[~np.isnan(sel)]
 ynn = y_r[~np.isnan(sel)]
 snn = sel[~np.isnan(sel)]
 
-gd = interp.griddata((xnn,ynn),snn,(x_r,y_r),method='nearest')
+gd = interp.griddata((xnn, ynn), snn, (x_r, y_r), method='nearest')
 
 
 smb = 0.38*np.ones(sel.shape)

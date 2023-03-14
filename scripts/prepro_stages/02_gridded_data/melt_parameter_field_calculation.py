@@ -29,7 +29,9 @@ melt_max_2 = 25.
 # Main directory path
 # This needs changing in bow
 MAIN_PATH = config['main_path']
-sys.path.append(MAIN_PATH)
+fice_tools = config['ficetoos_path']
+sys.path.append(fice_tools)
+
 output_path = os.path.join(MAIN_PATH,
                             'output/02_gridded_data')
 if not os.path.exists(output_path):
