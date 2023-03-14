@@ -75,7 +75,7 @@ Bbar = np.trapz(Bglen,zeta[0,:],axis=0)
 
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
-    ase_bbox = np.float64(config['mesh_extent'][key])
+    ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 
 ## Dealing with Frank's Patterson x and y

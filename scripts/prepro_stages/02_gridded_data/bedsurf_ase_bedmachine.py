@@ -1,7 +1,8 @@
 """
 Slice data from BedMachine netCDF and store in fenics_ice ready format.
 
-It also applies gaussian filtering, and redefines the ice base where required for hydrostatic
+It also applies gaussian filtering,
+and redefines the ice base where required for hydrostatic
 equilibrium.
 """
 import os
@@ -16,8 +17,15 @@ import argparse
 from configobj import ConfigObj
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-sigma", type=float, default=0.0, help="Sigma value for gauss filter - zero means no filtering")
-parser.add_argument("-conf", type=str, default="../../../config.ini", help="pass config file")
+parser.add_argument("-sigma",
+                    type=float,
+                    default=0.0,
+                    help="Sigma value for gauss filter - "
+                         "zero means no filtering")
+parser.add_argument("-conf",
+                    type=str,
+                    default="../../../config.ini",
+                    help="pass config file")
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
@@ -37,46 +45,77 @@ bedmac_file = os.path.join(MAIN_PATH, config['input_files']['bedmachine'])
 
 # Out files
 output_path = os.path.join(MAIN_PATH,
-                            'output/02_gridded_data')
+                           'output/02_gridded_data')
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
-out_file = Path(os.path.join(MAIN_PATH, config['output_files']['ase_bedmachine']))
+out_file = Path(os.path.join(MAIN_PATH,
+                             config['output_files']['ase_bedmachine']))
 
 if filt:
-    out_file = out_file.stem + "_filt_" + str(gauss_sigma) + out_file.suffix
+    out_file = out_file.stem + \
+               "_filt_" + \
+               str(gauss_sigma) + \
+               out_file.suffix
 
 rhoi = 917.0
 rhow = 1030.0
 
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
-    ase_bbox = np.float64(config['mesh_extent'][key])
+    ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 indata = netCDF4.Dataset(bedmac_file)
 
 # xx = indata['x']
 # yy = indata['y']
 
-bed, xx, yy = meshtools.slice_netcdf(indata, 'bed', ase_bbox, return_transform=False)
-surf, _, _ = meshtools.slice_netcdf(indata, 'surface', ase_bbox, return_transform=False)
-thick, _, _ = meshtools.slice_netcdf(indata, 'thickness', ase_bbox, return_transform=False)
-mask, _, _ = meshtools.slice_netcdf(indata, 'mask', ase_bbox, return_transform=False)
+bed, xx, yy = meshtools.slice_netcdf(indata,
+                                     'bed',
+                                     ase_bbox,
+                                     return_transform=False)
+
+surf, _, _ = meshtools.slice_netcdf(indata,
+                                    'surface',
+                                    ase_bbox,
+                                    return_transform=False)
+
+thick, _, _ = meshtools.slice_netcdf(indata,
+                                     'thickness',
+                                     ase_bbox,
+                                     return_transform=False)
+
+mask, _, _ = meshtools.slice_netcdf(indata,
+                                    'mask',
+                                    ase_bbox,
+                                    return_transform=False)
 
 #####################################################################
 # Smooth surf, then redefine ice base as min(bed, surf-floatthick)
 #####################################################################
 
-# Convenience function for param sweep sigma (1.5)
+
 def filt_and_show(arr, sigma):
+    """
+    # Convenience function for param sweep sigma (1.5)
+    arr: array to which the filter will be applied to
+    sigma: gaussian filter for topography
+    out: plots the gaussian filter applied to
+         bedmachine
+    """
     result = gaussian_filter(arr, sigma)
     plt.matshow(result[50:150, 100:200])
     plt.show()
+
 
 def gaussian_nan(arr, sigma, trunc=4.0):
     """
     Clever approach to gaussian filter w/ nans:
     https://stackoverflow.com/questions/18697532/gaussian-filtering-a-image-with-nan-in-python
+    arr: array with nans
+    sigma: filter to applied
+    trunc: Truncate the filter at this many standard deviations.
+        Default is 4.0.
     """
     arr1 = arr.copy()
     arr1[np.isnan(arr)] = 0.0
@@ -91,19 +130,22 @@ def gaussian_nan(arr, sigma, trunc=4.0):
     result[np.isnan(arr)] = np.nan
     return result
 
+
 if filt:
 
     # Smooth the surface
     surf_filt = surf.copy()
-    surf_filt[mask <= 1] = np.nan  # mask ocean/nunatak
-    surf_filt = gaussian_nan(surf_filt, gauss_sigma)  # gauss filter accounting for nans
-    #surf_filt[mask <= 1] = 0.0
+    # mask ocean/nunatak
+    surf_filt[mask <= 1] = np.nan
+    # gauss filter accounting for nans
+    surf_filt = gaussian_nan(surf_filt, gauss_sigma)
+    # surf_filt[mask <= 1] = 0.0
 
     assert np.nanmin(surf_filt) >= 0.0
 
     # Compute flotation thickness (i.e. max thick)
     float_thick = surf_filt * (rhow / (rhow - rhoi))
-    #float_thick[surf_filt == 0.0] = 0.0
+    # float_thick[surf_filt == 0.0] = 0.0
 
     # And the ice base (max of flotation base or BedMachine bed)
     base_float = surf_filt - float_thick
@@ -119,8 +161,10 @@ else:
     thick_mod = thick
     surf_filt = surf
 
-with h5py.File(os.path.join(MAIN_PATH,
-                            config['output_files']['ase_bedmachine']), 'w') as outty:
+file_name_out = os.path.join(MAIN_PATH,
+                             config['output_files']['ase_bedmachine'])
+
+with h5py.File(file_name_out, 'w') as outty:
     data = outty.create_dataset("bed", bed.shape, dtype='f')
     data[:] = bed
     data = outty.create_dataset("thick", thick_mod.shape, dtype='f')

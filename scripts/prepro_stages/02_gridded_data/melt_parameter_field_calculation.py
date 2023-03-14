@@ -39,7 +39,7 @@ if not os.path.exists(output_path):
 # grid on which to find mask
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
-    ase_bbox = np.float64(config['mesh_extent'][key])
+    ase_bbox[key] = np.float64(config['mesh_extent'][key])
               
 xmin = ase_bbox['xmin']
 xmax = ase_bbox['xmax']

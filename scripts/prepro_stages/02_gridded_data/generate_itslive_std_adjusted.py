@@ -67,7 +67,7 @@ from ficetools import velocity as vel_tools
 # IMPORTANT .. verify that the extent is always bigger than the mesh!
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
-    ase_bbox = np.float64(config['mesh_extent'][key])
+    ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 print('The velocity product for the composite solution will be ITSlive')
 print('This choice is slightly slower '

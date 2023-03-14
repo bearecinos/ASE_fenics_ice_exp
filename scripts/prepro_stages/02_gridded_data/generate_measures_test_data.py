@@ -59,7 +59,7 @@ from ficetools import velocity as vel_tools
 
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
-    ase_bbox = np.float64(config['mesh_extent'][key])
+    ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 ### Define paths for itslive file
 path_itslive = os.path.join(MAIN_PATH,
