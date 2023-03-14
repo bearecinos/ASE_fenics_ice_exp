@@ -111,7 +111,7 @@ mask, mask_transform = meshtools.slice_netcdf(bedmachine_data, 'mask', mesh_exte
 #
 # 0 -> 0
 # 1,2,3,4 -> 1
-mask = (mask >= 1).astype(np.int)
+mask = (mask >= 1).astype(np.int64)
 
 
 gmsh_ring, ice_labels, ocean_labels = meshtools.generate_boundary(mask,
