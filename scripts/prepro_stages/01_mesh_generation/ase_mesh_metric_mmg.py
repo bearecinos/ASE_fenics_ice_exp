@@ -31,14 +31,19 @@ from configobj import ConfigObj
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-conf", type=str, default="../../../config.ini", help="pass config file")
+
+parser.add_argument("-conf",
+                    type=str,
+                    default="../../../config.ini",
+                    help="pass config file")
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
 
 # Main directory path
 MAIN_PATH = config['main_path']
-sys.path.append(MAIN_PATH)
+fice_tools = config['ficetoos_path']
+sys.path.append(fice_tools)
 
 from ficetools import mesh as meshtools
 
