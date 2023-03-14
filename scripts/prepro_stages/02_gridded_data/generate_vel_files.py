@@ -35,10 +35,15 @@ import xarray as xr
 from decimal import Decimal
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-conf", type=str, default="../../../config.ini", help="pass config file")
+parser.add_argument("-conf",
+                    type=str,
+                    default="../../../config.ini",
+                    help="pass config file")
 parser.add_argument("-composite",
-                    type=str, default='measures',
-                    help="Data product for the composite velocities: itslive or measures")
+                    type=str,
+                    default='measures',
+                    help="Data product for the composite velocities: "
+                         "itslive or measures")
 parser.add_argument("-add_cloud_data",
                     action="store_true",
                     help="If this is specify a year for the data is selected "
@@ -62,11 +67,13 @@ from ficetools import velocity as vel_tools
 
 # Define the ase Glacier extent to crop all velocity data to this region
 # IMPORTANT .. verify that the extent is always bigger than the mesh!
+ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
+ef = args.error_factor
 
-#1) Generate first composite velocities and uncertainties
+# 1) Generate first composite velocities and uncertainties
 if args.composite == 'itslive':
     print('The velocity product for the composite solution will be ITSlive')
     print('This choice is slightly slower '
@@ -89,10 +96,13 @@ if args.composite == 'itslive':
 
     dv = xr.open_dataset(paths_itslive[0])
 
-    vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv, error_factor=args.error_factor)
+    vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
+                                                              error_factor=ef)
 
-    vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
+    vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx,
+                                                            ase_bbox,
                                                             return_coords=True)
+
     vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
     vx_std_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
     vy_std_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
@@ -128,10 +138,13 @@ if args.composite == 'itslive':
 
         dv = xr.open_dataset(paths_itslive[4])
 
-        vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv, error_factor=args.error_factor)
+        vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
+                                                                  error_factor=ef)
 
-        vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
+        vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx,
+                                                                ase_bbox,
                                                                 return_coords=True)
+
         vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
         vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
         vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
@@ -165,14 +178,15 @@ else:
 
     # First load and process MEaSUREs data for storing a composite mean of
     # all velocity components and uncertainty
-    path_measures = os.path.join(MAIN_PATH, config['input_files']['measures_comp'])
+    path_measures = os.path.join(MAIN_PATH,
+                                 config['input_files']['measures_comp'])
 
     dm = xr.open_dataset(path_measures)
 
     vx = dm.VX
     vy = dm.VY
-    std_vx = dm.STDX * args.error_factor
-    std_vy = dm.STDY * args.error_factor
+    std_vx = dm.STDX * ef
+    std_vy = dm.STDY * ef
 
     # Crop velocity data to the ase Glacier extend
     vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
@@ -208,17 +222,19 @@ else:
         print('The velocity product for the cloud '
               'point data its Measures 2013-2014')
 
-        path_measures = os.path.join(MAIN_PATH, config['input_files']['measures_cloud'])
+        path_measures = os.path.join(MAIN_PATH,
+                                     config['input_files']['measures_cloud'])
 
         dm = xr.open_dataset(path_measures)
 
         vx = dm.VX
         vy = dm.VY
-        std_vx = dm.STDX * args.error_factor
-        std_vy = dm.STDY * args.error_factor
+        std_vx = dm.STDX * ef
+        std_vy = dm.STDY * ef
 
         # Crop velocity data to the ase Glacier extend
-        vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
+        vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx,
+                                                                ase_bbox,
                                                                 return_coords=True)
         vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
         std_vx_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
@@ -227,7 +243,7 @@ else:
         # Mask arrays and interpolate nan with nearest neighbor
         x_grid, y_grid = np.meshgrid(x_s, y_s)
 
-        #array to mask ... a dot product of component and std
+        # array to mask ... a dot product of component and std
         mask_array = vx_s*std_vx_s
 
         array_ma = np.ma.masked_invalid(mask_array)
@@ -254,13 +270,21 @@ composite = args.composite + '-comp_'
 cloud = args.composite + '-cloud_'
 
 if args.add_cloud_data:
-    file_suffix = composite + cloud + 'error-factor-' + "{:.0E}".format(Decimal(args.error_factor)) +'.h5'
+    file_suffix = composite + \
+                  cloud + \
+                  'error-factor-' + \
+                  "{:.0E}".format(Decimal(ef)) + '.h5'
 else:
-    file_suffix = composite + 'no-cloud_' + 'error-factor-' "{:.0E}".format(Decimal(args.error_factor)) + '.h5'
+    file_suffix = composite + \
+                  'no-cloud_' + \
+                  'error-factor-' + \
+                  "{:.0E}".format(Decimal(ef)) + '.h5'
 
-file_name = os.path.join(MAIN_PATH, config['output_files']['ase_vel_obs']+file_suffix)
+file_name = os.path.join(MAIN_PATH,
+                         config['output_files']['ase_vel_obs'] +
+                         file_suffix)
 
 
 vel_tools.write_velocity_tuple_h5file(comp_dict=composite_dict,
-                                  cloud_dict=cloud_dict,
-                                  fpath=file_name)
+                                      cloud_dict=cloud_dict,
+                                      fpath=file_name)
