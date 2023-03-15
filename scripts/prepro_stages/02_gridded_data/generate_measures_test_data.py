@@ -72,6 +72,8 @@ for f in file_names:
     paths_itslive.append(os.path.join(path_itslive, f))
 print(paths_itslive)
 
+paths_itslive = sorted(paths_itslive)
+
 assert '_0000.nc' in paths_itslive[0]
 assert '_2014.nc' in paths_itslive[4]
 

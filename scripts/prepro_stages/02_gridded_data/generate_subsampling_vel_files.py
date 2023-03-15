@@ -85,6 +85,7 @@ if args.composite == 'itslive':
 
     print(paths_itslive)
 
+    paths_itslive = sorted(paths_itslive)
     assert '_0000.nc' in paths_itslive[0]
     assert '_2014.nc' in paths_itslive[4]
 
