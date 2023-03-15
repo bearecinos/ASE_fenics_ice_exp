@@ -68,8 +68,8 @@ from ficetools import velocity as vel_tools
 # Define the ase Glacier extent to crop all velocity data to this region
 # IMPORTANT .. verify that the extent is always bigger than the mesh!
 ase_bbox = {}
-for key in config['mesh_extent'].keys():
-    ase_bbox[key] = np.float64(config['mesh_extent'][key])
+for key in config['data_input_extent'].keys():
+    ase_bbox[key] = np.float64(config['data_input_extent'][key])
 
 ef = args.error_factor
 

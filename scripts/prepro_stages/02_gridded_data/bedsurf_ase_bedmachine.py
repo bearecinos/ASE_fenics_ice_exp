@@ -62,8 +62,8 @@ rhoi = 917.0
 rhow = 1030.0
 
 ase_bbox = {}
-for key in config['mesh_extent'].keys():
-    ase_bbox[key] = np.float64(config['mesh_extent'][key])
+for key in config['data_input_extent'].keys():
+    ase_bbox[key] = np.float64(config['data_input_extent'][key])
 
 indata = netCDF4.Dataset(bedmac_file)
 
