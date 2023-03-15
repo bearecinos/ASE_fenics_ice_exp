@@ -32,7 +32,7 @@ echo $(date -u) "Run inversion stages started"
 mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $2 |& tee $path_logs/log_tom2_inv.txt
 OUT=$(tail "$path_logs/log_tom2_inv.txt")
 echo $OUT | mail -s "run inv finish config1" beatriz.recinos@ed.ac.uk
-#
+
 #echo $(date -u) "Run forward stages started"
 #mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_forward.py $2 |& tee $path_logs/log_tom2_fwd.txt
 #OUT=$(tail "$path_logs/log_tom2_fwd.txt")
