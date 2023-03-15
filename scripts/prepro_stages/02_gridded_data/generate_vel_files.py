@@ -89,6 +89,7 @@ if args.composite == 'itslive':
     for f in file_names:
         paths_itslive.append(os.path.join(path_itslive, f))
 
+    paths_itslive = sorted(paths_itslive)
     print(paths_itslive)
 
     assert '_0000.nc' in paths_itslive[0]
