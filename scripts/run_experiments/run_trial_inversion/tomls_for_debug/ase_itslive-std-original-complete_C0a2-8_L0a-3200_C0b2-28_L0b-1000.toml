@@ -25,7 +25,7 @@ bglenmask_field_name = "bglenmask"
 
 log_level = "debug" #This is default
 
-output_var_format = "pvd"
+output_var_format = "all"
 
 [constants]
 
@@ -90,11 +90,11 @@ verbose = true
 delta_lbfgs = 1.0e3
 
 initial_guess_alpha_method = 'constant'
-initial_guess_alpha = 15.0
+initial_guess_alpha = 5.0
 
 use_cloud_point_velocities = true
 
-phase_suffix = 'itslive_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_test_'
+phase_suffix = '_all_cores_new_mesh'
 
 [ice_dynamics]
 
@@ -144,7 +144,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 0
 
-phase_suffix = 'itslive_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_test_'
+phase_suffix = '_all_cores_new_mesh'
 
 
 [eigendec]
@@ -157,18 +157,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = 'itslive_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_test_'
+phase_suffix = '_all_cores_new_mesh'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = 'itslive_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_test_'
+phase_suffix = '_all_cores_new_mesh'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = 'itslive_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_test_'
+phase_suffix = '_all_cores_new_mesh'
 
 [melt]
 
@@ -180,6 +180,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = 'itslive_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_test_'
+phase_suffix = '_all_cores_new_mesh'
 sample_posterior = true
 num_eigenvals = 10
