@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_debug_inv"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_inversion_test_sliding/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_inversion_test_sliding/diagnostics"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_inversion_max_iter_500_inialpha_2_/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_inversion_max_iter_500_inialpha_2_/diagnostics"
 
 write_diagnostics = true
 
@@ -59,7 +59,7 @@ vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_error-factor-1E+0.h5"
 
 [inversion]
 
-max_iter = 200
+max_iter = 500
 
 alpha_active = true
 beta_active = true
@@ -87,7 +87,7 @@ verbose = true
 delta_lbfgs = 1.0e3
 
 initial_guess_alpha_method = 'constant'
-initial_guess_alpha = 15.0
+initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = true
 
