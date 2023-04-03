@@ -25,7 +25,6 @@ import os
 import sys
 import numpy as np
 from netCDF4 import Dataset as NCDataset
-import gmsh
 import meshio
 from configobj import ConfigObj
 import argparse
@@ -42,9 +41,15 @@ config = ConfigObj(os.path.expanduser(config_file))
 
 # Main directory path
 MAIN_PATH = config['main_path']
+gmsh_lib_path = config['gmsh_path']
 fice_tools = config['ficetoos_path']
+
+if gmsh_lib_path:
+    sys.path.append(gmsh_lib_path)
+
 sys.path.append(fice_tools)
 
+import gmsh
 from ficetools import mesh as meshtools
 
 # In files

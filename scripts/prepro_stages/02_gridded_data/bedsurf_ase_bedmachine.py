@@ -33,9 +33,13 @@ config = ConfigObj(os.path.expanduser(config_file))
 # Main directory path
 # This needs changing in bow
 MAIN_PATH = config['main_path']
+gmsh_lib_path = config['gmsh_path']
 fice_tools = config['ficetoos_path']
-sys.path.append(fice_tools)
 
+if gmsh_lib_path:
+    sys.path.append(gmsh_lib_path)
+
+sys.path.append(fice_tools)
 from ficetools import mesh as meshtools
 
 gauss_sigma = args.sigma
