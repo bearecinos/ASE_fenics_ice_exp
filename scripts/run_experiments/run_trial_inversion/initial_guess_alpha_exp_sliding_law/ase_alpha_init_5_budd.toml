@@ -1,7 +1,7 @@
 [io] #Directory specification
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
-run_name = "ase_lcurve_trial"
+run_name = "ase_alpha_exp"
 input_dir = ""
 output_dir = ""
 diagnostics_dir = ""
@@ -23,7 +23,7 @@ bglenmask_field_name = "bglenmask"
 #melt_depth_therm_field_name = "melt_depth_therm"
 #melt_max_field_name = "melt_max"
 
-log_level = "info" #This is default
+log_level = "debug" #This is default
 
 output_var_format = "all"
 
@@ -55,11 +55,11 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_measures-comp_measures-cloud_error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_error-factor-1E+0.h5"
 
 [inversion]
 
-max_iter = 500
+max_iter = 200
 
 alpha_active = true
 beta_active = true
@@ -79,24 +79,24 @@ delta_beta_gnd = 3e-5
 #C0_beta**2 = 28.0
 #L0_beta = 1000.0
 
-ftol = 1e-8
-gtol = 1e-12
+ftol = 2.22e-09
+gtol = 1e-05
 m = 200
 verbose = true
 
 delta_lbfgs = 1.0e3
 
 initial_guess_alpha_method = 'constant'
-initial_guess_alpha = 2.0
+initial_guess_alpha = 5.0
 
 use_cloud_point_velocities = true
 
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_initial_guess_alpha_5_budd_'
 
 [ice_dynamics]
 
 sliding_law = 'budd' #weertman, linear
-min_thickness = 5.0
+min_thickness = 5
 
 [momsolve]
 
@@ -141,7 +141,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 0
 
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_initial_guess_alpha_5_budd_'
 
 
 [eigendec]
@@ -154,18 +154,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_initial_guess_alpha_5_budd_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_initial_guess_alpha_5_budd_'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_initial_guess_alpha_5_budd_'
 
 [melt]
 
@@ -177,6 +177,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_initial_guess_alpha_5_budd_'
 sample_posterior = true
 num_eigenvals = 10

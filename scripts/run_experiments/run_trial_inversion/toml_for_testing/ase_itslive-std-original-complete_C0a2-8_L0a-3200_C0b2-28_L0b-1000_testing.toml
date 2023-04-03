@@ -1,7 +1,7 @@
 [io] #Directory specification
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
-run_name = "ase_lcurve_trial"
+run_name = "ase_debug_inv"
 input_dir = ""
 output_dir = ""
 diagnostics_dir = ""
@@ -23,7 +23,7 @@ bglenmask_field_name = "bglenmask"
 #melt_depth_therm_field_name = "melt_depth_therm"
 #melt_max_field_name = "melt_max"
 
-log_level = "info" #This is default
+log_level = "debug" #This is default
 
 output_var_format = "all"
 
@@ -55,11 +55,14 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_measures-comp_measures-cloud_error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_error-factor-1E+0.h5"
 
 [inversion]
 
-max_iter = 500
+max_iter = 1
+
+c1 = 1.0e-10
+c2 = 0.99999990
 
 alpha_active = true
 beta_active = true
@@ -82,7 +85,7 @@ delta_beta_gnd = 3e-5
 ftol = 1e-8
 gtol = 1e-12
 m = 200
-verbose = true
+verbose = false
 
 delta_lbfgs = 1.0e3
 
@@ -91,7 +94,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = true
 
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_test_inversion_'
 
 [ice_dynamics]
 
@@ -107,7 +110,7 @@ linear_solver = "cg"
 preconditioner = "hypre_amg"
 maximum_iterations = 200
 absolute_tolerance = 1.0e-0
-relative_tolerance = 1.0e-4
+relative_tolerance = 1.0e-3
 convergence_criterion = "incremental"
 error_on_nonconvergence =  false
 
@@ -118,7 +121,7 @@ linear_solver = "bicgstab" # gmres?  try direct too. [cg with icc]  [gmres, sor]
 preconditioner = "hypre_amg" # doesn't work so well on unstructured mesh?
 maximum_iterations = 25
 absolute_tolerance = 1.0e-7
-relative_tolerance = 1.0e-7
+relative_tolerance = 1.0e-8
 convergence_criterion = "incremental"
 error_on_nonconvergence = true
 [momsolve.newton_params.newton_solver.krylov_solver]
@@ -141,7 +144,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 0
 
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_test_inversion_'
 
 
 [eigendec]
@@ -154,18 +157,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_test_inversion_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_test_inversion_'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_test_inversion_'
 
 [melt]
 
@@ -177,6 +180,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = 'measures_std-original-complete_C0a-8_L0a-3200_C0b-28_L0b-1000_'
+phase_suffix = '_test_inversion_'
 sample_posterior = true
 num_eigenvals = 10

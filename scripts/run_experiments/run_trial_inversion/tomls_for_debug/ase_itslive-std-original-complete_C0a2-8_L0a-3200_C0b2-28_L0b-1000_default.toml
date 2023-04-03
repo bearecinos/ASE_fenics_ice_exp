@@ -2,9 +2,9 @@
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_debug_inv"
-input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/04_debug_inversion/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/04_debug_inversion/diagnostics"
+input_dir = ""
+output_dir = ""
+diagnostics_dir = ""
 
 write_diagnostics = true
 
@@ -49,7 +49,7 @@ flow_bc = "obs_vel"
 [[BC]]
 
 name = "Calving Fronts"
-labels = [2, 3, 4]
+labels = [2, 3]
 flow_bc = "calving"
 
 
@@ -59,10 +59,7 @@ vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_error-factor-1E+0.h5"
 
 [inversion]
 
-max_iter = 1
-
-c1 = 1.0e-10
-c2 = 0.99999990
+max_iter = 200
 
 alpha_active = true
 beta_active = true
@@ -82,19 +79,19 @@ delta_beta_gnd = 3e-5
 #C0_beta**2 = 28.0
 #L0_beta = 1000.0
 
-ftol = 1e-8
-gtol = 1e-12
+ftol = 2.22e-09
+gtol = 1e-05
 m = 200
 verbose = true
 
 delta_lbfgs = 1.0e3
 
 initial_guess_alpha_method = 'constant'
-initial_guess_alpha = 5.0
+initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = true
 
-phase_suffix = '_all_cores_new_mesh'
+phase_suffix = '_default_config_'
 
 [ice_dynamics]
 
@@ -110,7 +107,7 @@ linear_solver = "cg"
 preconditioner = "hypre_amg"
 maximum_iterations = 200
 absolute_tolerance = 1.0e-0
-relative_tolerance = 1.0e-3
+relative_tolerance = 1.0e-4
 convergence_criterion = "incremental"
 error_on_nonconvergence =  false
 
@@ -121,7 +118,7 @@ linear_solver = "bicgstab" # gmres?  try direct too. [cg with icc]  [gmres, sor]
 preconditioner = "hypre_amg" # doesn't work so well on unstructured mesh?
 maximum_iterations = 25
 absolute_tolerance = 1.0e-7
-relative_tolerance = 1.0e-8
+relative_tolerance = 1.0e-7
 convergence_criterion = "incremental"
 error_on_nonconvergence = true
 [momsolve.newton_params.newton_solver.krylov_solver]
@@ -144,7 +141,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 0
 
-phase_suffix = '_all_cores_new_mesh'
+phase_suffix = '_default_config_'
 
 
 [eigendec]
@@ -157,18 +154,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_all_cores_new_mesh'
+phase_suffix = '_default_config_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_all_cores_new_mesh'
+phase_suffix = '_default_config_'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_all_cores_new_mesh'
+phase_suffix = '_default_config_'
 
 [melt]
 
@@ -180,6 +177,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_all_cores_new_mesh'
+phase_suffix = '_default_config_'
 sample_posterior = true
 num_eigenvals = 10

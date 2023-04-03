@@ -11,7 +11,7 @@ else
 fi
 
 # Create output directory for inversion output
-export run_inv_output_dir=$OUTPUT_DIR/06_inversion_test
+export run_inv_output_dir=$OUTPUT_DIR/03_inversion_debugg
 if [ ! -d $run_inv_output_dir ]
 then
   echo "Creating run directory $run_inv_output_dir"
@@ -27,10 +27,9 @@ toml set --toml-path $2 io.input_dir "$input_run_inv"
 toml set --toml-path $2 io.output_dir "$run_inv_output_dir/output"
 toml set --toml-path $2 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
 
-echo $(date -u) "Run inversion stages started"
-
-mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $2 |& tee $path_logs/log_tom1_newmesh.txt
-OUT=$(tail "$path_logs/log_tom1_newmesh.txt")
+echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
+mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $2 |& tee $path_logs/log_debugg.txt
+OUT=$(tail "$path_logs/log_debugg.txt")
 echo $OUT | mail -s "run inv finish config1" beatriz.recinos@ed.ac.uk
 
 #echo $(date -u) "Run forward stages started"
