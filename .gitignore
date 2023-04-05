@@ -2,4 +2,5 @@ output
 .idea/
 dev_notebooks
 input_data
+scripts/run_experiments/run_trial_inversion/tomls_for_debug/backup.toml
 log_*
