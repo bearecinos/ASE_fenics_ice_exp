@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create and define your run_input directory for the workflow run
-input_run_inv=$INPUT_DIR/input_run_workflow
+input_run_inv=$INPUT_DIR/input_run_workflow_coarse
 if [ ! -d $input_run_inv ]
 then
   echo "Creating run input directory $input_run_inv"
@@ -11,7 +11,7 @@ else
 fi
 
 # Create output directory for inversion output
-export run_inv_output_dir=$OUTPUT_DIR/03_inversion_debugg
+export run_inv_output_dir=$OUTPUT_DIR/03_inversion_debugg_coarse
 if [ ! -d $run_inv_output_dir ]
 then
   echo "Creating run directory $run_inv_output_dir"
