@@ -20,7 +20,7 @@ else
   echo "Directory is $run_inv_output_dir already exist"
 fi
 
-path_logs=$RUN_CONFIG_DIR/run_trial_inversion/tomls_for_debug
+path_logs=$RUN_CONFIG_DIR/run_trial_inversion_coarse_mesh/experiments_with_mosaic
 echo "Logs will be store here:" $path_logs
 
 toml set --toml-path $2 io.input_dir "$input_run_inv"
