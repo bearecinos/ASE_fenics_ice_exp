@@ -7,10 +7,12 @@ import os
 import sys
 import numpy as np
 import h5py
-from scipy import io
+from scipy import io 
+from scipy.interpolate import RegularGridInterpolator
 import argparse
 from configobj import ConfigObj
 from matplotlib.path import Path
+from IPython import embed
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-conf", type=str, default="../../../config.ini", help="pass config file")
@@ -21,10 +23,12 @@ config = ConfigObj(os.path.expanduser(config_file))
 
 # IMPORTANT: here is where we set our parameters
 
-melt_depth_therm_1 = 600.
-melt_depth_therm_2 = 600.
-melt_max_1 = 50.
-melt_max_2 = 25.
+melt_depth_therm_PIG = 500.
+melt_depth_therm_TG = 500.
+melt_depth_therm_SG = 600.
+melt_max_PIG = 100.
+melt_max_TG = 50.
+melt_max_SG = 50.
 
 # Main directory path
 # This needs changing in bow
@@ -51,29 +55,26 @@ ymax = ase_bbox['ymax']
 x = np.arange(xmin,xmax+1,1.e3)
 y = np.arange(ymin,ymax+1,1.e3)
 
+X,Y = np.meshgrid(x,y)
+
 # read the matlab file
 
 C = io.loadmat(config['input_files']['shelves_outline'])
-xs = C['xdot'].flatten().tolist()
-ys = C['ydot'].flatten().tolist()
-xgrid,ygrid = np.meshgrid(x,y)
-nygrid, nxgrid = np.shape(xgrid)
-xgrid, ygrid = xgrid.flatten(), ygrid.flatten()
-#poly = zip(xs,ys)
-poly = [(xs[i],ys[i]) for i in range(0,len(xs))]
-points =np.vstack((xgrid,ygrid)).T
-path = Path(poly)
-grid = path.contains_points(points).astype(float)
-grid = grid + 1
-grid = np.reshape(grid,(nygrid,nxgrid))
+xs = C['x']
+ys = C['y']
+M = C['M']
+interp = RegularGridInterpolator((xs.flatten(),ys.flatten()), M.T, method='nearest',fill_value=3,bounds_error=False)
+Mint = interp((X,Y))
 
-melt_depth_therm_field = np.zeros(np.shape(grid))
-melt_depth_therm_field[grid==1] = melt_depth_therm_1
-melt_depth_therm_field[grid==2] = melt_depth_therm_2
+melt_depth_therm_field = np.zeros(np.shape(Mint))
+melt_depth_therm_field[Mint==1] = melt_depth_therm_PIG
+melt_depth_therm_field[Mint==2] = melt_depth_therm_TG
+melt_depth_therm_field[Mint==3] = melt_depth_therm_SG
 
-melt_max_field = np.zeros(np.shape(grid))
-melt_max_field[grid==1] = melt_max_1
-melt_max_field[grid==2] = melt_max_2
+melt_max_field = np.zeros(np.shape(Mint))
+melt_max_field[Mint==1] = melt_max_PIG
+melt_max_field[Mint==2] = melt_max_TG
+melt_max_field[Mint==3] = melt_max_SG
 
 
 with h5py.File(os.path.join(output_path,
