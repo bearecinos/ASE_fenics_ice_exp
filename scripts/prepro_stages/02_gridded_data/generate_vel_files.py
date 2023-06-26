@@ -50,7 +50,7 @@ parser.add_argument("-add_cloud_data",
                          "we dont interpolate nans and add the data as it is "
                          " as cloud point velocities to the .h5 file")
 parser.add_argument("-year",
-                      type=float,
+                      type=int,
                       default= 2014,
                       help="if specify gives back vel "
                            "files corresponding that year")
@@ -103,7 +103,7 @@ if args.composite == 'itslive':
     assert '_0000.nc' in mosaic_file_path
 
     cloud_file_path = utils_funcs.find_itslive_file(year, path_itslive_main)
-    assert '_'+str(year)+'.nc' in cloud_file_path
+    assert '_'+str(year)+'.nc' in cloud_file_path, 'File does not exist check main itslive data folder'
 
     dv = xr.open_dataset(mosaic_file_path)
 
@@ -214,7 +214,8 @@ else:
     # Mask arrays and interpolate nan with nearest neighbor
     x_grid, y_grid = np.meshgrid(x_s, y_s)
     
-    array_ma = np.ma.masked_invalid(vx_s)
+    mask_array = vx_s*std_vx_s
+    array_ma = np.ma.masked_invalid(mask_array)
 
     # get only the valid values
     x_nona = x_grid[~array_ma.mask].ravel()
@@ -248,7 +249,7 @@ else:
         path_measures = utils_funcs.find_measures_file(year,
                                                        config['input_files']['measures_cloud'])
         assert '_' + str(year-1) + '_' + str(year) + \
-               '_1km_v01.nc' in path_measures
+               '_1km_v01.nc' in path_measures, "File does not exist check main measures data folder"
 
         dm = xr.open_dataset(path_measures)
 
