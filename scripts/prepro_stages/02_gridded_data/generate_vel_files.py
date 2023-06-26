@@ -49,6 +49,11 @@ parser.add_argument("-add_cloud_data",
                     help="If this is specify a year for the data is selected "
                          "we dont interpolate nans and add the data as it is "
                          " as cloud point velocities to the .h5 file")
+parser.add_argument("-year",
+                      type=float,
+                      default= 2014,
+                      help="if specify gives back vel "
+                           "files corresponding that year")
 parser.add_argument("-error_factor",
                     type=float, default=1.0,
                     help="Enlarge error in observation by a factor")
@@ -64,6 +69,7 @@ fice_tools = config['ficetoos_path']
 sys.path.append(fice_tools)
 
 from ficetools import velocity as vel_tools
+from ficetools import utils_funcs
 
 # Define the ase Glacier extent to crop all velocity data to this region
 # IMPORTANT .. verify that the extent is always bigger than the mesh!
@@ -72,6 +78,7 @@ for key in config['data_input_extent'].keys():
     ase_bbox[key] = np.float64(config['data_input_extent'][key])
 
 ef = args.error_factor
+year = args.year
 
 # 1) Generate first composite velocities and uncertainties
 if args.composite == 'itslive':
@@ -92,10 +99,13 @@ if args.composite == 'itslive':
     paths_itslive = sorted(paths_itslive)
     print(paths_itslive)
 
-    assert '_0000.nc' in paths_itslive[0]
-    assert '_2014.nc' in paths_itslive[4]
+    mosaic_file_path = paths_itslive[0]
+    assert '_0000.nc' in mosaic_file_path
 
-    dv = xr.open_dataset(paths_itslive[0])
+    cloud_file_path = utils_funcs.find_itslive_file(year, path_itslive)
+    assert '_'+str(year)+'.nc' in cloud_file_path
+
+    dv = xr.open_dataset(mosaic_file_path)
 
     vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
                                                               error_factor=ef)
@@ -138,11 +148,11 @@ if args.composite == 'itslive':
 
     if args.add_cloud_data:
         print('The velocity product for the cloud '
-              'point data its ITSlive 2014')
+              'point data its ITSlive '+str(year))
         # Opening files with salem slower than rasterio
         # but they end up more organised in xr.DataArrays
 
-        dv = xr.open_dataset(paths_itslive[4])
+        dv = xr.open_dataset(cloud_file_path)
 
         vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
                                                                   error_factor=ef)
@@ -232,10 +242,13 @@ else:
 
     if args.add_cloud_data:
         print('The velocity product for the cloud '
-              'point data its Measures 2013-2014')
+              'point data its Measures from '+
+              str(year-1) + 'to' + str(year))
 
-        path_measures = os.path.join(MAIN_PATH,
-                                     config['input_files']['measures_cloud'])
+        path_measures = utils_funcs.find_measures_file(year,
+                                                       config['input_files']['measures_cloud'])
+        assert '_' + str(year-1) + '_' + str(year) + \
+               '_1km_v01.nc' in path_measures
 
         dm = xr.open_dataset(path_measures)
 
@@ -284,6 +297,7 @@ cloud = args.composite + '-cloud_'
 if args.add_cloud_data:
     file_suffix = composite + \
                   cloud + \
+                  str(year) + '-' +\
                   'error-factor-' + \
                   "{:.0E}".format(Decimal(ef)) + '.h5'
 else:
