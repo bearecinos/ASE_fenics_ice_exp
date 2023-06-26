@@ -88,13 +88,13 @@ if args.composite == 'itslive':
 
     # First load and process ITSLive data for storing
     # a composite mean of all velocity components and uncertainty
-    path_itslive = os.path.join(MAIN_PATH,
+    path_itslive_main = os.path.join(MAIN_PATH,
                                 config['input_files']['itslive'])
-    file_names = os.listdir(path_itslive)
+    file_names = os.listdir(path_itslive_main)
 
     paths_itslive = []
     for f in file_names:
-        paths_itslive.append(os.path.join(path_itslive, f))
+        paths_itslive.append(os.path.join(path_itslive_main, f))
 
     paths_itslive = sorted(paths_itslive)
     print(paths_itslive)
@@ -102,7 +102,7 @@ if args.composite == 'itslive':
     mosaic_file_path = paths_itslive[0]
     assert '_0000.nc' in mosaic_file_path
 
-    cloud_file_path = utils_funcs.find_itslive_file(year, path_itslive)
+    cloud_file_path = utils_funcs.find_itslive_file(year, path_itslive_main)
     assert '_'+str(year)+'.nc' in cloud_file_path
 
     dv = xr.open_dataset(mosaic_file_path)
