@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_debug_inv"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_coarse"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_exp_on_vel_years/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_exp_on_vel_years/diagnostics"
+output_dir = ""
+diagnostics_dir = ""
 
 write_diagnostics = true
 
@@ -93,7 +93,7 @@ delta_lbfgs = 1.0e3
 initial_guess_alpha_method = 'constant'
 initial_guess_alpha = 2.0
 
-use_cloud_point_velocities = false
+use_cloud_point_velocities = true
 
 phase_suffix = '_default_vel_2014_'
 
