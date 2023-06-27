@@ -31,9 +31,9 @@ toml set --toml-path $3 io.input_dir "$input_run_inv"
 toml set --toml-path $3 io.output_dir "$run_inv_output_dir/output"
 toml set --toml-path $3 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
 
-toml set --toml-path $4 io.input_dir "$input_run_inv"
-toml set --toml-path $4 io.output_dir "$run_inv_output_dir/output"
-toml set --toml-path $4 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
+#toml set --toml-path $4 io.input_dir "$input_run_inv"
+#toml set --toml-path $4 io.output_dir "$run_inv_output_dir/output"
+#toml set --toml-path $4 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
 
 echo $(date -u) "Run inversion stages started config1" | mail -s "run inv started config1" beatriz.recinos@ed.ac.uk
 mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $2 |& tee $path_logs/log_debugg_config1.txt
@@ -45,7 +45,7 @@ mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $3 |& tee $path_logs/lo
 OUT=$(tail "$path_logs/log_debugg_config2.txt")
 echo $OUT | mail -s "run inv finish config2" beatriz.recinos@ed.ac.uk
 
-echo $(date -u) "Run inversion stages started config3" | mail -s "run inv started config3" beatriz.recinos@ed.ac.uk
-mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $4 |& tee $path_logs/log_debugg_config3.txt
-OUT=$(tail "$path_logs/log_debugg_config3.txt")
-echo $OUT | mail -s "run inv finish config3" beatriz.recinos@ed.ac.uk
+#echo $(date -u) "Run inversion stages started config3" | mail -s "run inv started config3" beatriz.recinos@ed.ac.uk
+#mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $4 |& tee $path_logs/log_debugg_config3.txt
+#OUT=$(tail "$path_logs/log_debugg_config3.txt")
+#echo $OUT | mail -s "run inv finish config3" beatriz.recinos@ed.ac.uk
