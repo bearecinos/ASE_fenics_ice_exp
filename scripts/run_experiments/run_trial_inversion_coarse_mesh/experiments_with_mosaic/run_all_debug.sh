@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create and define your run_input directory for the workflow run
-input_run_inv=$INPUT_DIR/input_run_workflow_coarse
+input_run_inv=$INPUT_DIR/input_run_workflow_test
 if [ ! -d $input_run_inv ]
 then
   echo "Creating run input directory $input_run_inv"

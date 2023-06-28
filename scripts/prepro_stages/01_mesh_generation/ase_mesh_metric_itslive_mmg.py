@@ -39,39 +39,17 @@ parser.add_argument("-conf",
                     type=str,
                     default="../../../config.ini",
                     help="pass config file")
-parser.add_argument("-lc",
-                    type=float,
-                    default=1000,
-                    help="mesh size parameter in gmsh")
-parser.add_argument("-len_min",
-                    type=float,
-                    default=100,
-                    help="We set a uniform mesh size by "
-                         "modifying the GMSH options, "
-                         "just for the minimum value, "
-                         "we let the maximum be set by the domain scale")
-parser.add_argument("-mmg_hgrad",
-                    type=float,
-                    default=1.3,
-                    help="maximum edge-length ratio of "
-                         "neighbouring elements (float) mmg param")
-parser.add_argument("-mmg_hausd",
-                    type=float,
-                    default=100,
-                    help="max distance by which edges "
-                         "can be moved from original")
+parser.add_argument("-smooth_coast",
+                    type=bool,
+                    default=False,
+                    help="If specified we smooth the calving front")
 
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
 
-# Mesh params
-lc = args.lc
-len_min = args.len_min
-
-# MMG params
-hgrad = args.mmg_hgrad
-hausd = args.mmg_hausd
+#smooth coastline and calving front
+smooth = args.smooth_coast
 
 # Main directory path
 MAIN_PATH = config['main_path']
@@ -104,6 +82,13 @@ mesh_outfile = os.path.join(output_path, 'ase_variable_ocean')
 lc_params = {}
 for key in config['mesh_lc_params'].keys():
     lc_params[key] = np.float64(config['mesh_lc_params'][key])
+
+# Mesh params
+lc = lc_params['lc']
+
+# MMG params
+hgrad = lc_params['mmg_hgrad']
+hausd = lc_params['mmg_hausd']
 
 mesh_extent = {}
 for key in config['mesh_extent'].keys():
@@ -199,19 +184,23 @@ mask = (mask >= 1).astype(np.int64)
 
 gmsh_ring, ice_labels, ocean_labels = meshtools.generate_boundary(mask,
                                                                   mask_transform,
-                                                                  simplify_tol=1.0e3,
-                                                                  bbox=mesh_extent)
+                                                                  simplify_tol=lc_params['simplify_tol'],
+                                                                  bbox=mesh_extent,
+                                                                  smooth_front=smooth)
 
 ice_tag, ocean_tags = meshtools.build_gmsh_domain(gmsh_ring,
                                                   ice_labels,
                                                   ocean_labels,
-                                                  lc=lc)
+                                                  lc=lc,
+                                                  mesh_size_min=lc_params['min'],
+                                                  mesh_size_max=lc_params['max']
+                                                  )
 
 meshtools.tags_to_file({'ice': [ice_tag],
                         'ocean': ocean_tags},
                        mesh_outfile+"_BCs.txt")
 
-gmsh.option.setNumber("Mesh.CharacteristicLengthMin", len_min)
+
 gmsh.model.geo.synchronize()
 
 # Create the (not yet adapted) mesh
