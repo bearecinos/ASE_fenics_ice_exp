@@ -60,6 +60,10 @@ parser.add_argument("-mmg_hausd",
                     default=100,
                     help="max distance by which edges "
                          "can be moved from original")
+parser.add_argument("-smooth_coast",
+                    type=bool,
+                    default=False,
+                    help="If specified we smooth the calving front")
 
 args = parser.parse_args()
 config_file = args.conf
@@ -72,6 +76,9 @@ len_min = args.len_min
 # MMG params
 hgrad = args.mmg_hgrad
 hausd = args.mmg_hausd
+
+#smooth coastline and calving front
+smooth = args.smooth_coast
 
 # Main directory path
 MAIN_PATH = config['main_path']
@@ -199,19 +206,23 @@ mask = (mask >= 1).astype(np.int64)
 
 gmsh_ring, ice_labels, ocean_labels = meshtools.generate_boundary(mask,
                                                                   mask_transform,
-                                                                  simplify_tol=1.0e3,
-                                                                  bbox=mesh_extent)
+                                                                  simplify_tol=lc_params['simplify_tol'],
+                                                                  bbox=mesh_extent,
+                                                                  smooth_front=smooth)
 
 ice_tag, ocean_tags = meshtools.build_gmsh_domain(gmsh_ring,
                                                   ice_labels,
                                                   ocean_labels,
-                                                  lc=lc)
+                                                  lc=lc,
+                                                  mesh_size_min=lc_params['min'],
+                                                  mesh_size_max=lc_params['max']
+                                                  )
 
 meshtools.tags_to_file({'ice': [ice_tag],
                         'ocean': ocean_tags},
                        mesh_outfile+"_BCs.txt")
 
-gmsh.option.setNumber("Mesh.CharacteristicLengthMin", len_min)
+#gmsh.option.setNumber("Mesh.CharacteristicLengthMin", len_min)
 gmsh.model.geo.synchronize()
 
 # Create the (not yet adapted) mesh
