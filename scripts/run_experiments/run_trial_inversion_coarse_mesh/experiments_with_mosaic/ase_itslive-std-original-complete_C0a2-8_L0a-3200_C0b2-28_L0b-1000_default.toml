@@ -143,7 +143,7 @@ total_steps = 960
 #dt = 0.033333333
 num_sens = 15 #TODO rename
 
-save_frequency = 0
+save_frequency = 5
 
 phase_suffix = '_default_config_mosaic'
 
