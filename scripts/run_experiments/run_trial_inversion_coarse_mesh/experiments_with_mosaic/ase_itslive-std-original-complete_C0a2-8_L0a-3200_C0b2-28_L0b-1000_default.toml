@@ -13,15 +13,15 @@ bed_data_file = "ase_bedmachine.h5"
 smb_data_file = "ase_smb.h5"
 bglen_data_file = "ase_bglen.h5"
 
-#melt_depth_therm_data_file = "ase_melt_depth_params.h5" # This must be a constant melt with melt_depth_therm 600 m!
-#melt_max_data_file = "ase_melt_depth_params.h5" # and melt_max 30
+melt_depth_therm_data_file = "ase_melt_depth_params.h5" # This must be a constant melt with melt_depth_therm 600 m!
+melt_max_data_file = "ase_melt_depth_params.h5" # and melt_max 30
 
 bglenmask_data_file = "ase_bglen.h5"
 bglen_field_name = "bglen"
 bglenmask_field_name = "bglenmask"
 
-#melt_depth_therm_field_name = "melt_depth_therm"
-#melt_max_field_name = "melt_max"
+melt_depth_therm_field_name = "melt_depth_therm"
+melt_max_field_name = "melt_max"
 
 log_level = "debug" #This is default
 
@@ -173,7 +173,7 @@ phase_suffix = '_default_config_mosaic'
 
 [melt]
 
-use_melt_parameterisation = false
+use_melt_parameterisation = true
 
 [sample]
 
