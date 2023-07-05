@@ -12,6 +12,7 @@ from scipy import io
 import pandas as pd
 import scipy.interpolate as interp
 import argparse
+import xarray as xr
 from configobj import ConfigObj
 
 parser = argparse.ArgumentParser()
@@ -19,6 +20,10 @@ parser.add_argument("-conf",
                     type=str,
                     default="../../../config.ini",
                     help="pass config file")
+parser.add_argument("-add_racmo_data",
+                    action="store_true",
+                    help="If this is specify the SMB will be from RACMOv3.2")
+
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
@@ -117,8 +122,35 @@ snn = sel[~np.isnan(sel)]
 
 gd = interp.griddata((xnn, ynn), snn, (x_r, y_r), method='nearest')
 
+if args.add_racmo_data:
+    # We add SMB from RACMO yearly average since 1979
+    racmo_f = config['input_files']['racmo']
+    dracmo = xr.open_dataset(racmo_f, decode_times=False)
+    smb_mean = dracmo.smb.mean(dim='time')
+    smb_mean = smb_mean[0, :, :]
+    x_coords = smb_mean.x.data
+    y_coords = smb_mean.y.data
 
-smb = 0.38*np.ones(sel.shape)
+    x_inds = np.where((x_coords >= ase_bbox["xmin"]) & (x_coords <= ase_bbox["xmax"]))[0]
+    y_inds = np.where((y_coords >= ase_bbox["ymin"]) & (y_coords <= ase_bbox["ymax"]))[0]
+
+    dr = smb_mean.isel(x=x_inds, y=y_inds)
+    dr_sub_x = dr.x.values
+    dr_sub_y = dr.y.values
+
+    x_grid, y_grid = np.meshgrid(dr_sub_x, dr_sub_y)
+    array_ma = np.ma.masked_invalid(dr.data)
+    x_nona_r = x_grid[~array_ma.mask].ravel()
+    y_nona_r = y_grid[~array_ma.mask].ravel()
+    smb_nona = dr.data[~array_ma.mask].ravel()
+
+    file_name = '_smb_racmo'
+
+else:
+    smb_nona = 0.38*np.ones(sel.shape)
+    x_nona_r = x_s
+    y_nona_r = y_s
+    file_name = '_smb_constant'
 
 with h5py.File(os.path.join(output_path,
                             'ase_bglen.h5'), 'w') as outty:
@@ -132,12 +164,14 @@ with h5py.File(os.path.join(output_path,
     data = outty.create_dataset("y", y_s.shape, dtype='f')
     data[:] = y_s
 
-with h5py.File(os.path.join(output_path,
-                            'ase_smb.h5'), 'w') as outty:
+file_smb_name_plus_suffix = 'ase'+file_name+'.h5'
 
-    data = outty.create_dataset("ase_smb", smb.shape, dtype='f')
-    data[:] = smb
-    data = outty.create_dataset("x", x_s.shape, dtype='f')
-    data[:] = x_s
-    data = outty.create_dataset("y", y_s.shape, dtype='f')
-    data[:] = y_s
+with h5py.File(os.path.join(output_path,
+                            file_smb_name_plus_suffix), 'w') as outty:
+
+    data = outty.create_dataset("ase_smb", smb_nona.shape, dtype='f')
+    data[:] = smb_nona
+    data = outty.create_dataset("x", x_nona_r.shape, dtype='f')
+    data[:] = x_nona_r
+    data = outty.create_dataset("y", y_nona_r.shape, dtype='f')
+    data[:] = y_nona_r
