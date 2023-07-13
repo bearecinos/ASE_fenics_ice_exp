@@ -248,6 +248,7 @@ else:
 
         path_measures = utils_funcs.find_measures_file(year,
                                                        config['input_files']['measures_cloud'])
+        print(path_measures)
         assert '_' + str(year-1) + '_' + str(year) + \
                '_1km_v01.nc' in path_measures, "File does not exist check main measures data folder"
 
