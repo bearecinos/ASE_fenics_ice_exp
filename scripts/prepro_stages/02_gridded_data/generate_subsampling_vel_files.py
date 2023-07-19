@@ -106,13 +106,13 @@ if args.composite == 'itslive':
     vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
                                                               error_factor=ef)
 
-    vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx,
-                                                            ase_bbox,
-                                                            return_coords=True)
+    vx_s = vel_tools.crop_velocity_data_to_extend(vx,
+                                                  ase_bbox,
+                                                  return_xarray=True)
 
-    vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
-    vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
-    vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
+    vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox, return_xarray=True)
+    vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox, return_xarray=True)
+    vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox, return_xarray=True)
 
     (x_trn_0, y_trn_0, vx_trn_0), (x_trn_m, y_trn_m, vx_trn_m) = vel_tools.create_subsample(vx_s, step)
     (_, _, vy_trn_0), (_, _, vy_trn_m) = vel_tools.create_subsample(vy_s, step)
@@ -256,11 +256,11 @@ else:
     std_vy = dm.STDY * ef
 
     # Crop velocity data to the ase Glacier extend
-    vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
-                                                            return_coords=True)
-    vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
-    vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
-    vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
+    vx_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
+                                                  return_xarray=True)
+    vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox, return_xarray=True)
+    vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox, return_xarray=True)
+    vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox, return_xarray=True)
 
     (x_trn_0, y_trn_0, vx_trn_0), (x_trn_m, y_trn_m, vx_trn_m) = vel_tools.create_subsample(vx_s, step)
     (_, _, vy_trn_0), (_, _, vy_trn_m) = vel_tools.create_subsample(vy_s, step)
