@@ -399,7 +399,7 @@ else:
 
 
 composite = args.composite + '-comp_'
-cloud = args.composite + '-cloud_'
+cloud = args.composite + '-cloud_' + str(year) + '-'
 
 file_suffix_test = composite + cloud + 'subsample-test-step-' + "{:.0E}".format(Decimal(step)) + \
                    '_error-factor-' + "{:.0E}".format(Decimal(args.error_factor)) + '.h5'
