@@ -44,6 +44,11 @@ parser.add_argument("-composite",
 parser.add_argument("-error_factor",
                     type=float, default=1.0,
                     help="Enlarge error in observation by a factor")
+parser.add_argument("-year",
+                      type=int,
+                      default= 2014,
+                      help="if specify gives back vel "
+                           "files corresponding that year")
 parser.add_argument("-step",
                     type=int, default=10,
                     help="Sub-box size for the subsample")
@@ -59,6 +64,7 @@ fice_tools = config['ficetoos_path']
 sys.path.append(fice_tools)
 
 from ficetools import velocity as vel_tools
+from ficetools import utils_funcs
 
 # Define the ase Glacier extent to crop all velocity data to this region
 # IMPORTANT .. verify that the extent is always bigger than the mesh!
@@ -66,6 +72,9 @@ ase_bbox = {}
 for key in config['data_input_extent'].keys():
     ase_bbox[key] = np.float64(config['data_input_extent'][key])
 
+ef = args.error_factor
+year = args.year
+step = args.step
 
 #1) Generate first composite velocities and uncertainties
 if args.composite == 'itslive':
@@ -75,67 +84,105 @@ if args.composite == 'itslive':
 
     # First load and process ITSLive data for storing
     # a composite mean of all velocity components and uncertainty
-    path_itslive = os.path.join(MAIN_PATH,
-                                config['input_files']['itslive'])
-    file_names = os.listdir(path_itslive)
+    path_itslive_main = os.path.join(MAIN_PATH,
+                                     config['input_files']['itslive'])
+    file_names = os.listdir(path_itslive_main)
 
     paths_itslive = []
     for f in file_names:
-        paths_itslive.append(os.path.join(path_itslive, f))
-
-    print(paths_itslive)
+        paths_itslive.append(os.path.join(path_itslive_main, f))
 
     paths_itslive = sorted(paths_itslive)
-    assert '_0000.nc' in paths_itslive[0]
-    assert '_2014.nc' in paths_itslive[4]
+    print(paths_itslive)
 
-    dv = xr.open_dataset(paths_itslive[0])
+    mosaic_file_path = paths_itslive[0]
+    assert '_0000.nc' in mosaic_file_path
 
-    vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv, error_factor=args.error_factor)
+    cloud_file_path = utils_funcs.find_itslive_file(year, path_itslive_main)
+    assert '_' + str(year) + '.nc' in cloud_file_path, 'File does not exist check main itslive data folder'
 
-    vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
+    dv = xr.open_dataset(mosaic_file_path)
+
+    vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
+                                                              error_factor=ef)
+
+    vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx,
+                                                            ase_bbox,
                                                             return_coords=True)
+
     vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
-    vx_std_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
-    vy_std_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
+    vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
+    vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
 
-    x_grid, y_grid = np.meshgrid(x_s, y_s)
+    (x_trn_0, y_trn_0, vx_trn_0), (x_trn_m, y_trn_m, vx_trn_m) = vel_tools.create_subsample(vx_s, step)
+    (_, _, vy_trn_0), (_, _, vy_trn_m) = vel_tools.create_subsample(vy_s, step)
+    (_, _, vx_std_trn_0), (_, _, vx_std_trn_m) = vel_tools.create_subsample(vx_err_s, step)
+    (_, _, vy_std_trn_0), (_, _, vy_std_trn_m) = vel_tools.create_subsample(vy_err_s, step)
 
-    array_ma = np.ma.masked_invalid(vx_s)
+    # Computing our test set of cloud velocities
+    for x_0, y_0 in zip(x_trn_0, y_trn_0):
+        vx_s.loc[dict(x=x_0, y=y_0)] = np.nan
+        vy_s.loc[dict(x=x_0, y=y_0)] = np.nan
+        vx_err_s.loc[dict(x=x_0, y=y_0)] = np.nan
+        vy_err_s.loc[dict(x=x_0, y=y_0)] = np.nan
 
-    # get only the valid values
-    x_nona = x_grid[~array_ma.mask].ravel()
-    y_nona = y_grid[~array_ma.mask].ravel()
-    vx_nona = vx_s[~array_ma.mask].ravel()
-    vy_nona = vy_s[~array_ma.mask].ravel()
-    stdvx_nona = vx_std_s[~array_ma.mask].ravel()
-    stdvy_nona = vy_std_s[~array_ma.mask].ravel()
+    for x_m, y_m in zip(x_trn_m, y_trn_m):
+        vx_s.loc[dict(x=x_m, y=y_m)] = np.nan
+        vy_s.loc[dict(x=x_m, y=y_m)] = np.nan
+        vx_err_s.loc[dict(x=x_m, y=y_m)] = np.nan
+        vy_err_s.loc[dict(x=x_m, y=y_m)] = np.nan
+
+    # Dropping the Nans from the training set
+    out_mosaic_0 = vel_tools.drop_nan_from_multiple_numpy(x_trn_0, y_trn_0,
+                                                         vx_trn_0, vy_trn_0,
+                                                         vx_std_trn_0, vy_std_trn_0)
+
+    out_mosaic_m = vel_tools.drop_nan_from_multiple_numpy(x_trn_m, y_trn_m,
+                                                         vx_trn_m, vy_trn_m,
+                                                         vx_std_trn_m, vy_std_trn_m)
+
+    mosaic_dict_training_0 = {f'{name:s}_cloud': getattr(out_mosaic_0, name).values for name in ['x', 'y',
+                                                                                               'vx', 'vy',
+                                                                                               'std_vx', 'std_vy']}
+
+    mosaic_dict_training_m = {f'{name:s}_cloud': getattr(out_mosaic_m, name).values for name in ['x', 'y',
+                                                                                               'vx', 'vy',
+                                                                                               'std_vx', 'std_vy']}
+
+    # Dropping the nans from the testing set
+    masked_array = np.ma.masked_invalid(vx_s.data)
+
+    out_test = vel_tools.drop_invalid_data_from_several_arrays(vx_s.x.values,
+                                                               vx_s.y.values,
+                                                               vx_s,
+                                                               vy_s,
+                                                               vx_err_s,
+                                                               vy_err_s,
+                                                               masked_array)
 
     # Ravel all arrays so they can be stored with
     # a tuple shape (values, )
-    composite_dict = {'x_comp': x_nona.ravel(),
-                      'y_comp': y_nona.ravel(),
-                      'vx_comp': vx_nona,
-                      'vy_comp': vy_nona,
-                      'std_vx_comp': stdvx_nona,
-                      'std_vy_comp': stdvy_nona}
+    composite_dict = {'x_comp': out_test[0],
+                      'y_comp': out_test[1],
+                      'vx_comp': out_test[2],
+                      'vy_comp': out_test[3],
+                      'std_vx_comp': out_test[4],
+                      'std_vy_comp': out_test[5]}
 
     print('The velocity product for the cloud '
-          'point data its ITSlive 2014')
+          'point data its ITSlive ' + str(year))
     # Opening files with salem slower than rasterio
     # but they end up more organised in xr.DataArrays
 
-    dv = xr.open_dataset(paths_itslive[4])
+    dv = xr.open_dataset(cloud_file_path)
 
     vx, vy, std_vx, std_vy = vel_tools.process_itslive_netcdf(dv,
-                                                              error_factor=args.error_factor)
+                                                              error_factor=ef)
 
     vx_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox, return_xarray=True)
     vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox, return_xarray=True)
     vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox, return_xarray=True)
     vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox, return_xarray=True)
-
-    step = args.step
 
     # Computing our training sets of cloud velocities
     # vx_trn_0 is the upper left
@@ -205,55 +252,93 @@ else:
 
     vx = dm.VX
     vy = dm.VY
-    std_vx = dm.STDX * args.error_factor
-    std_vy = dm.STDY * args.error_factor
+    std_vx = dm.STDX * ef
+    std_vy = dm.STDY * ef
 
     # Crop velocity data to the ase Glacier extend
     vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
                                                             return_coords=True)
     vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox)
-    std_vx_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
-    std_vy_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
+    vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox)
+    vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox)
 
-    # Mask arrays and interpolate nan with nearest neighbor
-    x_grid, y_grid = np.meshgrid(x_s, y_s)
-    array_ma = np.ma.masked_invalid(vx_s)
+    (x_trn_0, y_trn_0, vx_trn_0), (x_trn_m, y_trn_m, vx_trn_m) = vel_tools.create_subsample(vx_s, step)
+    (_, _, vy_trn_0), (_, _, vy_trn_m) = vel_tools.create_subsample(vy_s, step)
+    (_, _, vx_std_trn_0), (_, _, vx_std_trn_m) = vel_tools.create_subsample(vx_err_s, step)
+    (_, _, vy_std_trn_0), (_, _, vy_std_trn_m) = vel_tools.create_subsample(vy_err_s, step)
 
-    # get only the valid values
-    x_nona = x_grid[~array_ma.mask].ravel()
-    y_nona = y_grid[~array_ma.mask].ravel()
-    vx_nona = vx_s[~array_ma.mask].ravel()
-    vy_nona = vy_s[~array_ma.mask].ravel()
-    stdvx_nona = std_vx_s[~array_ma.mask].ravel()
-    stdvy_nona = std_vy_s[~array_ma.mask].ravel()
+    # Computing our test set of cloud velocities
+    for x_0, y_0 in zip(x_trn_0, y_trn_0):
+        vx_s.loc[dict(x=x_0, y=y_0)] = np.nan
+        vy_s.loc[dict(x=x_0, y=y_0)] = np.nan
+        vx_err_s.loc[dict(x=x_0, y=y_0)] = np.nan
+        vy_err_s.loc[dict(x=x_0, y=y_0)] = np.nan
+
+    for x_m, y_m in zip(x_trn_m, y_trn_m):
+        vx_s.loc[dict(x=x_m, y=y_m)] = np.nan
+        vy_s.loc[dict(x=x_m, y=y_m)] = np.nan
+        vx_err_s.loc[dict(x=x_m, y=y_m)] = np.nan
+        vy_err_s.loc[dict(x=x_m, y=y_m)] = np.nan
+
+    # Dropping the Nans from the training set
+    out_mosaic_0 = vel_tools.drop_nan_from_multiple_numpy(x_trn_0, y_trn_0,
+                                                          vx_trn_0, vy_trn_0,
+                                                          vx_std_trn_0, vy_std_trn_0)
+
+    out_mosaic_m = vel_tools.drop_nan_from_multiple_numpy(x_trn_m, y_trn_m,
+                                                          vx_trn_m, vy_trn_m,
+                                                          vx_std_trn_m, vy_std_trn_m)
+
+    mosaic_dict_training_0 = {f'{name:s}_cloud': getattr(out_mosaic_0, name).values for name in ['x', 'y',
+                                                                                                 'vx', 'vy',
+                                                                                                 'std_vx', 'std_vy']}
+
+    mosaic_dict_training_m = {f'{name:s}_cloud': getattr(out_mosaic_m, name).values for name in ['x', 'y',
+                                                                                                 'vx', 'vy',
+                                                                                                 'std_vx', 'std_vy']}
+
+    # Dropping the nans from the testing set
+    masked_array = np.ma.masked_invalid(vx_s.data)
+
+    out_test = vel_tools.drop_invalid_data_from_several_arrays(vx_s.x.values,
+                                                               vx_s.y.values,
+                                                               vx_s,
+                                                               vy_s,
+                                                               vx_err_s,
+                                                               vy_err_s,
+                                                               masked_array)
 
     # Ravel all arrays so they can be stored with
     # a tuple shape (values, )
-    composite_dict = {'x_comp': x_nona.ravel(),
-                      'y_comp': y_nona.ravel(),
-                      'vx_comp': vx_nona,
-                      'vy_comp': vy_nona,
-                      'std_vx_comp': stdvx_nona,
-                      'std_vy_comp': stdvy_nona}
+    composite_dict = {'x_comp': out_test[0],
+                      'y_comp': out_test[1],
+                      'vx_comp': out_test[2],
+                      'vy_comp': out_test[3],
+                      'std_vx_comp': out_test[4],
+                      'std_vy_comp': out_test[5]}
 
     print('The velocity product for the cloud '
-          'point data its Measures 2013-2014')
+          'point data its Measures from ' +
+          str(year - 1) + 'to' + str(year))
 
-    path_measures = os.path.join(MAIN_PATH, config['input_files']['measures_cloud'])
+    path_measures = utils_funcs.find_measures_file(year,
+                                                   config['input_files']['measures_cloud'])
+    print(path_measures)
+    assert '_' + str(year - 1) + '_' + str(year) + \
+           '_1km_v01.nc' in path_measures, "File does not exist check main measures data folder"
 
     dm = xr.open_dataset(path_measures)
 
     vx = dm.VX
     vy = dm.VY
-    std_vx = dm.STDX * args.error_factor
-    std_vy = dm.STDY * args.error_factor
+    std_vx = dm.STDX * ef
+    std_vy = dm.STDY * ef
 
     vx_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox, return_xarray=True)
     vy_s = vel_tools.crop_velocity_data_to_extend(vy, ase_bbox, return_xarray=True)
     vx_err_s = vel_tools.crop_velocity_data_to_extend(std_vx, ase_bbox, return_xarray=True)
     vy_err_s = vel_tools.crop_velocity_data_to_extend(std_vy, ase_bbox, return_xarray=True)
 
-    step = args.step
 
     # Computing our training sets of cloud velocities
     # vx_trn_0 is the upper left
