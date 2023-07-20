@@ -419,10 +419,10 @@ vel_tools.write_velocity_tuple_h5file(comp_dict=composite_dict,
                                   cloud_dict=cloud_dict_test,
                                   fpath=file_name_test)
 
-vel_tools.write_velocity_tuple_h5file(comp_dict=composite_dict,
+vel_tools.write_velocity_tuple_h5file(comp_dict=mosaic_dict_training_0,
                                   cloud_dict=cloud_dict_training_0,
                                   fpath=file_name_training_0)
 
-vel_tools.write_velocity_tuple_h5file(comp_dict=composite_dict,
+vel_tools.write_velocity_tuple_h5file(comp_dict=mosaic_dict_training_m,
                                   cloud_dict=cloud_dict_training_m,
                                   fpath=file_name_training_m)
