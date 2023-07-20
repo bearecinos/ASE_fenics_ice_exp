@@ -141,11 +141,11 @@ if args.composite == 'itslive':
                                                          vx_trn_m, vy_trn_m,
                                                          vx_std_trn_m, vy_std_trn_m)
 
-    mosaic_dict_training_0 = {f'{name:s}_cloud': getattr(out_mosaic_0, name).values for name in ['x', 'y',
+    mosaic_dict_training_0 = {f'{name:s}_comp': getattr(out_mosaic_0, name).values for name in ['x', 'y',
                                                                                                'vx', 'vy',
                                                                                                'std_vx', 'std_vy']}
 
-    mosaic_dict_training_m = {f'{name:s}_cloud': getattr(out_mosaic_m, name).values for name in ['x', 'y',
+    mosaic_dict_training_m = {f'{name:s}_comp': getattr(out_mosaic_m, name).values for name in ['x', 'y',
                                                                                                'vx', 'vy',
                                                                                                'std_vx', 'std_vy']}
 
@@ -289,11 +289,11 @@ else:
                                                           vx_trn_m, vy_trn_m,
                                                           vx_std_trn_m, vy_std_trn_m)
 
-    mosaic_dict_training_0 = {f'{name:s}_cloud': getattr(out_mosaic_0, name).values for name in ['x', 'y',
+    mosaic_dict_training_0 = {f'{name:s}_comp': getattr(out_mosaic_0, name).values for name in ['x', 'y',
                                                                                                  'vx', 'vy',
                                                                                                  'std_vx', 'std_vy']}
 
-    mosaic_dict_training_m = {f'{name:s}_cloud': getattr(out_mosaic_m, name).values for name in ['x', 'y',
+    mosaic_dict_training_m = {f'{name:s}_comp': getattr(out_mosaic_m, name).values for name in ['x', 'y',
                                                                                                  'vx', 'vy',
                                                                                                  'std_vx', 'std_vy']}
 
