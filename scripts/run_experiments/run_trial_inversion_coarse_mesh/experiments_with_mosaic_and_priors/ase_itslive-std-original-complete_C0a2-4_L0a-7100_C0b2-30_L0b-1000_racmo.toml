@@ -2,9 +2,9 @@
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_debug_inv"
-input_dir = ""
-output_dir = ""
-diagnostics_dir = ""
+input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/10_coarse_mesh_mosaic_priors/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/10_coarse_mesh_mosaic_priors/diagnostics"
 
 write_diagnostics = true
 
@@ -66,16 +66,16 @@ alpha_active = true
 beta_active = true
 
 # Dan priors
-gamma_alpha = 1.7
-delta_alpha = 1.9e-07
+gamma_alpha = 500.0
+delta_alpha = 1.0e-5
 gamma_beta = 9.4
 delta_beta = 9.4e-06
 delta_beta_gnd = 9.4e-06
 
 # All rounded to 2 digits
-#C0_alpha = 500.0
-#C0_alpha**2 = 250000.0
-#L0_alpha = 3000.0
+#C0_alpha = 4.0
+#C0_alpha**2 = 16.0
+#L0_alpha = 7100.0
 #C0_beta = 30.0
 #C0_beta**2 = 900.0
 #L0_beta = 1000.0
@@ -95,7 +95,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [ice_dynamics]
 
@@ -145,7 +145,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [eigendec]
 
@@ -157,18 +157,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [melt]
 
@@ -180,6 +180,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 sample_posterior = true
 num_eigenvals = 10
