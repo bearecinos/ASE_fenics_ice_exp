@@ -2,9 +2,9 @@
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_debug_inv"
-input_dir = ""
-output_dir = ""
-diagnostics_dir = ""
+input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/09_coarse_mesh_subsample_mosaic/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/09_coarse_mesh_subsample_mosaic/diagnostics"
 
 write_diagnostics = true
 
@@ -55,7 +55,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_2014-error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_2014-subsample-training-step-middle-8E+0_error-factor-1E+0.h5"
 
 [inversion]
 
@@ -66,18 +66,18 @@ alpha_active = true
 beta_active = true
 
 # Dan priors
-gamma_alpha = 1.7
-delta_alpha = 1.9e-07
-gamma_beta = 9.4
-delta_beta = 9.4e-06
-delta_beta_gnd = 9.4e-06
+gamma_alpha = 100.0 # after doing gamma-alpha and gamma-beta l-curve
+delta_alpha = 1e-5
+gamma_beta = 10.0
+delta_beta = 1e-5
+delta_beta_gnd = 3e-5
 
 # All rounded to 2 digits
-#C0_alpha = 500.0
-#C0_alpha**2 = 250000.0
-#L0_alpha = 3000.0
-#C0_beta = 30.0
-#C0_beta**2 = 900.0
+#C0_alpha = 80.0
+#C0_alpha**2 = 8.9
+#L0_alpha = 3200.0
+#C0_beta = 800.0
+#C0_beta**2 = 28.0
 #L0_beta = 1000.0
 
 ftol = 1e-8
@@ -95,7 +95,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_step_8_mosaic_racmo'
 
 [ice_dynamics]
 
@@ -145,7 +145,8 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_step_8_mosaic_racmo'
+
 
 [eigendec]
 
@@ -157,18 +158,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_step_8_mosaic_racmo'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_step_8_mosaic_racmo'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_step_8_mosaic_racmo'
 
 [melt]
 
@@ -180,6 +181,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-3000_C0b-30_L0b-1000_'
+phase_suffix = '_step_8_mosaic_racmo'
 sample_posterior = true
 num_eigenvals = 10
