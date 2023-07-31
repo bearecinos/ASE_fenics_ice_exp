@@ -1,0 +1,185 @@
+[io] #Directory specification
+
+#gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
+run_name = "ase_debug_inv"
+input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
+output_dir = ""
+diagnostics_dir = ""
+
+write_diagnostics = true
+
+thick_data_file = "ase_bedmachine.h5"
+bed_data_file = "ase_bedmachine.h5"
+smb_data_file = "ase_smb_racmo.h5"
+bglen_data_file = "ase_bglen.h5"
+
+melt_depth_therm_data_file = "ase_melt_depth_params.h5" # This must be a constant melt with melt_depth_therm 600 m!
+melt_max_data_file = "ase_melt_depth_params.h5" # and melt_max 30
+
+bglenmask_data_file = "ase_bglen.h5"
+bglen_field_name = "bglen"
+bglenmask_field_name = "bglenmask"
+
+melt_depth_therm_field_name = "melt_depth_therm"
+melt_max_field_name = "melt_max"
+
+log_level = "info" #This is default
+
+output_var_format = "all"
+
+[constants]
+
+rhoi = 917.0
+rhow = 1030.0
+g = 9.81
+
+random_seed = 0
+
+[mesh]
+
+mesh_filename = "ase_variable_ocean.xdmf"
+bc_filename = "ase_variable_ocean_ff.xdmf"
+
+[[BC]]
+
+name = "Lateral Margins" # unimportant
+labels = [1]
+flow_bc = "obs_vel"
+
+[[BC]]
+
+name = "Calving Fronts"
+labels = [2, 3]
+flow_bc = "calving"
+
+
+[obs]
+
+vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_2014-error-factor-1E+0.h5"
+
+[inversion]
+
+max_iter = 500
+#max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
+
+alpha_active = true
+beta_active = true
+
+# Dan priors
+gamma_alpha = 7.05
+delta_alpha = 2.82e-03
+gamma_beta = 7.05
+delta_beta = 2.82e-03
+delta_beta_gnd = 9.4e-06
+
+# All rounded to 2 digits
+#C0_alpha = 4.0
+#C0_alpha**2 = 16.0
+#L0_alpha = 50.0
+#C0_beta = 4.0
+#C0_beta**2 = 16.0
+#L0_beta = 50.0
+
+ftol = 1e-8
+gtol = 1e-12
+
+#ftol = 2.22e-09 # This default values fail in the new environment (Newton iteration does not converge)
+#gtol = 1e-05 # This default values fail in  the new environment (Newton iteration does not converge)
+m = 200
+verbose = true
+
+delta_lbfgs = 1.0e3
+
+initial_guess_alpha_method = 'constant'
+initial_guess_alpha = 2.0
+
+use_cloud_point_velocities = false
+
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+
+[ice_dynamics]
+
+sliding_law = 'budd' #weertman, linear
+min_thickness = 5.0
+
+[momsolve]
+
+[momsolve.picard_params]
+nonlinear_solver = "newton"
+[momsolve.picard_params.newton_solver]
+linear_solver = "cg"
+preconditioner = "hypre_amg"
+maximum_iterations = 200
+absolute_tolerance = 1.0e-0
+relative_tolerance = 1.0e-4
+convergence_criterion = "incremental"
+error_on_nonconvergence =  false
+
+[momsolve.newton_params]
+nonlinear_solver = "newton"
+[momsolve.newton_params.newton_solver] #[gmres w/ ilu]
+linear_solver = "bicgstab" # gmres?  try direct too. [cg with icc]  [gmres, sor]
+preconditioner = "hypre_amg" # doesn't work so well on unstructured mesh?
+maximum_iterations = 25
+absolute_tolerance = 1.0e-7
+relative_tolerance = 1.0e-7
+convergence_criterion = "incremental"
+error_on_nonconvergence = true
+[momsolve.newton_params.newton_solver.krylov_solver]
+divergence_limit = 1e20
+nonzero_initial_guess = false
+
+# #used for weertman sliding: (TODO -test)
+# [momsolve.newton_params.newton_solver.lu_solver]
+# same_nonzero_pattern = false
+# symmetric = false
+# reuse_factorization = false
+
+[time]
+
+run_length = 40.0
+#steps_per_year = 30
+total_steps = 960
+#dt = 0.033333333
+num_sens = 15 #TODO rename
+
+save_frequency = 5
+
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+
+[eigendec]
+
+num_eig = 10000
+eig_algo = "slepc"
+misfit_only = true
+
+#power_iter = 1 <- not used yet, saving in case
+precondition_by = "prior" #prior by default
+#eigenvalue_thresh = 1.0e-1
+
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+
+[errorprop]
+
+qoi = 'vaf'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+
+[invsigma]
+
+patch_downscale = 0.1
+# npatches = 100
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+
+[melt]
+
+use_melt_parameterisation = true
+
+[sample]
+
+sample_size = 2
+sample_alpha = true
+sample_beta = true
+phase_name = 'sample'
+phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+sample_posterior = true
+num_eigenvals = 10
