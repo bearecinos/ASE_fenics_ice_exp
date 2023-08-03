@@ -66,19 +66,19 @@ alpha_active = true
 beta_active = true
 
 # Dan priors
-gamma_alpha = 7.05
-delta_alpha = 2.82e-03
-gamma_beta = 7.05
-delta_beta = 2.82e-03
+gamma_alpha = 630.78
+delta_alpha = 2.52e-07
+gamma_beta = 630.78
+delta_beta = 2.52e-07
 delta_beta_gnd = 9.4e-06
 
 # All rounded to 2 digits
-#C0_alpha = 4.0
-#C0_alpha**2 = 16.0
-#L0_alpha = 50.0
-#C0_beta = 4.0
-#C0_beta**2 = 16.0
-#L0_beta = 50.0
+#C0_alpha = 500.0
+#C0_alpha**2 = 250000.0
+#L0_alpha = 50000.0
+#C0_beta = 500.0
+#C0_beta**2 = 250000.0
+#L0_beta = 50000.0
 
 ftol = 1e-8
 gtol = 1e-12
@@ -95,7 +95,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-50000_C0b-500_L0b-50000_'
 
 [ice_dynamics]
 
@@ -145,7 +145,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-50000_C0b-500_L0b-50000_'
 
 [eigendec]
 
@@ -157,18 +157,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-50000_C0b-500_L0b-50000_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-50000_C0b-500_L0b-50000_'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-50000_C0b-500_L0b-50000_'
 
 [melt]
 
@@ -180,6 +180,6 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_itslive_mosaic_racmo_C0a-4_L0a-50_C0b-4_L0b-50_'
+phase_suffix = '_itslive_mosaic_racmo_C0a-500_L0a-50000_C0b-500_L0b-50000_'
 sample_posterior = true
 num_eigenvals = 10
