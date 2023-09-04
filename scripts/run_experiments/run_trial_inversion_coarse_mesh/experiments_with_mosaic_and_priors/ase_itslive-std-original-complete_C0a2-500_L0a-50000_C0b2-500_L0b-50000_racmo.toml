@@ -114,6 +114,8 @@ absolute_tolerance = 1.0e-0
 relative_tolerance = 1.0e-4
 convergence_criterion = "incremental"
 error_on_nonconvergence =  false
+[momsolve.picard_params.newton_solver.krylov_solver]
+relative_tolerance = 1.0e-7
 
 [momsolve.newton_params]
 nonlinear_solver = "newton"
@@ -128,6 +130,7 @@ error_on_nonconvergence = true
 [momsolve.newton_params.newton_solver.krylov_solver]
 divergence_limit = 1e20
 nonzero_initial_guess = false
+relative_tolerance = 1.0e-7
 
 # #used for weertman sliding: (TODO -test)
 # [momsolve.newton_params.newton_solver.lu_solver]
