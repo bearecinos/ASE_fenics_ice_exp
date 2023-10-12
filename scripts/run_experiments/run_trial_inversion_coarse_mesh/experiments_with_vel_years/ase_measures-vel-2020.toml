@@ -2,9 +2,9 @@
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_debug_inv"
-input_dir = ""
-output_dir = ""
-diagnostics_dir = ""
+input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/04_exp_with_vel_years/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/04_exp_with_vel_years/diagnostics"
 
 write_diagnostics = true
 

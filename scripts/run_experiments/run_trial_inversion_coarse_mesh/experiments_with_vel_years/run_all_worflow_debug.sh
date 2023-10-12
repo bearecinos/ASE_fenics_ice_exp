@@ -11,7 +11,7 @@ else
 fi
 
 # Create output directory for inversion output
-export run_inv_output_dir=$OUTPUT_DIR/06_coarse_mesh_plus_mosaic
+export run_inv_output_dir=$OUTPUT_DIR/04_exp_with_vel_years
 if [ ! -d $run_inv_output_dir ]
 then
   echo "Creating run directory $run_inv_output_dir"
