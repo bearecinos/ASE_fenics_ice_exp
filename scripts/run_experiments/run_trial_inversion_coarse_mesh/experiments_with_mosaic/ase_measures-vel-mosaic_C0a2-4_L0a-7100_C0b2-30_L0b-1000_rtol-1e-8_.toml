@@ -186,3 +186,7 @@ phase_name = 'sample'
 phase_suffix = '_measures_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_rtol-1e-8_'
 sample_posterior = true
 num_eigenvals = 10
+
+[obs_sens]
+
+phase_suffix = '_measures_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_rtol-1e-8_'
