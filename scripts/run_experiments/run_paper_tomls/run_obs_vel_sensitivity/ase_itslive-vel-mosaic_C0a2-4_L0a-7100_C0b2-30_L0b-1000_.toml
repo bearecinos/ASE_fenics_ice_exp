@@ -1,29 +1,29 @@
 [io] #Directory specification
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
-run_name = "ase_debug_inv"
-input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_coarse"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/05_exp_on_eps_rp/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/05_exp_on_eps_rp/diagnostics"
+run_name = "ase_itslive"
+input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
+output_dir = ""
+diagnostics_dir = ""
 
 write_diagnostics = true
 
 thick_data_file = "ase_bedmachine.h5"
 bed_data_file = "ase_bedmachine.h5"
-smb_data_file = "ase_smb.h5"
+smb_data_file = "ase_smb_racmo.h5"
 bglen_data_file = "ase_bglen.h5"
 
-#melt_depth_therm_data_file = "ase_melt_depth_params.h5" # This must be a constant melt with melt_depth_therm 600 m!
-#melt_max_data_file = "ase_melt_depth_params.h5" # and melt_max 30
+melt_depth_therm_data_file = "ase_melt_depth_params.h5" # This must be a constant melt with melt_depth_therm 600 m!
+melt_max_data_file = "ase_melt_depth_params.h5" # and melt_max 30
 
 bglenmask_data_file = "ase_bglen.h5"
 bglen_field_name = "bglen"
 bglenmask_field_name = "bglenmask"
 
-#melt_depth_therm_field_name = "melt_depth_therm"
-#melt_max_field_name = "melt_max"
+melt_depth_therm_field_name = "melt_depth_therm"
+melt_max_field_name = "melt_max"
 
-log_level = "debug" #This is default
+log_level = "info" #This is default
 
 output_var_format = "all"
 
@@ -34,7 +34,6 @@ rhow = 1030.0
 g = 9.81
 
 random_seed = 0
-eps_rp = 1e-5
 
 [mesh]
 
@@ -56,7 +55,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_2014-error-factor-1E+0.h5"
 
 [inversion]
 
@@ -67,18 +66,18 @@ alpha_active = true
 beta_active = true
 
 # Dan priors
-gamma_alpha = 100.0 # after doing gamma-alpha and gamma-beta l-curve
-delta_alpha = 1e-5
-gamma_beta = 10.0
-delta_beta = 1e-5
-delta_beta_gnd = 3e-5
+gamma_alpha = 500.0
+delta_alpha = 1.0e-5
+gamma_beta = 9.4
+delta_beta = 9.4e-06
+delta_beta_gnd = 9.4e-06
 
 # All rounded to 2 digits
-#C0_alpha = 80.0
-#C0_alpha**2 = 8.9
-#L0_alpha = 3200.0
-#C0_beta = 800.0
-#C0_beta**2 = 28.0
+#C0_alpha = 4.0
+#C0_alpha**2 = 16.0
+#L0_alpha = 7100.0
+#C0_beta = 30.0
+#C0_beta**2 = 900.0
 #L0_beta = 1000.0
 
 ftol = 1e-8
@@ -94,9 +93,9 @@ delta_lbfgs = 1.0e3
 initial_guess_alpha_method = 'constant'
 initial_guess_alpha = 2.0
 
-use_cloud_point_velocities = true
+use_cloud_point_velocities = false
 
-phase_suffix = 'esp_rp_1E-5_newtonrtol_1E-10'
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [ice_dynamics]
 
@@ -115,6 +114,8 @@ absolute_tolerance = 1.0e-0
 relative_tolerance = 1.0e-4
 convergence_criterion = "incremental"
 error_on_nonconvergence =  false
+[momsolve.picard_params.newton_solver.krylov_solver]
+relative_tolerance = 1.0e-8
 
 [momsolve.newton_params]
 nonlinear_solver = "newton"
@@ -123,12 +124,13 @@ linear_solver = "bicgstab" # gmres?  try direct too. [cg with icc]  [gmres, sor]
 preconditioner = "hypre_amg" # doesn't work so well on unstructured mesh?
 maximum_iterations = 25
 absolute_tolerance = 1.0e-7
-relative_tolerance = 1.0e-10
+relative_tolerance = 1.0e-7
 convergence_criterion = "incremental"
 error_on_nonconvergence = true
 [momsolve.newton_params.newton_solver.krylov_solver]
 divergence_limit = 1e20
 nonzero_initial_guess = false
+relative_tolerance = 1.0e-8
 
 # #used for weertman sliding: (TODO -test)
 # [momsolve.newton_params.newton_solver.lu_solver]
@@ -144,10 +146,9 @@ total_steps = 960
 #dt = 0.033333333
 num_sens = 15 #TODO rename
 
-save_frequency = 0
+save_frequency = 5
 
-phase_suffix = 'esp_rp_1E-5_newtonrtol_1E-10'
-
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [eigendec]
 
@@ -159,22 +160,22 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = 'esp_rp_1E-5_newtonrtol_1E-10'
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = 'esp_rp_1E-5_newtonrtol_1E-10'
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = 'esp_rp_1E-5_newtonrtol_1E-10'
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 
 [melt]
 
-use_melt_parameterisation = false
+use_melt_parameterisation = true
 
 [sample]
 
@@ -182,6 +183,11 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = 'esp_rp_1E-5_newtonrtol_1E-10'
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
 sample_posterior = true
 num_eigenvals = 10
+
+[obs_sens]
+
+phase_suffix = '_itslive_mosaic_C0a-4_L0a-7100_C0b-30_L0b-1000_'
+
