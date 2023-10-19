@@ -55,7 +55,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_measures-comp_measures-cloud_2020-error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_measures-comp_measures-cloud_2014-error-factor-1E+0.h5"
 
 [inversion]
 
