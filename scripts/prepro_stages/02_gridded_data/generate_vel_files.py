@@ -200,7 +200,7 @@ else:
     dm = xr.open_dataset(path_measures)
 
     vx = dm.vx
-    vy = dm.vt
+    vy = dm.vy
     std_vx = dm.std_vx * ef
     std_vy = dm.std_vy * ef
 
