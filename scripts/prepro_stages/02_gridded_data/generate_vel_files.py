@@ -195,14 +195,14 @@ else:
     # First load and process MEaSUREs data for storing a composite mean of
     # all velocity components and uncertainty
     path_measures = os.path.join(MAIN_PATH,
-                                 config['input_files']['measures_comp'])
+                                 config['input_files']['measures_comp_interp'])
 
     dm = xr.open_dataset(path_measures)
 
-    vx = dm.VX
-    vy = dm.VY
-    std_vx = dm.STDX * ef
-    std_vy = dm.STDY * ef
+    vx = dm.vx
+    vy = dm.vt
+    std_vx = dm.std_vx * ef
+    std_vy = dm.std_vy * ef
 
     # Crop velocity data to the ase Glacier extend
     vx_s, x_s, y_s = vel_tools.crop_velocity_data_to_extend(vx, ase_bbox,
