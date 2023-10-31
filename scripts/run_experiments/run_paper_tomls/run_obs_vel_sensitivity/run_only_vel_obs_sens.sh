@@ -20,7 +20,7 @@ else
   echo "Directory is $run_inv_output_dir already exist"
 fi
 
-path_logs=$RUN_CONFIG_DIR/run_papers_tomls/run_obs_vel_sensitivity
+path_logs=$RUN_CONFIG_DIR/run_paper_tomls/run_obs_vel_sensitivity
 echo "Logs will be store here:" $path_logs
 
 toml set --toml-path $1 io.input_dir "$input_run_inv"
