@@ -146,42 +146,42 @@ assert len(xim_s) == len(xmm_s)
 assert sorted(xim_s) == sorted(xmm_s)
 assert sorted(yim_s) == sorted(ymm_s)
 
-## Interpolate all nans in MEaSUREs first ..
-## Then we will mask them with ITSLIVE nan's
-x_r, y_r = np.meshgrid(xmm_s, ymm_s)
+## Interpolate all nans in ITSLIVE first ..
+## Then we will mask them with MEaSUREs nan's
+x_r, y_r = np.meshgrid(xim_s, yim_s)
 
-xnn = x_r[~np.isnan(vxmm_s*vxmm_std_s)]
-ynn = y_r[~np.isnan(vxmm_s*vxmm_std_s)]
-vxnn = vxmm_s[~np.isnan(vxmm_s*vxmm_std_s)]
-vynn = vymm_s[~np.isnan(vxmm_s*vxmm_std_s)]
-vxstd_nn = vxmm_std_s[~np.isnan(vxmm_s*vxmm_std_s)]
-vystd_nn = vymm_std_s[~np.isnan(vxmm_s*vxmm_std_s)]
+xnn = x_r[~np.isnan(vxim_s)]
+ynn = y_r[~np.isnan(vxim_s)]
+vxnn = vxim_s[~np.isnan(vxim_s)]
+vynn = vyim_s[~np.isnan(vxim_s)]
+vxstd_nn = vxim_std_s[~np.isnan(vxim_s)]
+vystd_nn = vyim_std_s[~np.isnan(vxim_s)]
 
-vxmm_int = interp.griddata((xnn,ynn), vxnn, (x_r,y_r), method='nearest')
-vymm_int = interp.griddata((xnn,ynn), vynn, (x_r,y_r), method='nearest')
+vxim_int = interp.griddata((xnn,ynn), vxnn, (x_r,y_r), method='nearest')
+vyim_int = interp.griddata((xnn,ynn), vynn, (x_r,y_r), method='nearest')
 
-vxm_std_int = interp.griddata((xnn,ynn), vxstd_nn, (x_r,y_r), method='nearest')
-vym_std_int = interp.griddata((xnn,ynn), vystd_nn, (x_r,y_r), method='nearest')
+vxi_std_int = interp.griddata((xnn,ynn), vxstd_nn, (x_r,y_r), method='nearest')
+vyi_std_int = interp.griddata((xnn,ynn), vystd_nn, (x_r,y_r), method='nearest')
 
 # Mask arrays and make sure same nans are drop in both
 # Itslive and Measures
 xim_grid, yim_grid = np.meshgrid(xim_s, yim_s)
 
-mask_array = vxim_s
+mask_array = vxmm_s*vxmm_std_s
 array_ma = np.ma.masked_invalid(mask_array)
 
 # get only the valid values for both mosaics
 xim_nona = xim_grid[~array_ma.mask].ravel()
 yim_nona = yim_grid[~array_ma.mask].ravel()
-vxim_nona = vxim_s[~array_ma.mask].ravel()
-vyim_nona = vyim_s[~array_ma.mask].ravel()
-stdvxim_nona = vxim_std_s[~array_ma.mask].ravel()
-stdvyim_nona = vyim_std_s[~array_ma.mask].ravel()
+vxim_nona = vxim_int[~array_ma.mask].ravel()
+vyim_nona = vyim_int[~array_ma.mask].ravel()
+stdvxim_nona = vxi_std_int[~array_ma.mask].ravel()
+stdvyim_nona = vyi_std_int[~array_ma.mask].ravel()
 
-vxmm_nona = vxmm_int[~array_ma.mask].ravel()
-vymm_nona = vymm_int[~array_ma.mask].ravel()
-stdvxmm_nona = vxm_std_int[~array_ma.mask].ravel()
-stdvymm_nona = vym_std_int[~array_ma.mask].ravel()
+vxmm_nona = vxmm_s[~array_ma.mask].ravel()
+vymm_nona = vymm_s[~array_ma.mask].ravel()
+stdvxmm_nona = vxmm_std_s[~array_ma.mask].ravel()
+stdvymm_nona = vymm_std_s[~array_ma.mask].ravel()
 
 if args.add_noise_to_data:
     noise = np.random.normal(loc=mu, scale=sigma, size=vxim_nona.shape)
