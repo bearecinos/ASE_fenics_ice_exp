@@ -147,10 +147,10 @@ assert sorted(xim_s) == sorted(xmm_s)
 assert sorted(yim_s) == sorted(ymm_s)
 
 #Fill nan's in measures with zeros
-vxmm_s[np.isnan(vxmm_s*vxmm_std_s)] = 1e-07
-vymm_s[np.isnan(vxmm_s*vxmm_std_s)] = 1e-07
-vxmm_std_s[np.isnan(vxmm_s*vxmm_std_s)] = 1e-07
-vymm_std_s[np.isnan(vxmm_s*vxmm_std_s)] = 1e-07
+vxmm_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
+vymm_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
+vxmm_std_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
+vymm_std_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
 
 # Mask arrays and make sure same nans are drop in both
 # Itslive and Measures
