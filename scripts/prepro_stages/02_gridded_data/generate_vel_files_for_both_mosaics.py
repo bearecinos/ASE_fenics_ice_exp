@@ -181,7 +181,7 @@ stdvyim_nona = vyim_std_s[~array_ma.mask].ravel()
 vxmm_nona = vxmm_int[~array_ma.mask].ravel()
 vymm_nona = vymm_int[~array_ma.mask].ravel()
 stdvxmm_nona = vxm_std_int[~array_ma.mask].ravel()
-stdvymm_nona = vxm_std_int[~array_ma.mask].ravel()
+stdvymm_nona = vym_std_int[~array_ma.mask].ravel()
 
 if args.add_noise_to_data:
     noise = np.random.normal(loc=mu, scale=sigma, size=vxim_nona.shape)
