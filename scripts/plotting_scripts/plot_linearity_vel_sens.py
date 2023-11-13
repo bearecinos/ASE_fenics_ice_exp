@@ -26,10 +26,6 @@ parser.add_argument("-toml_path_i",
 parser.add_argument("-toml_path_m", type=str,
                     default="",
                     help="pass .toml file")
-parser.add_argument('-n_sens',
-                    nargs="+",
-                    type=int,
-                    help="pass n_sens to plot (max 2)")
 parser.add_argument("-sub_plot_dir",
                     type=str,
                     default="temp",
