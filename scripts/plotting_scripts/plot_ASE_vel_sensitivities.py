@@ -1,6 +1,7 @@
 import sys
+import salem#
 import xarray as xr
-import salem
+import pyproj
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -152,7 +153,36 @@ ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
-gv = velocity.define_salem_grid_from_measures(vel_obs, ase_bbox)
+dv = xr.open_dataset(vel_obs)
+
+vx = dv.VX
+vy = dv.VY
+std_vx = dv.STDX
+std_vy = dv.STDY
+
+# Crop velocity data to the Smith Glacier extend
+vx_s = velocity.crop_velocity_data_to_extend(vx,
+                                             ase_bbox,
+                                             return_xarray=True)
+
+# Lets define our salem grid. (but we modified things cuz
+# fabi's code only works for the North! TODO: ask fabien)
+
+proj = pyproj.Proj('EPSG:3413')
+y_grid = vx_s.y
+x_grid = vx_s.x
+
+dy = abs(y_grid[0] - y_grid[1])
+dx = abs(x_grid[0] - x_grid[1])
+
+# Pixel corner
+origin_y = y_grid[0] + dy * 0.5
+origin_x = x_grid[0] - dx * 0.5
+
+gv = salem.Grid(nxny=(len(x_grid),
+                      len(y_grid)),
+                dxdy=(dx, -1 * dy), # We use -dy as this is the Sout Hemisphere somehow salem
+                x0y0=(origin_x, origin_y), proj=proj)
 
 rcParams['axes.labelsize'] = 18
 rcParams['xtick.labelsize'] = 18
