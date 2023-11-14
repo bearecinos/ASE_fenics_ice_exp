@@ -4,15 +4,11 @@ import pyproj
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
-import pickle
 import os
-from pathlib import Path
 from configobj import ConfigObj
 from fenics_ice import config as conf
 from fenics_ice import mesh as fice_mesh
-from fenics_ice import inout, model, solver
-
+from fenics_ice import inout, model
 
 import matplotlib.ticker as ticker
 from matplotlib import rcParams
@@ -20,6 +16,9 @@ from matplotlib.offsetbox import AnchoredText
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.tri as tri
+import seaborn as sns
+import argparse
+from numpy import inf
 
 # Load configuration file for more order in paths
 parser = argparse.ArgumentParser()
