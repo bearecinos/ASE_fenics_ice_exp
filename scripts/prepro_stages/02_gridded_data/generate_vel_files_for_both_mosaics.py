@@ -146,18 +146,11 @@ assert len(xim_s) == len(xmm_s)
 assert sorted(xim_s) == sorted(xmm_s)
 assert sorted(yim_s) == sorted(ymm_s)
 
-#Fill nan's in measures with zeros
-vxmm_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
-vymm_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
-vxmm_std_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
-vymm_std_s[np.isnan(vxmm_s*vymm_std_s)] = 1e-07
-
-# Mask arrays and make sure same nans are drop in both
+# Mask arrays and make sure nans are drop in both
 # Itslive and Measures
 xim_grid, yim_grid = np.meshgrid(xim_s, yim_s)
 
-mask_array = vxim_s #* (vxmm_s * vxmm_std_s)
-
+mask_array = vxim_s
 array_ma = np.ma.masked_invalid(mask_array)
 
 # get only the valid values for both mosaics
@@ -168,17 +161,23 @@ vyim_nona = vyim_s[~array_ma.mask].ravel()
 stdvxim_nona = vxim_std_s[~array_ma.mask].ravel()
 stdvyim_nona = vyim_std_s[~array_ma.mask].ravel()
 
+mask_array = vxmm_s * vxmm_std_s
+array_ma = np.ma.masked_invalid(mask_array)
+
+xmm_nona = xim_grid[~array_ma.mask].ravel()
+ymm_nona = yim_grid[~array_ma.mask].ravel()
 vxmm_nona = vxmm_s[~array_ma.mask].ravel()
 vymm_nona = vymm_s[~array_ma.mask].ravel()
 stdvxmm_nona = vxmm_std_s[~array_ma.mask].ravel()
 stdvymm_nona = vymm_std_s[~array_ma.mask].ravel()
 
 if args.add_noise_to_data:
-    noise = np.random.normal(loc=mu, scale=sigma, size=vxim_nona.shape)
-    vxim_nona = vxim_nona + noise
-    vyim_nona = vyim_nona + noise
-    vxmm_nona = vxmm_nona + noise
-    vymm_nona = vymm_nona + noise
+    noise_i = 0.01 * np.random.random(vxim_nona.shape)
+    noise_m = 0.01 * np.random.random(vxmm_nona.shape)
+    vxim_nona = vxim_nona + noise_i
+    vyim_nona = vyim_nona + noise_i
+    vxmm_nona = vxmm_nona + noise_m
+    vymm_nona = vymm_nona + noise_m
 
 # Ravel all arrays so they can be stored with
 # a tuple shape (values, )
@@ -189,8 +188,8 @@ composite_dict_i = {'x_comp': xim_nona,
                   'std_vx_comp': stdvxim_nona,
                   'std_vy_comp': stdvyim_nona}
 
-composite_dict_m = {'x_comp': xim_nona,
-                  'y_comp': yim_nona,
+composite_dict_m = {'x_comp': xmm_nona,
+                  'y_comp': ymm_nona,
                   'vx_comp': vxmm_nona,
                   'vy_comp': vymm_nona,
                   'std_vx_comp': stdvxmm_nona,
