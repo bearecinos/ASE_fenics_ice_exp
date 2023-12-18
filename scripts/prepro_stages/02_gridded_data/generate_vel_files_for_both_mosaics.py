@@ -172,12 +172,14 @@ stdvxmm_nona = vxmm_std_s[~array_ma.mask].ravel()
 stdvymm_nona = vymm_std_s[~array_ma.mask].ravel()
 
 if args.add_noise_to_data:
-    noise_i = 0.01 * np.random.random(vxim_nona.shape)
-    noise_m = 0.01 * np.random.random(vxmm_nona.shape)
-    vxim_nona = vxim_nona + noise_i
-    vyim_nona = vyim_nona + noise_i
-    vxmm_nona = vxmm_nona + noise_m
-    vymm_nona = vymm_nona + noise_m
+    noise_ix = 0.01 * np.random.random(vxim_nona.shape)
+    noise_mx = 0.01 * np.random.random(vxmm_nona.shape)
+    noise_iy = 0.01 * np.random.random(vxim_nona.shape)
+    noise_my = 0.01 * np.random.random(vxmm_nona.shape)
+    vxim_nona = vxim_nona + noise_ix
+    vyim_nona = vyim_nona + noise_iy
+    vxmm_nona = vxmm_nona + noise_mx
+    vymm_nona = vymm_nona + noise_my
 
 # Ravel all arrays so they can be stored with
 # a tuple shape (values, )
