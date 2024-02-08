@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_measures"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = ""
-diagnostics_dir = ""
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/05_sensitivity_strong_priors_strong_tol/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/05_sensitivity_strong_priors_strong_tol/diagnostics"
 
 write_diagnostics = true
 
@@ -59,7 +59,7 @@ vel_file = "ase_obs_vel_measures-comp_measures-cloud_2014-error-factor-1E+0.h5"
 
 [inversion]
 
-max_iter = 2000
+max_iter = 1000
 #max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
 
 alpha_active = true

@@ -41,12 +41,12 @@ echo $OUT | mail -s "run fwd finish config" beatriz.recinos@ed.ac.uk
 #mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_eigendec.py $2 |& tee $path_logs/log_toml_eigen.txt
 #OUT=$(tail "$path_logs/log_toml_eigen.txt")
 #echo $OUT | mail -s "run eigen finish config" beatriz.recinos@ed.ac.uk
-#
+
 #echo $(date -u) "Run error prop stages started" | mail -s "run error prop started" beatriz.recinos@ed.ac.uk
 #mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_errorprop.py $2 |& tee $path_logs/log_toml_errprop.txt
 #OUT=$(tail "$path_logs/log_toml_errprop.txt")
 #echo $OUT | mail -s "run errp finish config" beatriz.recinos@ed.ac.uk
-#
+
 #echo $(date -u) "Run inv_sigma stages started" | mail -s "run inv sigma started" beatriz.recinos@ed.ac.uk
 #mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_invsigma.py $2 |& tee $path_logs/log_toml_invsig.txt
 #OUT=$(tail "$path_logs/log_toml_invsig.txt")
