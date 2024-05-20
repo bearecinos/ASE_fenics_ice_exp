@@ -141,7 +141,11 @@ ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
-gv = velocity.define_salem_grid_from_measures(vel_obs, ase_bbox)
+# Any measures should do ... 
+full_vel_path = os.path.join(vel_obs, 'Antarctica_ice_velocity_2013_2014_1km_v01.nc')
+print(full_vel_path)
+
+gv = velocity.define_salem_grid_from_measures(full_vel_path, ase_bbox)
 
 rcParams['axes.labelsize'] = 18
 rcParams['xtick.labelsize'] = 18
@@ -220,7 +224,7 @@ ax2.add_artist(at)
 
 ax0.title.set_text('FEniCS_ice model domain')
 ax1.title.set_text('FEniCS_ice initial velocity')
-ax2.title.set_text('ITS_LIVE - Model velocities')
+ax2.title.set_text('MEaSUREs - Model velocities')
 
 plt.tight_layout()
 plt.savefig(os.path.join(plot_path, 'ase_model_obs_velocities.png'),
@@ -275,8 +279,8 @@ at = AnchoredText('b', prop=dict(size=18), frameon=True, loc='upper right')
 ax1.add_artist(at)
 
 
-ax0.title.set_text(r'$\alpha_{ITSLIVE}$')
-ax1.title.set_text(r'$\beta_{ITSLIVE}$')
+ax0.title.set_text(r'$\alpha_{MEaSUREs}$')
+ax1.title.set_text(r'$\beta_{MEaSUREs}$')
 
 plt.tight_layout()
 plt.savefig(os.path.join(plot_path, 'ase_inversion.png'),
