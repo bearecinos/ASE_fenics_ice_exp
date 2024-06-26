@@ -59,8 +59,8 @@ vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_2014-error-factor-1E+0.h5"
 
 [inversion]
 
-max_iter = 500
-#max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
+#max_iter = 1000
+max_iter = 500 # This default values fail in the new environment (Newton iteration does not converge)
 
 alpha_active = true
 beta_active = true

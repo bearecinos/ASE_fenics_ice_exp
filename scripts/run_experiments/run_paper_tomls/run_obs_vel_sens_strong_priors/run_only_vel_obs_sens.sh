@@ -11,7 +11,7 @@ else
 fi
 
 # Create output directory for inversion output
-export run_inv_output_dir=$OUTPUT_DIR/04_sensitivity_strong_priors
+export run_inv_output_dir=$OUTPUT_DIR/05_sensitivity_strong_priors_strong_tol
 if [ ! -d $run_inv_output_dir ]
 then
   echo "Creating run directory $run_inv_output_dir"

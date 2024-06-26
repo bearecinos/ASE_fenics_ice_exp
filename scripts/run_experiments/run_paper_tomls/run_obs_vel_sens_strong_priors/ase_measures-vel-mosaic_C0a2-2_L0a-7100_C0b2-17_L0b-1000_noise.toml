@@ -55,7 +55,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_measures-comp_measures-cloud_2014-error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_measures-comp_measures-cloud_2014-error-factor-1E+0-added-noise.h5"
 
 [inversion]
 
@@ -95,7 +95,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 
 [ice_dynamics]
 
@@ -148,7 +148,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 
 [eigendec]
 
@@ -160,18 +160,18 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 
 [melt]
 
@@ -183,11 +183,11 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 sample_posterior = true
 num_eigenvals = 10
 
 [obs_sens]
 
-phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_'
+phase_suffix = '_measures_mosaic_C0a-2_L0a-7100_C0b-17_L0b-1000_noise'
 
