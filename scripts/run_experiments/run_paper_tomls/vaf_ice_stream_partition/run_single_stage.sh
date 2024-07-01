@@ -39,19 +39,19 @@ toml set --toml-path $toml_3 io.input_dir "$input_run_inv"
 toml set --toml-path $toml_3 io.output_dir "$run_inv_output_dir/output"
 toml set --toml-path $toml_3 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
 
-#echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
-#mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $toml_1 |& tee $path_logs/log_toml_inv_1.txt
-#OUT=$(tail "$path_logs/log_toml_inv_1.txt")
-#echo $OUT | mail -s "run inv finish config 1" beatriz.recinos@ed.ac.uk
-#
-#echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
-#mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $toml_2 |& tee $path_logs/log_toml_inv_2.txt
-#OUT=$(tail "$path_logs/log_toml_inv_2.txt")
-#echo $OUT | mail -s "run inv finish config 2" beatriz.recinos@ed.ac.uk
-#
-#echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
-#mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $toml_3 |& tee $path_logs/log_toml_inv_3.txt
-#OUT=$(tail "$path_logs/log_toml_inv_3.txt")
-#echo $OUT | mail -s "run inv finish config 3" beatriz.recinos@ed.ac.uk
+echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
+mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $toml_1 |& tee $path_logs/log_toml_inv_1.txt
+OUT=$(tail "$path_logs/log_toml_inv_1.txt")
+echo $OUT | mail -s "run inv finish config 1" beatriz.recinos@ed.ac.uk
+
+echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
+mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $toml_2 |& tee $path_logs/log_toml_inv_2.txt
+OUT=$(tail "$path_logs/log_toml_inv_2.txt")
+echo $OUT | mail -s "run inv finish config 2" beatriz.recinos@ed.ac.uk
+
+echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
+mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $toml_3 |& tee $path_logs/log_toml_inv_3.txt
+OUT=$(tail "$path_logs/log_toml_inv_3.txt")
+echo $OUT | mail -s "run inv finish config 3" beatriz.recinos@ed.ac.uk
 
 
