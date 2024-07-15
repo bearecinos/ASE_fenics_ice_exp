@@ -96,14 +96,14 @@ all_dfs = defaultdict(list)
 for n_sen in np.arange(15):
     dict_me = {'xm': xm.ravel(),
                'ym': ym.ravel(),
-               'dObsU': out_me['dObsV'][n_sen],
+               'dObsU': out_me['dObsU'][n_sen],
                'dObsV': out_me['dObsV'][n_sen]}
 
     df_measures = pd.DataFrame(data=dict_me)
 
     dict_il = {'xi': xi.ravel(),
                'yi': yi.ravel(),
-               'dObsU': out_il['dObsV'][n_sen],
+               'dObsU': out_il['dObsU'][n_sen],
                'dObsV': out_il['dObsV'][n_sen]}
 
     df_itslive = pd.DataFrame(data=dict_il)
