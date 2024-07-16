@@ -167,7 +167,7 @@ phase_suffix = '_itslive_'
 
 qoi = 'vaf'
 phase_suffix = '_itslive_'
-qoi_vaf_mask_code = 3
+qoi_vaf_mask_code = 0
 qoi_apply_vaf_mask = true
 qoi_vaf_mask_usecode = false
 
