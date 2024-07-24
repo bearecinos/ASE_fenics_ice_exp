@@ -96,7 +96,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_itslive_mask_01_SPK_'
+phase_suffix = '_itslive_'
 
 [ice_dynamics]
 
@@ -161,7 +161,7 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_itslive_mask_01_SPK_'
+phase_suffix = '_itslive_'
 
 [errorprop]
 
