@@ -180,7 +180,7 @@ spec = gridspec.GridSpec(1, 4, wspace=0.25, hspace=0.05)
 ax0 = plt.subplot(spec[0])
 
 p1, = ax0.plot(qoi_dict_c2['x'],
-              np.abs(qoi_dict_c2['y'] - qoi_dict_c1['y']),
+              qoi_dict_c2['y'] - qoi_dict_c1['y'],
               linestyle='dashed', color=color_palette[3])
 
 p3, = ax0.plot(qoi_dict_c2['x'],
@@ -200,7 +200,7 @@ ax0.add_artist(at)
 ax1 = plt.subplot(spec[1])
 
 p1, = ax1.plot(qoi_dict_c2_SPK['x'],
-              np.abs(qoi_dict_c2_SPK['y'] - qoi_dict_c1_SPK['y']),
+               qoi_dict_c2_SPK['y'] - qoi_dict_c1_SPK['y'],
               linestyle='dashed', color=color_palette[3])
 
 p3, = ax1.plot(qoi_dict_c2_SPK['x'],
@@ -216,7 +216,7 @@ ax1.add_artist(at)
 ax2 = plt.subplot(spec[2])
 
 p1, = ax2.plot(qoi_dict_c2_PIG['x'],
-               np.abs(qoi_dict_c2_PIG['y'] - qoi_dict_c1_PIG['y']),
+               qoi_dict_c2_PIG['y'] - qoi_dict_c1_PIG['y'],
                linestyle='dashed', color=color_palette[3])
 p3, = ax2.plot(qoi_dict_c2_PIG['x'],
                dot_Vme_PIG_mask_intrp + dot_Ume_PIG_mask_intrp,
@@ -231,7 +231,7 @@ ax2.add_artist(at)
 ax3 = plt.subplot(spec[3])
 
 p1, = ax3.plot(qoi_dict_c2_THW['x'],
-               np.abs(qoi_dict_c2_THW['y'] - qoi_dict_c1_THW['y']),
+               qoi_dict_c2_THW['y'] - qoi_dict_c1_THW['y'],
                linestyle='dashed', color=color_palette[3])
 p3, = ax3.plot(qoi_dict_c2_THW['x'],
                dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp,
