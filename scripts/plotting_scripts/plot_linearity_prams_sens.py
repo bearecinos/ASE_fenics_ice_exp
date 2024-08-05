@@ -1,13 +1,10 @@
-import sys
 import os
-import salem
 from pathlib import Path
 import numpy as np
 from fenics import *
 from fenics_ice import config as conf
 from fenics_ice import mesh as fice_mesh
 import argparse
-from IPython import embed
 
 #Plotting imports
 from matplotlib import pyplot as plt
@@ -239,7 +236,7 @@ ax = fig.add_subplot(1, 1, 1)
 p1, = ax.plot(qoi_dict_m['x'], (qoi_dict_m['y']-qoi_dict_il['y']),
               linestyle='dashed', color=color_palette[3], label='', linewidth=3)
 #p2, = ax.plot(qoi_dict_il['x'], dot_alpha_line, color=color_palette[0], label='', linewidth=3)
-p3, = ax.plot(qqoi_dict_m['x'], dot_alpha_line+dot_beta_line, color=color_palette[1], label='', linewidth=3)
+p3, = ax.plot(qoi_dict_m['x'], dot_alpha_line+dot_beta_line, color=color_palette[1], label='', linewidth=3)
 ax.axhline(y=0, color='k', linewidth=2.5)
 plt.legend(handles = [p1, p3],
            labels = [r'$\Delta$ abs($Q^{MEaSUREs}_{T}$ - $Q^{ITSLIVE}_{T}$)',
@@ -250,6 +247,7 @@ plt.legend(handles = [p1, p3],
 
 ax.set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
 ax.set_xlabel('Time [yrs]')
+ax.title.set_text('Linearity test for' + args.sub_plot_name)
 
 plt.tight_layout()
 plt.savefig(os.path.join(plot_path, args.sub_plot_name+'.png'), bbox_inches='tight')
