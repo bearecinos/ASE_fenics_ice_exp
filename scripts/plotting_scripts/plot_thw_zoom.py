@@ -38,8 +38,6 @@ parser.add_argument("-sub_plot_dir",
                     type=str,
                     default="temp",
                     help="pass sub plot directory to store the plots")
-parser.add_argument("-sub_plot_name", type=str,
-                    default="temp", help="pass filename")
 
 args = parser.parse_args()
 config_file = args.conf
@@ -61,31 +59,23 @@ from ficetools import utils_funcs, graphics, velocity
 main_run_path = os.path.join(MAIN_PATH, str(args.main_path_tomls))
 assert os.path.exists(main_run_path), "Provide the right path to tomls for the runs"
 
-run_path_itslive = os.path.join(main_run_path, 'ase_itslive-*')
-path_tomls_folder = sorted(glob.glob(run_path_itslive))
-print('---- These are the tomls for itslive ----')
-print(path_tomls_folder)
-
 run_path_measures = os.path.join(main_run_path, 'ase_measures*')
 path_tomls_folder_m = sorted(glob.glob(run_path_measures))
 print('---- These are the tomls for MEaSUREs ----')
 print(path_tomls_folder_m)
 
-run_name = args.sub_plot_name
+run_name = 'THW'
 
-toml_i = ''
 toml_m = ''
 
-for path_i, path_m in zip(path_tomls_folder, path_tomls_folder_m):
-    if run_name in path_i:
-        toml_i = path_i
+for path_m in path_tomls_folder_m:
     if run_name in path_m:
         toml_m = path_m
     else:
         continue
 
-assert toml_i != ""
 assert toml_m != ""
+assert 'THW' in toml_m
 
 params_me = conf.ConfigParser(toml_m)
 
@@ -160,9 +150,6 @@ for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 gv = velocity.define_salem_grid_from_measures(vel_obs, ase_bbox)
-proj_gnd = pyproj.Proj('EPSG:3031')
-gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),
-                x0y0=(-1702500.0, 500.0), proj=proj_gnd)
 
 rcParams['axes.labelsize'] = 16
 rcParams['xtick.labelsize'] = 16
@@ -174,44 +161,40 @@ r = 0.8
 tick_options = {'axis': 'both', 'which': 'both', 'bottom': False,
                 'top': False, 'left': False, 'right': False, 'labelleft': False, 'labelbottom': False}
 
-minv = 3.0
-maxv = 6.0
+minv = 3.5
+maxv = 6.5
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
+print(ticks)
 
 label_math = r'$| \frac{\partial Q}{\partial V} |$'
-format_ticker = [r'3$\times 10^{10}$',
-                 r'4.5$\times 10^{10}$',
-                 r'6$\times 10^{10}$']
+format_ticker = [r'3.5$\times 10^{10}$',
+                 r'5.0$\times 10^{10}$',
+                 r'6.5$\times 10^{10}$']
 
 shp = gpd.read_file(config['input_files']['ice_boundaries'])
-shp_sel = None
-
-if run_name == 'THW':
-    shp_sel = shp.loc[[64, 138]]
-if run_name == 'PIG':
-    shp_sel = shp.loc[[63]]
-if run_name == 'SPK':
-    shp_sel = shp.loc[[137, 138, 139]]
-
-assert shp_sel is not None
-
+shp_sel = shp.loc[[64, 138]]
 shp_sel.crs = gv.proj.crs
 
-gdf = gpd.read_file(config['input_files']['grounding_line'])
-ase_ground = gdf[220:235]
+# Reading grounding line from Rignot et al 2024
+gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
 proj = pyproj.Proj('EPSG:3031')
 
-data = ase_ground.to_crs(proj.crs).reset_index()
+gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
-if run_name == 'THW':
-    # We add the lakes
-    shp_lake = gpd.read_file(config['input_files']['thw_lake'])
+# Lakes!
+shp_lake = gpd.read_file(config['input_files']['thw_lake'])
 
+# Making a new grid for plot zooming on the previous Salem grid
+# Based on MEaSUREs
+gs = salem.Grid(nxny=(150, 100), dxdy=(gv.dx, gv.dy),
+                x0y0=(-1549357, -399373), proj=proj)
 
-##################### Plotting ################################################
+########### Plotting ##############################################
+
 fig1 = plt.figure(figsize=(10 * r, 14 * r))
-spec = gridspec.GridSpec(1, 2, wspace=0.35)
+
+spec = gridspec.GridSpec(2, 1, wspace=0.1, hspace=0.3)
 
 ### dQ/dU and dQ/dV magnitude for year zero
 
@@ -219,9 +202,9 @@ ax0 = plt.subplot(spec[0])
 ax0.set_aspect('equal')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gv, countries=False)
+smap = salem.Map(gs, countries=False)
 x_n, y_n = smap.grid.transform(x, y,
-                               crs=gv.proj)
+                               crs=gs.proj)
 c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
                     levels=levels,
                     cmap=cmap_sen, extend="both")
@@ -230,20 +213,19 @@ smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-for g, geo in enumerate(data.geometry):
-    smap.set_geometry(data.loc[g].geometry,
-                      linewidth=2,
-                      color=sns.xkcd_rgb["white"],
-                      alpha=0.3, crs=gv.proj)
 
-if run_name == 'THW':
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=0.5,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
+for g, geo in enumerate(gnd_rig.geometry):
+    smap.set_geometry(gnd_rig.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["black"],
+                      alpha=0.3, crs=gs.proj)
 
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=0.5,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gs.proj)
 
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
@@ -261,7 +243,7 @@ ax1 = plt.subplot(spec[1])
 ax1.set_aspect('equal')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gv, countries=False)
+smap = salem.Map(gs, countries=False)
 c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
                     levels=levels,
                     cmap=cmap_sen,
@@ -271,20 +253,19 @@ smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-for g, geo in enumerate(data.geometry):
-    smap.set_geometry(data.loc[g].geometry,
-                      linewidth=2,
-                      color=sns.xkcd_rgb["white"],
-                      alpha=0.3,
-                      crs=gv.proj)
 
-if run_name == 'THW':
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=0.5,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
+for g, geo in enumerate(gnd_rig.geometry):
+    smap.set_geometry(gnd_rig.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["black"],
+                      alpha=0.3, crs=gs.proj)
+
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=0.5,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gs.proj)
 
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
@@ -300,5 +281,5 @@ ax1.add_artist(at)
 
 plt.tight_layout()
 
-path_to_plot = os.path.join(str(plot_path), str(run_name) + '.png')
+path_to_plot = os.path.join(str(plot_path), 'THW_zoomed_sub_hydro' + '.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
