@@ -159,9 +159,9 @@ r=1.2
 tick_options = {'axis':'both','which':'both','bottom':False,
      'top':False,'left':False,'right':False,'labelleft':False, 'labelbottom':False}
 
-label_alpha = r'$\frac{\partial Q_{VAF}}{\partial \alpha} $'
+label_alpha = r'$\frac{\delta Q_{VAF}}{\delta \alpha^{2}}$'
 
-label_beta = r'$\frac{\partial Q_{VAF}}{\partial \beta} $'
+label_beta = r'$\frac{\delta Q}{\delta \beta^{2}}$'
 
 minv = 0.0
 maxv = 5.0
@@ -189,7 +189,7 @@ gdf = gpd.read_file(config['input_files']['grounding_line'])
 ase_ground = gdf[220:235]
 data = ase_ground.to_crs(proj_gnd.crs).reset_index()
 
-if run_name == 'THW':
+if run_name == 'THW' or run_name == 'ALL':
     # We add the lakes
     shp_lake = gpd.read_file(config['input_files']['thw_lake'])
     gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
@@ -227,6 +227,13 @@ if run_name == 'THW':
                           color=sns.xkcd_rgb["orange"],
                           alpha=0.3, crs=gv.proj)
 
+    for g, geo in enumerate(shp_lake.geometry):
+        smap.set_geometry(shp_lake.loc[g].geometry,
+                          linewidth=1.0,
+                          alpha=0.1,
+                          facecolor='white', edgecolor='white',
+                          crs=gv.proj)
+if run_name == 'ALL':
     for g, geo in enumerate(shp_lake.geometry):
         smap.set_geometry(shp_lake.loc[g].geometry,
                           linewidth=1.0,
@@ -276,6 +283,14 @@ if run_name == 'THW':
                           color=sns.xkcd_rgb["orange"],
                           alpha=0.3, crs=gv.proj)
 
+    for g, geo in enumerate(shp_lake.geometry):
+        smap.set_geometry(shp_lake.loc[g].geometry,
+                          linewidth=1.0,
+                          alpha=0.1,
+                          facecolor='white', edgecolor='white',
+                          crs=gv.proj)
+
+if run_name == 'ALL':
     for g, geo in enumerate(shp_lake.geometry):
         smap.set_geometry(shp_lake.loc[g].geometry,
                           linewidth=1.0,
