@@ -164,7 +164,7 @@ label_alpha = r'$\frac{\partial Q_{VAF}}{\partial \alpha} $'
 label_beta = r'$\frac{\partial Q_{VAF}}{\partial \beta} $'
 
 minv = 0.0
-maxv = 10.0
+maxv = 5.0
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
 
@@ -212,7 +212,7 @@ smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
-ax0.triplot(x_n, y_n, trim.triangles, '-', color='grey', lw=0.2, alpha=0.5)
+#ax0.triplot(x_n, y_n, trim.triangles, '-', color='grey', lw=0.2, alpha=0.5)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
 for g, geo in enumerate(data.geometry):
     smap.set_geometry(data.loc[g].geometry,
@@ -257,7 +257,7 @@ cax = divider.append_axes("bottom", size="5%", pad=0.5)
 
 smap = salem.Map(gv, countries=False)
 c = ax1.tricontourf(x_n, y_n, t, dq_dalpha_t40_norm, levels = levels, cmap=cmap_sen, extend="both")
-ax1.triplot(x_n, y_n, trim.triangles, '-', color='grey', lw=0.2, alpha=0.5)
+#ax1.triplot(x_n, y_n, trim.triangles, '-', color='grey', lw=0.2, alpha=0.5)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
