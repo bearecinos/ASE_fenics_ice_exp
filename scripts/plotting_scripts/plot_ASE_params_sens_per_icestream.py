@@ -189,11 +189,10 @@ gdf = gpd.read_file(config['input_files']['grounding_line'])
 ase_ground = gdf[220:235]
 data = ase_ground.to_crs(proj_gnd.crs).reset_index()
 
-if run_name == 'THW' or run_name == 'ALL':
-    # We add the lakes
-    shp_lake = gpd.read_file(config['input_files']['thw_lake'])
-    gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
-    gnd_rig = gnd_line.to_crs(proj_gnd.crs).reset_index()
+# We add the lakes
+shp_lake = gpd.read_file(config['input_files']['thw_lake'])
+gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
+gnd_rig = gnd_line.to_crs(proj_gnd.crs).reset_index()
 
 ## ALPHA PLOT #####################################################
 fig1 = plt.figure(figsize=(10*r, 10*r))#, constrained_layout=True)
@@ -220,26 +219,18 @@ for g, geo in enumerate(data.geometry):
                       color=sns.xkcd_rgb["white"],
                       alpha=0.3, crs=gv.proj)
 
-if run_name == 'THW':
-    for g, geo in enumerate(gnd_rig.geometry):
-        smap.set_geometry(gnd_rig.loc[g].geometry,
-                          linewidth=1.0,
-                          color=sns.xkcd_rgb["orange"],
-                          alpha=0.3, crs=gv.proj)
+for g, geo in enumerate(gnd_rig.geometry):
+    smap.set_geometry(gnd_rig.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["orange"],
+                      alpha=0.3, crs=gv.proj)
 
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=1.0,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
-if run_name == 'ALL':
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=1.0,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=1.0,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gv.proj)
 
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)
@@ -276,27 +267,18 @@ for g, geo in enumerate(data.geometry):
                       color=sns.xkcd_rgb["white"],
                       alpha=0.3, crs=gv.proj)
 
-if run_name == 'THW':
-    for g, geo in enumerate(gnd_rig.geometry):
-        smap.set_geometry(gnd_rig.loc[g].geometry,
-                          linewidth=1.0,
-                          color=sns.xkcd_rgb["orange"],
-                          alpha=0.3, crs=gv.proj)
+for g, geo in enumerate(gnd_rig.geometry):
+    smap.set_geometry(gnd_rig.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["orange"],
+                      alpha=0.3, crs=gv.proj)
 
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=1.0,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
-
-if run_name == 'ALL':
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=1.0,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=1.0,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gv.proj)
 
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)

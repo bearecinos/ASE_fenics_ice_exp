@@ -61,30 +61,23 @@ from ficetools import utils_funcs, graphics, velocity
 main_run_path = os.path.join(MAIN_PATH, str(args.main_path_tomls))
 assert os.path.exists(main_run_path), "Provide the right path to tomls for the runs"
 
-run_path_itslive = os.path.join(main_run_path, 'ase_itslive-*')
-path_tomls_folder = sorted(glob.glob(run_path_itslive))
-print('---- These are the tomls for itslive ----')
-print(path_tomls_folder)
-
 run_path_measures = os.path.join(main_run_path, 'ase_measures*')
 path_tomls_folder_m = sorted(glob.glob(run_path_measures))
 print('---- These are the tomls for MEaSUREs ----')
 print(path_tomls_folder_m)
 
 run_name = args.sub_plot_name
-
-toml_i = ''
 toml_m = ''
 
-for path_i, path_m in zip(path_tomls_folder, path_tomls_folder_m):
-    if run_name in path_i:
-        toml_i = path_i
-    if run_name in path_m:
-        toml_m = path_m
-    else:
-        continue
+if run_name == 'ALL':
+    toml_m = path_tomls_folder_m[0]
+else:
+    for path_m in path_tomls_folder_m:
+        if run_name in path_m:
+            toml_m = path_m
+        else:
+            continue
 
-assert toml_i != ""
 assert toml_m != ""
 
 params_me = conf.ConfigParser(toml_m)
@@ -193,6 +186,8 @@ if run_name == 'PIG':
     shp_sel = shp.loc[[63]]
 if run_name == 'SPK':
     shp_sel = shp.loc[[137, 138, 139]]
+if run_name == 'ALL':
+    shp_sel = shp.loc[[63, 64, 138, 137, 138, 139]]
 
 assert shp_sel is not None
 
@@ -204,9 +199,10 @@ proj = pyproj.Proj('EPSG:3031')
 
 data = ase_ground.to_crs(proj.crs).reset_index()
 
-if run_name == 'THW':
-    # We add the lakes
-    shp_lake = gpd.read_file(config['input_files']['thw_lake'])
+# We add the lakes and Rignot 2024 grounding line indicating seawater intrusions
+shp_lake = gpd.read_file(config['input_files']['thw_lake'])
+gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
+gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
 
 ##################### Plotting ################################################
@@ -235,15 +231,19 @@ for g, geo in enumerate(data.geometry):
                       linewidth=2,
                       color=sns.xkcd_rgb["white"],
                       alpha=0.3, crs=gv.proj)
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=0.5,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gv.proj)
 
 if run_name == 'THW':
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=0.5,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
-
+    for g, geo in enumerate(gnd_rig.geometry):
+        smap.set_geometry(gnd_rig.loc[g].geometry,
+                          linewidth=1.0,
+                          color=sns.xkcd_rgb["black"],
+                          alpha=0.3, crs=gv.proj)
 
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
@@ -278,13 +278,19 @@ for g, geo in enumerate(data.geometry):
                       alpha=0.3,
                       crs=gv.proj)
 
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=0.5,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gv.proj)
+
 if run_name == 'THW':
-    for g, geo in enumerate(shp_lake.geometry):
-        smap.set_geometry(shp_lake.loc[g].geometry,
-                          linewidth=0.5,
-                          alpha=0.1,
-                          facecolor='white', edgecolor='white',
-                          crs=gv.proj)
+    for g, geo in enumerate(gnd_rig.geometry):
+        smap.set_geometry(gnd_rig.loc[g].geometry,
+                          linewidth=1.0,
+                          color=sns.xkcd_rgb["black"],
+                          alpha=0.3, crs=gv.proj)
 
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
