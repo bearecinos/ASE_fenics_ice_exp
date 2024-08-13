@@ -179,7 +179,7 @@ maxv = 6.0
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 
-label_math = r'$| \frac{\partial Q}{\partial V} |$'
+label_math = r'$| \frac{\delta Q}{\delta V} |$'
 format_ticker = [r'3$\times 10^{10}$',
                  r'4.5$\times 10^{10}$',
                  r'6$\times 10^{10}$']
@@ -251,10 +251,10 @@ cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          format=ticker.FixedFormatter(format_ticker))
 cbar.set_label(label_math, fontsize=16)
 n_text = AnchoredText('year ' + str(t_zero),
-                      prop=dict(size=14),
+                      prop=dict(size=12),
                       frameon=True, loc='upper right')
 ax0.add_artist(n_text)
-at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='upper left')
+at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
 ax0.add_artist(at)
 
 ax1 = plt.subplot(spec[1])
@@ -292,10 +292,10 @@ cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          format=ticker.FixedFormatter(format_ticker))
 cbar.set_label(label_math, fontsize=16)
 n_text = AnchoredText('year ' + str(t_last),
-                      prop=dict(size=14),
+                      prop=dict(size=12),
                       frameon=True, loc='upper right')
 ax1.add_artist(n_text)
-at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='upper left')
+at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
 
 plt.tight_layout()
