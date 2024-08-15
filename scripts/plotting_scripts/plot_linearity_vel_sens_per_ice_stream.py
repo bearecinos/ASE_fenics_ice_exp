@@ -173,7 +173,7 @@ d = {'time': qoi_dict_c2['x'],
      'Dot_product_THW': dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp}
 
 data_frame = pd.DataFrame(data=d)
-h_obs_path = os.path.join(plot_path, 'results_linearity_test.csv')
+h_obs_path = data_frame.to_csv(os.path.join(plot_path, 'results_linearity_test.csv'))
 
 color_palette = sns.color_palette("deep")
 
