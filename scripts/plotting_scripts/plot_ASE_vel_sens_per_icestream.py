@@ -229,14 +229,14 @@ dx_mos = abs(x_mos[0] - x_mos[1])
 origin_y_mos = y_mos[0] + dy_mos * 0.5
 origin_x_mos = x_mos[0] - dx_mos * 0.5
 
-gmos = salem.Grid(nxny=(len(x_mos), len(y_mos)), dxdy=(dx_mos, -1*dy_mos),
-               x0y0=(origin_x_mos, origin_y_mos), proj=proj)
+gmos = salem.Grid(nxny=(len(x_mos), len(y_mos)),
+                  dxdy=(dx_mos, -1*dy_mos),
+                  x0y0=(origin_x_mos, origin_y_mos), proj=proj)
 
 ##################### Plotting ################################################
-r=0.9
+r = 0.9
 
 fig = plt.figure(figsize=(12.5*r, 6*r), constrained_layout=True)
-#fig.suptitle("Thwaites and Haynes")
 
 gs = gridspec.GridSpec(2, 3, wspace=0.35, hspace=0.35, width_ratios=[4, 4, 3], height_ratios=[2, 1])
 ax0 = fig.add_subplot(gs[0:2, 0])
@@ -342,7 +342,7 @@ p1, = ax2.plot(data_frame['time'].values,
 p3, = ax2.plot(data_frame['time'].values,
                data_frame['Dot_product_'+run_name].values,
                color=color_palette[2], label='', linewidth=3)
-plt.legend(handles = [p1, p3],
+plt.legend(handles=[p1, p3],
            labels=label_lin,
            frameon=True, fontsize=9, loc='upper left')
 ax2.set_ylabel(y_label_lin)
@@ -355,10 +355,9 @@ ax3 = fig.add_subplot(gs[5])
 smap = salem.Map(gmos, countries=False)
 
 smap.set_rgb(natural_earth='hr')
-#smap.set_shapefile(shp, linewidth=2, edgecolor=sns.xkcd_rgb["black"])
 smap.set_shapefile(shp_sel, linewidth=2, facecolor='red', edgecolor=sns.xkcd_rgb["grey"])
 smap.set_cmap(plt.get_cmap('gray'))
-smap.set_lonlat_contours(xinterval=0,yinterval=0)
+smap.set_lonlat_contours(xinterval=0, yinterval=0)
 smap.visualize(ax=ax3, addcbar=False)
 at = AnchoredText('d', prop=dict(size=9), frameon=True, loc='lower left')
 ax3.add_artist(at)
