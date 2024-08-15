@@ -167,7 +167,7 @@ levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 print(ticks)
 
-label_math = r'$| \frac{\partial Q}{\partial V} |$'
+label_math = r'$| \frac{\delta Q}{\delta V} |$'
 format_ticker = [r'3.5$\times 10^{10}$',
                  r'5.0$\times 10^{10}$',
                  r'6.5$\times 10^{10}$']
@@ -223,11 +223,7 @@ smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-for g, geo in enumerate(data.geometry):
-    smap.set_geometry(data.loc[g].geometry,
-                      linewidth=2,
-                      color=sns.xkcd_rgb["white"],
-                      alpha=0.3, crs=gv.proj)
+
 for g, geo in enumerate(shp_lake.geometry):
     smap.set_geometry(shp_lake.loc[g].geometry,
                       linewidth=0.5,
@@ -259,10 +255,9 @@ n_text = AnchoredText('year ' + str(t_zero),
                       prop=dict(size=12),
                       frameon=True, loc='upper right')
 ax0.add_artist(n_text)
-
-
 at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
 ax0.add_artist(at)
+
 
 ax1 = fig.add_subplot(gs[1])
 ax1.set_aspect('equal')
@@ -278,12 +273,6 @@ smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-for g, geo in enumerate(data.geometry):
-    smap.set_geometry(data.loc[g].geometry,
-                      linewidth=2,
-                      color=sns.xkcd_rgb["white"],
-                      alpha=0.3,
-                      crs=gv.proj)
 
 for g, geo in enumerate(shp_lake.geometry):
     smap.set_geometry(shp_lake.loc[g].geometry,
