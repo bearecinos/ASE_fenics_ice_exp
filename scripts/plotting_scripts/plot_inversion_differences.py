@@ -24,7 +24,6 @@ from matplotlib import rcParams
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib import colormaps
 import matplotlib.tri as tri
 import argparse
 
@@ -202,13 +201,14 @@ beta_mep = project(beta_me, M)
 beta_v_il = beta_ilp.compute_vertex_values(mesh_in)
 beta_v_me = beta_mep.compute_vertex_values(mesh_in)
 
-vel_obs = config['input_files']['measures_cloud']
-
+vel_obs = utils_funcs.find_measures_file(2013,
+                                         config['input_files']['measures_cloud'])
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 gv = velocity.define_salem_grid_from_measures(vel_obs, ase_bbox)
+
 # Right Projection! TODO: We need to add this to every plot!
 proj_gnd = pyproj.Proj('EPSG:3031')
 gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),

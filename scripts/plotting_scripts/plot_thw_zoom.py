@@ -184,8 +184,7 @@ gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
 # Rignot et al 2024 Water pressure P, as fraction of ice overburden
 # Pressure contours (only > 0.8) is plotted
-path_water_contours = gpd.read_file(config['input_files']['rignot_P'])
-df_water_press = gpd.read_file(path_water_contours)
+df_water_press = gpd.read_file(config['input_files']['rignot_P'])
 idx = df_water_press.index[df_water_press['ELEV'] > 0.80]
 df_press = df_water_press.loc[idx]
 df_press = df_press.to_crs(proj.crs).reset_index()
