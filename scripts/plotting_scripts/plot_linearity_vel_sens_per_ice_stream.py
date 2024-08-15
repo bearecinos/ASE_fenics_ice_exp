@@ -260,10 +260,10 @@ ax3.set_xlabel('Time [yrs]')
 at = AnchoredText('d', prop=dict(size=16), frameon=True, loc='upper left')
 ax3.add_artist(at)
 
-ax0.title.set_text('Full domain', loc='right')
-ax1.title.set_text('Smith, Pope, Kohler', loc='right')
-ax2.title.set_text('Pine Island', loc='right')
-ax3.title.set_text('Thwaites', loc='right')
+ax0.set_title('Full domain', loc='right')
+ax1.set_title('Smith, Pope, Kohler', loc='right')
+ax2.set_title('Pine Island', loc='right')
+ax3.set_title('Thwaites', loc='right')
 
 plt.tight_layout()
 
