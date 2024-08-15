@@ -11,6 +11,7 @@ from matplotlib import rcParams
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.gridspec as gridspec
 import seaborn as sns
+import pandas as pd
 
 # Load configuration file for more order in paths
 parser = argparse.ArgumentParser()
@@ -156,6 +157,24 @@ dot_Vme_THW_mask_intrp = np.interp(qoi_dict_c2['x'],
                                    t_sens,
                                    dot_Vme_THW_mask)
 
+# We save all the data to plot it later
+d = {'time': qoi_dict_c2['x'],
+     'delta_VAF_measures_all': qoi_dict_c2['y'],
+     'delta_VAF_itslive_all': qoi_dict_c1['y'],
+     'Dot_product_all': dot_Vme_full_mask_intrp + dot_Ume_full_mask_intrp,
+     'delta_VAF_measures_PIG': qoi_dict_c2_PIG['y'],
+     'delta_VAF_itslive_PIG': qoi_dict_c1_PIG['y'],
+     'Dot_product_PIG': dot_Vme_PIG_mask_intrp + dot_Ume_PIG_mask_intrp,
+     'delta_VAF_measures_SPK': qoi_dict_c2_SPK['y'],
+     'delta_VAF_itslive_SPK': qoi_dict_c1_SPK['y'],
+     'Dot_product_SPK': dot_Vme_SPK_mask_intrp + dot_Ume_SPK_mask_intrp,
+     'delta_VAF_measures_THW': qoi_dict_c2_THW['y'],
+     'delta_VAF_itslive_THW': qoi_dict_c1_THW['y'],
+     'Dot_product_THW': dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp}
+
+data_frame = pd.DataFrame(data=d)
+h_obs_path = os.path.join(plot_path, 'results_linearity_test.csv')
+
 color_palette = sns.color_palette("deep")
 
 rcParams['axes.labelsize'] = 10
@@ -241,10 +260,10 @@ ax3.set_xlabel('Time [yrs]')
 at = AnchoredText('d', prop=dict(size=16), frameon=True, loc='upper left')
 ax3.add_artist(at)
 
-ax0.title.set_text('Full domain')
-ax1.title.set_text('Smith, Pope, Kohler')
-ax2.title.set_text('Pine Island')
-ax3.title.set_text('Thwaites')
+ax0.title.set_text('Full domain', loc='right')
+ax1.title.set_text('Smith, Pope, Kohler', loc='right')
+ax2.title.set_text('Pine Island', loc='right')
+ax3.title.set_text('Thwaites', loc='right')
 
 plt.tight_layout()
 
