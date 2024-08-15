@@ -158,10 +158,10 @@ proj_gnd = pyproj.Proj('EPSG:3031')
 gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),
                 x0y0=(-1702500.0, 500.0), proj=proj_gnd)
 
-rcParams['axes.labelsize'] = 16
-rcParams['xtick.labelsize'] = 16
-rcParams['ytick.labelsize'] = 16
-rcParams['axes.titlesize'] = 16
+rcParams['axes.labelsize'] = 14
+rcParams['xtick.labelsize'] = 14
+rcParams['ytick.labelsize'] = 14
+rcParams['axes.titlesize'] = 14
 
 cmap_sen = sns.color_palette("magma", as_cmap=True)
 r = 0.8
@@ -278,7 +278,7 @@ smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
-cbar.set_label(label_math, fontsize=12)
+cbar.set_label(label_math, fontsize=14)
 n_text = AnchoredText('year ' + str(t_zero),
                       prop=dict(size=12),
                       frameon=True, loc='upper right')
@@ -326,7 +326,7 @@ smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
-cbar.set_label(label_math, fontsize=12)
+cbar.set_label(label_math, fontsize=14)
 n_text = AnchoredText('year ' + str(t_last),
                       prop=dict(size=12),
                       frameon=True, loc='upper right')
@@ -354,9 +354,8 @@ ax2.add_artist(at)
 ax3 = fig.add_subplot(gs[5])
 smap = salem.Map(gmos, countries=False)
 
-smap.set_rgb(natural_earth='hr')
-smap.set_shapefile(shp_sel, linewidth=2, facecolor='red', edgecolor=sns.xkcd_rgb["grey"])
-smap.set_cmap(plt.get_cmap('gray'))
+smap.set_rgb(natural_earth='lr')
+smap.set_shapefile(shp_sel, linewidth=0.2, facecolor='red', edgecolor=sns.xkcd_rgb["black"])
 smap.set_lonlat_contours(xinterval=0, yinterval=0)
 smap.visualize(ax=ax3, addcbar=False)
 at = AnchoredText('d', prop=dict(size=9), frameon=True, loc='lower left')
