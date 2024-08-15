@@ -274,6 +274,9 @@ if run_name == 'THW':
                           color=sns.xkcd_rgb["black"],
                           alpha=0.3, crs=gv.proj)
 
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
@@ -322,6 +325,8 @@ if run_name == 'THW':
                           color=sns.xkcd_rgb["black"],
                           alpha=0.3, crs=gv.proj)
 
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
