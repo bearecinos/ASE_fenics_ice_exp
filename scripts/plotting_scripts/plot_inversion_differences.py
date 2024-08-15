@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from pathlib import Path
+import pyproj
 from configobj import ConfigObj
 from fenics_ice import config as conf
 from fenics_ice import mesh as fice_mesh
@@ -208,6 +209,10 @@ for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
 gv = velocity.define_salem_grid_from_measures(vel_obs, ase_bbox)
+# Right Projection! TODO: We need to add this to every plot!
+proj_gnd = pyproj.Proj('EPSG:3031')
+gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),
+                x0y0=(-1702500.0, 500.0), proj=proj_gnd)
 
 # Now plotting
 r=1.2
@@ -230,10 +235,9 @@ c = ax0.tricontourf(x_n, y_n, t, U_measures-U_itlive,
                     levels = levels,
                     cmap=cmap_vel,
                     extend="both")
-smap.set_lonlat_contours(xinterval=2.0,
-                         yinterval=1.0,
-                         add_tick_labels=True,
-                         linewidths=1.5)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -262,9 +266,8 @@ c = ax1.tricontourf(x_n, y_n, t,
                     levels = levels,
                     cmap=cmap_vel,
                     extend="both")
-smap.set_lonlat_contours(xinterval=2.0,
-                         yinterval=1.0,
-                         add_tick_labels=True, linewidths=1.5)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -291,9 +294,9 @@ ticks = np.linspace(minv,maxv,3)
 c = ax2.tricontourf(x_n, y_n, t,
                     alpha_v_me-alpha_v_il,
                     levels=levels, cmap=cmap_params_alpha, extend="both")
-smap.set_lonlat_contours(xinterval=2.0,
-                         yinterval=1.0,
-                         add_tick_labels=True, linewidths=1.5)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+
 #ax2.triplot(x_n, y_n, trim.triangles, '-', color='grey', lw=0.2, alpha=0.5)
 smap.set_cmap(cmap_params_alpha)
 smap.set_vmin(minv)
@@ -320,10 +323,8 @@ ticks = np.linspace(minv,maxv,3)
 c = ax3.tricontourf(x_n, y_n, t,
                     beta_v_me-beta_v_il,
                     levels=levels, cmap=cmap_params_bglen, extend="both")
-smap.set_lonlat_contours(xinterval=2.0,
-                         yinterval=1.0,
-                         add_tick_labels=True,
-                         linewidths=1.5)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
 #ax3.triplot(x_n, y_n, trim.triangles, '-', color='grey', lw=0.2, alpha=0.5)
 smap.set_cmap(cmap_params_bglen)
 smap.set_vmin(minv)
