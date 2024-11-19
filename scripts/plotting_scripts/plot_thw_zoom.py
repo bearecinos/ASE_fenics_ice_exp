@@ -167,7 +167,7 @@ levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 print(ticks)
 
-label_math = r'$| \frac{\partial Q}{\partial V} |$'
+label_math = r'$\frac{\partial Q}{\partial\hat{p}}$'
 format_ticker = [r'3.5$\times 10^{10}$',
                  r'5.0$\times 10^{10}$',
                  r'6.5$\times 10^{10}$']
@@ -182,29 +182,38 @@ proj = pyproj.Proj('EPSG:3031')
 
 gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
+# Rignot et al 2024 Water pressure P, as fraction of ice overburden
+# Pressure contours (only > 0.8) is plotted
+df_water_press = gpd.read_file(config['input_files']['rignot_P'])
+idx = df_water_press.index[df_water_press['ELEV'] > 0.80]
+df_press = df_water_press.loc[idx]
+df_press = df_press.to_crs(proj.crs).reset_index()
+
 # Lakes!
 shp_lake = gpd.read_file(config['input_files']['thw_lake'])
 
 # Making a new grid for plot zooming on the previous Salem grid
 # Based on MEaSUREs
-gs = salem.Grid(nxny=(150, 100), dxdy=(gv.dx, gv.dy),
-                x0y0=(-1549357, -399373), proj=proj)
+gv = salem.Grid(nxny=(370, 300), dxdy=(gv.dx, gv.dy),
+                x0y0=(-1559357, -299373), proj=proj)
 
 ########### Plotting ##############################################
 
-fig1 = plt.figure(figsize=(10 * r, 14 * r))
+r=0.9
 
-spec = gridspec.GridSpec(2, 1, wspace=0.1, hspace=0.3)
+fig = plt.figure(figsize=(12.5*r, 6*r), constrained_layout=True)
+#fig.suptitle("Thwaites and Haynes")
 
-### dQ/dU and dQ/dV magnitude for year zero
+gs = gridspec.GridSpec(1, 2)
+ax0 = fig.add_subplot(gs[0])
 
-ax0 = plt.subplot(spec[0])
+
 ax0.set_aspect('equal')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gs, countries=False)
+smap = salem.Map(gv, countries=False)
 x_n, y_n = smap.grid.transform(x, y,
-                               crs=gs.proj)
+                               crs=gv.proj)
 c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
                     levels=levels,
                     cmap=cmap_sen, extend="both")
@@ -214,36 +223,46 @@ smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
 
-for g, geo in enumerate(gnd_rig.geometry):
-    smap.set_geometry(gnd_rig.loc[g].geometry,
-                      linewidth=1.0,
-                      color=sns.xkcd_rgb["black"],
-                      alpha=0.3, crs=gs.proj)
-
 for g, geo in enumerate(shp_lake.geometry):
     smap.set_geometry(shp_lake.loc[g].geometry,
                       linewidth=0.5,
                       alpha=0.1,
                       facecolor='white', edgecolor='white',
-                      crs=gs.proj)
+                      crs=gv.proj)
 
+for g, geo in enumerate(gnd_rig.geometry):
+    smap.set_geometry(gnd_rig.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["black"],
+                      alpha=0.3, crs=gv.proj)
+
+for g, geo in enumerate(df_press.geometry):
+    smap.set_geometry(df_press.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["grey"],
+                      alpha=0.5, crs=gv.proj)
+
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
-cbar.set_label(label_math, fontsize=16)
+cbar.set_label(label_math, fontsize=14)
 n_text = AnchoredText('year ' + str(t_zero),
-                      prop=dict(size=14),
+                      prop=dict(size=12),
                       frameon=True, loc='upper right')
 ax0.add_artist(n_text)
-at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='upper left')
+at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
 ax0.add_artist(at)
 
-ax1 = plt.subplot(spec[1])
+
+ax1 = fig.add_subplot(gs[1])
 ax1.set_aspect('equal')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gs, countries=False)
+smap = salem.Map(gv, countries=False)
 c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
                     levels=levels,
                     cmap=cmap_sen,
@@ -254,29 +273,38 @@ smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
 
-for g, geo in enumerate(gnd_rig.geometry):
-    smap.set_geometry(gnd_rig.loc[g].geometry,
-                      linewidth=1.0,
-                      color=sns.xkcd_rgb["black"],
-                      alpha=0.3, crs=gs.proj)
-
 for g, geo in enumerate(shp_lake.geometry):
     smap.set_geometry(shp_lake.loc[g].geometry,
                       linewidth=0.5,
                       alpha=0.1,
                       facecolor='white', edgecolor='white',
-                      crs=gs.proj)
+                      crs=gv.proj)
+
+for g, geo in enumerate(gnd_rig.geometry):
+    smap.set_geometry(gnd_rig.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["black"],
+                      alpha=0.3, crs=gv.proj)
+
+for g, geo in enumerate(df_press.geometry):
+    smap.set_geometry(df_press.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["grey"],
+                      alpha=0.5, crs=gv.proj)
+
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
 
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
-cbar.set_label(label_math, fontsize=16)
+cbar.set_label(label_math, fontsize=14)
 n_text = AnchoredText('year ' + str(t_last),
-                      prop=dict(size=14),
+                      prop=dict(size=12),
                       frameon=True, loc='upper right')
 ax1.add_artist(n_text)
-at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='upper left')
+at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
 
 plt.tight_layout()

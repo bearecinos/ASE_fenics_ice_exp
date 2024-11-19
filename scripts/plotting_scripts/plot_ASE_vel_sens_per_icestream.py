@@ -8,6 +8,7 @@ from numpy import inf
 from configobj import ConfigObj
 import seaborn as sns
 import geopandas as gpd
+import pandas as pd
 import pyproj
 import matplotlib.tri as tri
 import matplotlib.pyplot as plt
@@ -157,10 +158,10 @@ proj_gnd = pyproj.Proj('EPSG:3031')
 gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),
                 x0y0=(-1702500.0, 500.0), proj=proj_gnd)
 
-rcParams['axes.labelsize'] = 16
-rcParams['xtick.labelsize'] = 16
-rcParams['ytick.labelsize'] = 16
-rcParams['axes.titlesize'] = 16
+rcParams['axes.labelsize'] = 14
+rcParams['xtick.labelsize'] = 14
+rcParams['ytick.labelsize'] = 14
+rcParams['axes.titlesize'] = 14
 
 cmap_sen = sns.color_palette("magma", as_cmap=True)
 r = 0.8
@@ -172,7 +173,7 @@ maxv = 6.0
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 
-label_math = r'$| \frac{\delta Q}{\delta V} |$'
+label_math = r'$\frac{\partial Q}{\partial\hat{p}}$'
 format_ticker = [r'3$\times 10^{10}$',
                  r'4.5$\times 10^{10}$',
                  r'6$\times 10^{10}$']
@@ -185,9 +186,9 @@ if run_name == 'THW':
 if run_name == 'PIG':
     shp_sel = shp.loc[[63]]
 if run_name == 'SPK':
-    shp_sel = shp.loc[[137, 138, 139]]
+    shp_sel = shp.loc[[62, 137, 139]]
 if run_name == 'ALL':
-    shp_sel = shp.loc[[63, 64, 138, 137, 138, 139]]
+    shp_sel = shp.loc[[62, 63, 64, 137, 138, 139]]
 
 assert shp_sel is not None
 
@@ -204,14 +205,42 @@ shp_lake = gpd.read_file(config['input_files']['thw_lake'])
 gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
 gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
+data_frame = pd.read_csv(os.path.join(plot_path,
+                                      'results_linearity_test.csv'), index_col=0)
+
+label_lin = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + \n' +
+             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
+
+y_label_lin = r'$\Delta$ $Q_{T}$ [$m^3$]'
+
+color_palette = sns.color_palette("deep")
+
+img = salem.open_xr_dataset(config['input_files']['mosaic'])
+
+# Make salem grid for antarctica map
+y_mos = img.y
+x_mos = img.x
+
+dy_mos = abs(y_mos[0] - y_mos[1])
+dx_mos = abs(x_mos[0] - x_mos[1])
+
+# Pixel corner
+origin_y_mos = y_mos[0] + dy_mos * 0.5
+origin_x_mos = x_mos[0] - dx_mos * 0.5
+
+gmos = salem.Grid(nxny=(len(x_mos), len(y_mos)),
+                  dxdy=(dx_mos, -1*dy_mos),
+                  x0y0=(origin_x_mos, origin_y_mos), proj=proj)
 
 ##################### Plotting ################################################
-fig1 = plt.figure(figsize=(10 * r, 14 * r))
-spec = gridspec.GridSpec(1, 2, wspace=0.35)
+r = 0.9
 
-### dQ/dU and dQ/dV magnitude for year zero
+fig = plt.figure(figsize=(12.5*r, 6*r), constrained_layout=True)
 
-ax0 = plt.subplot(spec[0])
+gs = gridspec.GridSpec(2, 3, wspace=0.35, hspace=0.35, width_ratios=[4, 4, 3], height_ratios=[2, 1])
+ax0 = fig.add_subplot(gs[0:2, 0])
+
 ax0.set_aspect('equal')
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
@@ -245,11 +274,14 @@ if run_name == 'THW':
                           color=sns.xkcd_rgb["black"],
                           alpha=0.3, crs=gv.proj)
 
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
-cbar.set_label(label_math, fontsize=16)
+cbar.set_label(label_math, fontsize=14)
 n_text = AnchoredText('year ' + str(t_zero),
                       prop=dict(size=12),
                       frameon=True, loc='upper right')
@@ -257,7 +289,8 @@ ax0.add_artist(n_text)
 at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
 ax0.add_artist(at)
 
-ax1 = plt.subplot(spec[1])
+
+ax1 = fig.add_subplot(gs[0:2, 1])
 ax1.set_aspect('equal')
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
@@ -292,11 +325,13 @@ if run_name == 'THW':
                           color=sns.xkcd_rgb["black"],
                           alpha=0.3, crs=gv.proj)
 
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
-cbar.set_label(label_math, fontsize=16)
+cbar.set_label(label_math, fontsize=14)
 n_text = AnchoredText('year ' + str(t_last),
                       prop=dict(size=12),
                       frameon=True, loc='upper right')
@@ -304,7 +339,32 @@ ax1.add_artist(n_text)
 at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
 
-plt.tight_layout()
+
+ax2 = fig.add_subplot(gs[2])
+p1, = ax2.plot(data_frame['time'].values,
+               data_frame['delta_VAF_measures_'+run_name].values - data_frame['delta_VAF_itslive_'+run_name].values,
+               linestyle='dashed', color=color_palette[3])
+p3, = ax2.plot(data_frame['time'].values,
+               data_frame['Dot_product_'+run_name].values,
+               color=color_palette[2], label='', linewidth=3)
+plt.legend(handles=[p1, p3],
+           labels=label_lin,
+           frameon=True, fontsize=9, loc='upper left')
+ax2.set_ylabel(y_label_lin)
+ax2.set_xlabel('Time [yrs]')
+at = AnchoredText('c', prop=dict(size=12), frameon=True, loc='lower right')
+ax2.add_artist(at)
+
+
+ax3 = fig.add_subplot(gs[5])
+smap = salem.Map(gmos, countries=False)
+
+smap.set_rgb(natural_earth='lr')
+smap.set_shapefile(shp_sel, linewidth=0.2, facecolor='red', edgecolor=sns.xkcd_rgb["black"])
+smap.set_lonlat_contours(xinterval=0, yinterval=0)
+smap.visualize(ax=ax3, addcbar=False)
+at = AnchoredText('d', prop=dict(size=9), frameon=True, loc='lower left')
+ax3.add_artist(at)
 
 path_to_plot = os.path.join(str(plot_path), str(run_name) + '.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)

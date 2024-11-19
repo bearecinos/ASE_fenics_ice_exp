@@ -184,7 +184,7 @@ rcParams['legend.fontsize'] = 5
 rcParams['axes.titlesize'] = 5
 sns.set_context('poster')
 
-label = [r'$\Delta$ abs($Q^{M}_{T}$ - $Q^{I}_{T}$)',
+label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
          r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' +
          r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
 
