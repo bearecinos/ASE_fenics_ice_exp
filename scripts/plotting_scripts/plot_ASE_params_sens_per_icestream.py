@@ -159,7 +159,7 @@ r=1.2
 tick_options = {'axis':'both','which':'both','bottom':False,
      'top':False,'left':False,'right':False,'labelleft':False, 'labelbottom':False}
 
-label_alpha = r'$\frac{\delta Q_{VAF}}{\delta \alpha^{2}}$'
+label_alpha = r'$\frac{\delta Q}{\delta \alpha^{2}}$'
 
 label_beta = r'$\frac{\delta Q}{\delta \beta^{2}}$'
 
@@ -177,9 +177,9 @@ if run_name == 'THW':
 if run_name == 'PIG':
     shp_sel = shp.loc[[63]]
 if run_name == 'SPK':
-    shp_sel = shp.loc[[137, 138, 139]]
+    shp_sel = shp.loc[[62, 137, 139]]
 if run_name == 'ALL':
-    shp_sel = shp.loc[[63, 64, 138, 137, 138, 139]]
+    shp_sel = shp.loc[[62, 63, 64, 138, 137, 138, 139]]
 
 assert shp_sel is not None
 shp_sel.crs = gv.proj.crs

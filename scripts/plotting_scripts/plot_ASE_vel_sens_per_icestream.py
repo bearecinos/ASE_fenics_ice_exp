@@ -173,7 +173,7 @@ maxv = 6.0
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 
-label_math = r'$| \frac{\delta Q}{\delta V} |$'
+label_math = r'$\frac{\partial Q}{\partial\hat{p}}$'
 format_ticker = [r'3$\times 10^{10}$',
                  r'4.5$\times 10^{10}$',
                  r'6$\times 10^{10}$']
@@ -186,9 +186,9 @@ if run_name == 'THW':
 if run_name == 'PIG':
     shp_sel = shp.loc[[63]]
 if run_name == 'SPK':
-    shp_sel = shp.loc[[137, 138, 139]]
+    shp_sel = shp.loc[[62, 137, 139]]
 if run_name == 'ALL':
-    shp_sel = shp.loc[[63, 64, 138, 137, 138, 139]]
+    shp_sel = shp.loc[[62, 63, 64, 137, 138, 139]]
 
 assert shp_sel is not None
 
@@ -208,7 +208,7 @@ gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 data_frame = pd.read_csv(os.path.join(plot_path,
                                       'results_linearity_test.csv'), index_col=0)
 
-label_lin = [r'$\Delta$ abs($Q^{M}_{T}$ - $Q^{I}_{T}$)',
+label_lin = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
              r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + \n' +
              r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
 

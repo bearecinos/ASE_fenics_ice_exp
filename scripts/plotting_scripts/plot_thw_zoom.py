@@ -167,7 +167,7 @@ levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 print(ticks)
 
-label_math = r'$| \frac{\delta Q}{\delta V} |$'
+label_math = r'$\frac{\partial Q}{\partial\hat{p}}$'
 format_ticker = [r'3.5$\times 10^{10}$',
                  r'5.0$\times 10^{10}$',
                  r'6.5$\times 10^{10}$']
