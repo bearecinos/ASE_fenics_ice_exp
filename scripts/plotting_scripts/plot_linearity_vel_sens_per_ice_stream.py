@@ -198,7 +198,7 @@ rcParams['axes.titlesize'] = 5
 sns.set_context('poster')
 
 if add_std:
-    label_std = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
                  r'$abs(\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{STD, M} - u_{STD, I}))$' + ' + ' +
                  r'$abs(\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{STD, M} - v_{STD, I}))$']
 else:
@@ -226,7 +226,7 @@ p3, = ax0.plot(qoi_dict_c2['x'],
 
 plt.legend(handles = [p1, p3],
            labels=label,
-           frameon=True, fontsize=18)
+           frameon=True, fontsize=18, bbox_to_anchor=(3.0, -0.2))
 
 ax0.set_ylabel(y_label)
 ax0.set_xlabel('Time [yrs]')
