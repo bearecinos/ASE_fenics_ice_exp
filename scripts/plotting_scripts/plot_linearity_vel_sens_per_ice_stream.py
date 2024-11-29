@@ -22,10 +22,17 @@ parser.add_argument("-sub_plot_dir",
                     type=str,
                     default="temp",
                     help="pass sub plot directory to store the plots")
+parser.add_argument("-add_std",
+                    action="store_true",
+                    help="If this is specify std is plot instead of velocity data "
+                         "for each vel_component in the dot product.")
 
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
+
+add_std = args.add_std
+print(f"add_std is you are plotting velocities: {add_std}")
 
 # Define main repository path
 MAIN_PATH = config['main_path']
@@ -124,10 +131,10 @@ all_dfs_measures_SPK = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=o
 all_dfs_measures_PIG = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_PIG, dic_me=out_me_PIG)
 all_dfs_measures_THW = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_THW, dic_me=out_me_THW)
 
-dot_Ume_full_mask, dot_Vme_full_mask = velocity.dot_product_per_pair(all_dfs_full_mask, df_merge)
-dot_Ume_SPK_mask, dot_Vme_SPK_mask = velocity.dot_product_per_pair(all_dfs_measures_SPK, df_merge)
-dot_Ume_PIG_mask, dot_Vme_PIG_mask = velocity.dot_product_per_pair(all_dfs_measures_PIG, df_merge)
-dot_Ume_THW_mask, dot_Vme_THW_mask = velocity.dot_product_per_pair(all_dfs_measures_THW, df_merge)
+dot_Ume_full_mask, dot_Vme_full_mask = velocity.dot_product_per_pair(all_dfs_full_mask, df_merge, add_std=add_std)
+dot_Ume_SPK_mask, dot_Vme_SPK_mask = velocity.dot_product_per_pair(all_dfs_measures_SPK, df_merge,add_std=add_std)
+dot_Ume_PIG_mask, dot_Vme_PIG_mask = velocity.dot_product_per_pair(all_dfs_measures_PIG, df_merge,add_std=add_std)
+dot_Ume_THW_mask, dot_Vme_THW_mask = velocity.dot_product_per_pair(all_dfs_measures_THW, df_merge, add_std=add_std)
 
 dot_Ume_full_mask_intrp = np.interp(qoi_dict_c2['x'],
                                     t_sens,
@@ -173,7 +180,13 @@ d = {'time': qoi_dict_c2['x'],
      'Dot_product_THW': dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp}
 
 data_frame = pd.DataFrame(data=d)
-h_obs_path = data_frame.to_csv(os.path.join(plot_path, 'results_linearity_test.csv'))
+
+if add_std:
+    csv_f_name = 'results_linearity_test_with_STD.csv'
+else:
+    csv_f_name = 'results_linearity_test.csv'
+
+h_obs_path = data_frame.to_csv(os.path.join(plot_path, csv_f_name))
 
 color_palette = sns.color_palette("deep")
 
@@ -184,9 +197,14 @@ rcParams['legend.fontsize'] = 5
 rcParams['axes.titlesize'] = 5
 sns.set_context('poster')
 
-label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
-         r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' +
-         r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
+if add_std:
+    label_std = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+                 r'$abs(\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{STD, M} - u_{STD, I}))$' + ' + ' +
+                 r'$abs(\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{STD, M} - v_{STD, I}))$']
+else:
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' +
+             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
 
 y_label = r'$\Delta$ $Q_{T}$ [$m^3$]'
 
@@ -267,6 +285,10 @@ ax3.set_title('Thwaites', loc='right')
 
 plt.tight_layout()
 
-fig_save_path = os.path.join(plot_path, 'linearity_test_final.png')
+if add_std:
+    file_plot_name = 'linearity_test_final_with_STD.png'
+else:
+    file_plot_name = 'linearity_test_final.png'
 
+fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
