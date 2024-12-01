@@ -7,6 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import argparse
 from fenics_ice import config as conf
+from fenics_ice import inout
 from matplotlib import rcParams
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.gridspec as gridspec
@@ -22,10 +23,26 @@ parser.add_argument("-sub_plot_dir",
                     type=str,
                     default="temp",
                     help="pass sub plot directory to store the plots")
+parser.add_argument("-add_std",
+                    action="store_true",
+                    help="If this is specify std is plot instead of velocity data "
+                         "for each vel_component in the dot product.")
+parser.add_argument("-add_enveo",
+                    action="store_true",
+                    help="If this is specify the difference "
+                         "between measures and enveo velocities "
+                         "is plot additionally to itslive.")
 
 args = parser.parse_args()
 config_file = args.conf
 config = ConfigObj(os.path.expanduser(config_file))
+
+add_std = args.add_std
+print(f"add_std is you are plotting velocities: {add_std}")
+
+add_enveo = args.add_enveo
+print(f"add_enveo is you are plotting "
+      f"also enveo velocity differences: {add_enveo}")
 
 # Define main repository path
 MAIN_PATH = config['main_path']
@@ -116,6 +133,74 @@ t_sens = np.flip(np.linspace(params_il.time.run_length,
                              0,
                              params_il.time.num_sens))
 
+if add_enveo:
+    # We read velocities
+    file_enveo = os.path.join(MAIN_PATH,
+                              'output/02_gridded_data/ase_obs_vel_enveo-comp_enveo-cloud_2014-error-factor-1E+0.h5')
+    assert os.path.exists(file_enveo), (f"File '{file_enveo}' does not exist. "
+                                        f"You must produce the file via "
+                                        f"scripts/prepro_stages/02_gridded_data/.")
+    vel_enveo = inout.read_vel_obs(Path(file_enveo), model=None, use_cloud_point=False)
+
+    # We merge MEaSUREs and ENVEO common data points!
+    all_dfs_full_mask_enveo, df_merge_enveo = velocity.merge_measures_and_enveo_vel_obs_sens(dic_env=vel_enveo,
+                                                                                             dic_me=out_me,
+                                                                                             return_df_merge=True)
+
+    all_dfs_measures_SPK_ENVEO = velocity.merge_measures_and_enveo_vel_obs_sens(dic_env=vel_enveo, dic_me=out_me_SPK)
+    all_dfs_measures_PIG_ENVEO = velocity.merge_measures_and_enveo_vel_obs_sens(dic_env=vel_enveo, dic_me=out_me_PIG)
+    all_dfs_measures_THW_ENVEO = velocity.merge_measures_and_enveo_vel_obs_sens(dic_env=vel_enveo, dic_me=out_me_THW)
+
+    # We do the dot product between the derivatives and velocity differences, do it for the STD if needed.
+    dot_Ume_full_mask_ENV, dot_Vme_full_mask_ENV = velocity.dot_product_per_pair_enveo(all_dfs_full_mask_enveo,
+                                                                                       df_merge_enveo,
+                                                                                       add_std=add_std)
+    dot_Ume_SPK_mask_ENV, dot_Vme_SPK_mask_ENV = velocity.dot_product_per_pair_enveo(all_dfs_measures_SPK_ENVEO,
+                                                                                     df_merge_enveo,
+                                                                                     add_std=add_std)
+    dot_Ume_PIG_mask_ENV, dot_Vme_PIG_mask_ENV = velocity.dot_product_per_pair_enveo(all_dfs_measures_PIG_ENVEO,
+                                                                                     df_merge_enveo,
+                                                                                     add_std=add_std)
+    dot_Ume_THW_mask_ENV, dot_Vme_THW_mask_ENV = velocity.dot_product_per_pair_enveo(all_dfs_measures_THW_ENVEO,
+                                                                                     df_merge_enveo,
+                                                                                     add_std=add_std)
+    dot_Ume_full_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                            t_sens,
+                                            dot_Ume_full_mask_ENV)
+    dot_Vme_full_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                            t_sens,
+                                            dot_Vme_full_mask_ENV)
+
+    dot_Ume_SPK_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                           t_sens,
+                                           dot_Ume_SPK_mask_ENV)
+    dot_Vme_SPK_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                           t_sens,
+                                           dot_Vme_SPK_mask_ENV)
+
+    dot_Ume_PIG_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                           t_sens,
+                                           dot_Ume_PIG_mask_ENV)
+    dot_Vme_PIG_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                           t_sens,
+                                           dot_Vme_PIG_mask_ENV)
+
+    dot_Ume_THW_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                           t_sens,
+                                           dot_Ume_THW_mask_ENV)
+    dot_Vme_THW_mask_intrp_ENV = np.interp(qoi_dict_c2['x'],
+                                           t_sens,
+                                           dot_Vme_THW_mask_ENV)
+
+    d_to_add = {'Dot_product_all_enveo': dot_Vme_full_mask_intrp_ENV + dot_Ume_full_mask_intrp_ENV,
+                'Dot_product_PIG_enveo': dot_Vme_PIG_mask_intrp_ENV + dot_Ume_PIG_mask_intrp_ENV,
+                'Dot_product_SPK_enveo': dot_Vme_SPK_mask_intrp_ENV + dot_Ume_SPK_mask_intrp_ENV,
+                'Dot_product_THW_enveo': dot_Vme_THW_mask_intrp_ENV + dot_Ume_THW_mask_intrp_ENV}
+
+    cols_to_add = pd.DataFrame(data=d_to_add)
+
+
+## Now for ITSLIVE and MEaSUREs
 all_dfs_full_mask, df_merge = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il,
                                                                                dic_me=out_me,
                                                                                return_df_merge=True)
@@ -124,10 +209,10 @@ all_dfs_measures_SPK = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=o
 all_dfs_measures_PIG = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_PIG, dic_me=out_me_PIG)
 all_dfs_measures_THW = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_THW, dic_me=out_me_THW)
 
-dot_Ume_full_mask, dot_Vme_full_mask = velocity.dot_product_per_pair(all_dfs_full_mask, df_merge)
-dot_Ume_SPK_mask, dot_Vme_SPK_mask = velocity.dot_product_per_pair(all_dfs_measures_SPK, df_merge)
-dot_Ume_PIG_mask, dot_Vme_PIG_mask = velocity.dot_product_per_pair(all_dfs_measures_PIG, df_merge)
-dot_Ume_THW_mask, dot_Vme_THW_mask = velocity.dot_product_per_pair(all_dfs_measures_THW, df_merge)
+dot_Ume_full_mask, dot_Vme_full_mask = velocity.dot_product_per_pair(all_dfs_full_mask, df_merge, add_std=add_std)
+dot_Ume_SPK_mask, dot_Vme_SPK_mask = velocity.dot_product_per_pair(all_dfs_measures_SPK, df_merge,add_std=add_std)
+dot_Ume_PIG_mask, dot_Vme_PIG_mask = velocity.dot_product_per_pair(all_dfs_measures_PIG, df_merge,add_std=add_std)
+dot_Ume_THW_mask, dot_Vme_THW_mask = velocity.dot_product_per_pair(all_dfs_measures_THW, df_merge, add_std=add_std)
 
 dot_Ume_full_mask_intrp = np.interp(qoi_dict_c2['x'],
                                     t_sens,
@@ -173,7 +258,18 @@ d = {'time': qoi_dict_c2['x'],
      'Dot_product_THW': dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp}
 
 data_frame = pd.DataFrame(data=d)
-h_obs_path = data_frame.to_csv(os.path.join(plot_path, 'results_linearity_test.csv'))
+
+if add_enveo:
+    data_frame = pd.concat([data_frame, cols_to_add], axis=1)
+
+if add_std and add_enveo:
+    csv_f_name = 'results_linearity_test_with_STD_ENV.csv'
+if add_enveo:
+    csv_f_name = 'results_linearity_test_with_ENV.csv'
+else:
+    csv_f_name = 'results_linearity_test.csv'
+
+h_obs_path = data_frame.to_csv(os.path.join(plot_path, csv_f_name))
 
 color_palette = sns.color_palette("deep")
 
@@ -184,9 +280,26 @@ rcParams['legend.fontsize'] = 5
 rcParams['axes.titlesize'] = 5
 sns.set_context('poster')
 
-label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
-         r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' +
-         r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
+if add_std:
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+             r'$abs(\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{STD, M} - u_{STD, I}))$' + ' + ' +
+             r'$abs(\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{STD, M} - v_{STD, I}))$']
+if add_std and add_enveo:
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+             r'$abs(\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{STD, M} - u_{STD, E}))$' + ' + ' +
+             r'$abs(\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{STD, M} - v_{STD, E}))$',
+             r'$abs(\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{STD, M} - u_{STD, I}))$' + ' + ' +
+             r'$abs(\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{STD, M} - v_{STD, I}))$']
+if add_enveo:
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{E})$' + ' + ' +
+             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{E})$',
+             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' +
+             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
+else:
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' +
+             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
 
 y_label = r'$\Delta$ $Q_{T}$ [$m^3$]'
 
@@ -206,9 +319,17 @@ p3, = ax0.plot(qoi_dict_c2['x'],
               dot_Vme_full_mask_intrp + dot_Ume_full_mask_intrp,
               color=color_palette[2], label='', linewidth=3)
 
-plt.legend(handles = [p1, p3],
-           labels=label,
-           frameon=True, fontsize=18)
+if add_enveo:
+    p2, = ax0.plot(qoi_dict_c2['x'],
+                   dot_Vme_full_mask_intrp_ENV + dot_Ume_full_mask_intrp_ENV,
+                   color=color_palette[1], label='', linewidth=3)
+    plt.legend(handles=[p1, p2, p3],
+               labels=label,
+               frameon=True, fontsize=18, bbox_to_anchor=(3.0, -0.2))
+else:
+    plt.legend(handles = [p1, p3],
+               labels=label,
+               frameon=True, fontsize=18, bbox_to_anchor=(3.0, -0.2))
 
 ax0.set_ylabel(y_label)
 ax0.set_xlabel('Time [yrs]')
@@ -226,6 +347,11 @@ p3, = ax1.plot(qoi_dict_c2_SPK['x'],
                dot_Vme_SPK_mask_intrp + dot_Ume_SPK_mask_intrp,
               color=color_palette[2], label='', linewidth=3)
 
+if add_enveo:
+    p2, = ax1.plot(qoi_dict_c2_SPK['x'],
+                   dot_Vme_SPK_mask_intrp_ENV + dot_Ume_SPK_mask_intrp_ENV,
+                   color=color_palette[1], label='', linewidth=3)
+
 ax1.set_xlabel('Time [yrs]')
 
 at = AnchoredText('b', prop=dict(size=16), frameon=True, loc='upper left')
@@ -240,6 +366,11 @@ p1, = ax2.plot(qoi_dict_c2_PIG['x'],
 p3, = ax2.plot(qoi_dict_c2_PIG['x'],
                dot_Vme_PIG_mask_intrp + dot_Ume_PIG_mask_intrp,
                color=color_palette[2], label='', linewidth=3)
+
+if add_enveo:
+    p2, = ax2.plot(qoi_dict_c2_PIG['x'],
+                   dot_Vme_PIG_mask_intrp_ENV + dot_Ume_PIG_mask_intrp_ENV,
+                   color=color_palette[1], label='', linewidth=3)
 
 ax2.set_xlabel('Time [yrs]')
 
@@ -256,6 +387,11 @@ p3, = ax3.plot(qoi_dict_c2_THW['x'],
                dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp,
                color=color_palette[2], label='', linewidth=3)
 
+if add_enveo:
+    p2, = ax3.plot(qoi_dict_c2_THW['x'],
+                   dot_Vme_THW_mask_intrp_ENV + dot_Ume_THW_mask_intrp_ENV,
+                   color=color_palette[1], label='', linewidth=3)
+
 ax3.set_xlabel('Time [yrs]')
 at = AnchoredText('d', prop=dict(size=16), frameon=True, loc='upper left')
 ax3.add_artist(at)
@@ -267,6 +403,14 @@ ax3.set_title('Thwaites', loc='right')
 
 plt.tight_layout()
 
-fig_save_path = os.path.join(plot_path, 'linearity_test_final.png')
+if add_std:
+    file_plot_name = 'linearity_test_final_with_STD.png'
+if add_std and add_enveo:
+    file_plot_name = 'linearity_test_final_with_STD_and_ENVEO.png'
+if add_enveo:
+    file_plot_name = 'linearity_test_final_with_ENVEO.png'
+else:
+    file_plot_name = 'linearity_test_final.png'
 
+fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
