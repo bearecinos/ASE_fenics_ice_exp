@@ -1,3 +1,4 @@
+import sys
 import os
 from pathlib import Path
 import numpy as np
@@ -135,7 +136,7 @@ rcParams['legend.fontsize'] = 5
 rcParams['axes.titlesize'] = 5
 sns.set_context('poster')
 
-label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$)',
+label = [r'$\Delta$ ($Q^{M}_{T}$ - $Q^{I}_{T}$)',
          r'$\frac{\partial Q_{M}}{\partial \alpha_{M}} \cdot (\alpha_{M} - \alpha_{I})$ +' +
          r'$\frac{\partial Q_{M}}{\partial \beta_{M}} \cdot (\beta_{M} - \beta_{I})$']
 
