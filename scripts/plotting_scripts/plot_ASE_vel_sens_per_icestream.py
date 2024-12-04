@@ -10,6 +10,7 @@ import seaborn as sns
 import geopandas as gpd
 import pandas as pd
 import pyproj
+from pathlib import Path
 import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -58,6 +59,7 @@ if not os.path.exists(plot_path):
     os.makedirs(plot_path)
 
 from ficetools import utils_funcs, graphics, velocity
+from ficetools.backend import FunctionSpace, VectorFunctionSpace, Function, project
 
 main_run_path = os.path.join(MAIN_PATH, str(args.main_path_tomls))
 assert os.path.exists(main_run_path), "Provide the right path to tomls for the runs"
@@ -193,12 +195,57 @@ if run_name == 'ALL':
 assert shp_sel is not None
 
 shp_sel.crs = gv.proj.crs
-
-gdf = gpd.read_file(config['input_files']['grounding_line'])
-ase_ground = gdf[220:235]
 proj = pyproj.Proj('EPSG:3031')
 
-data = ase_ground.to_crs(proj.crs).reset_index()
+# Adding model gnd lines for year 9 and 40
+params_all = conf.ConfigParser(path_tomls_folder_m[0])
+
+# Reading the model output
+outdir = params_all.io.diagnostics_dir
+phase_name_fwd = params_all.time.phase_name
+run_name = params_all.io.run_name
+phase_suffix = params_all.time.phase_suffix
+
+fwd_outdir_me = Path(outdir) / phase_name_fwd / phase_suffix
+
+file_H_time10 = "_".join((params_all.io.run_name + phase_suffix, 'H_timestep_240.xml'))
+file_H_time40 = "_".join((params_all.io.run_name + phase_suffix, 'H_timestep_960.xml'))
+
+xmlfile_H_10 = fwd_outdir_me / file_H_time10
+xmlfile_H_40 = fwd_outdir_me / file_H_time40
+
+assert xmlfile_H_10.is_file(), "File not found"
+assert xmlfile_H_40.is_file(), "File not found"
+
+# Compute the function spaces from the Mesh
+H_10 = Function(M, str(xmlfile_H_10))
+H_10_vertex = H_10.compute_vertex_values(mesh_in)
+
+H_40 = Function(M, str(xmlfile_H_40))
+H_40_vertex = H_40.compute_vertex_values(mesh_in)
+
+# Reading the sensitivity output
+phase_name_inversion = params_all.inversion.phase_name
+inv_outdir_me = Path(outdir) / phase_name_inversion / phase_suffix
+bed_file = "_".join((params_all.io.run_name + phase_suffix, 'bed.xml'))
+
+bed_file_fullpath = inv_outdir_me / bed_file
+assert bed_file_fullpath.is_file(), "File not found"
+
+Q = mdl.Q
+bed_func = Function(Q, str(bed_file_fullpath))
+bed_v = bed_func.compute_vertex_values(mesh_in)
+
+rhoi = 917.0          #Density of ice
+rhow = 1030.0         #Density of sea water
+
+H_10_AF = H_10_vertex + bed_v*(rhow/rhoi)
+mask = H_10_AF > 0.0  # Example value to filter
+masked_H_10_AF = np.ma.array(H_10_AF, mask=mask)
+
+H_40_AF = H_40_vertex + bed_v*(rhow/rhoi)
+mask_40 = H_40_AF > 0.0
+masked_H_40_AF = np.ma.array(H_40_AF, mask=mask_40)
 
 # We add the lakes and Rignot 2024 grounding line indicating seawater intrusions
 shp_lake = gpd.read_file(config['input_files']['thw_lake'])
@@ -206,7 +253,7 @@ gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
 gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
 data_frame = pd.read_csv(os.path.join(plot_path,
-                                      'results_linearity_test.csv'), index_col=0)
+                                      'results_linearity_test_BKP.csv'), index_col=0)
 
 label_lin = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
              r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + \n' +
@@ -250,16 +297,16 @@ x_n, y_n = smap.grid.transform(x, y,
 c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
                     levels=levels,
                     cmap=cmap_sen, extend="both")
+
+triang = tri.Triangulation(x_n, y_n)
+ax0.tricontour(triang, masked_H_10_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["grey blue"])
+
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-for g, geo in enumerate(data.geometry):
-    smap.set_geometry(data.loc[g].geometry,
-                      linewidth=2,
-                      color=sns.xkcd_rgb["white"],
-                      alpha=0.3, crs=gv.proj)
+
 for g, geo in enumerate(shp_lake.geometry):
     smap.set_geometry(shp_lake.loc[g].geometry,
                       linewidth=0.5,
@@ -299,17 +346,14 @@ c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
                     levels=levels,
                     cmap=cmap_sen,
                     extend="both")
+triang = tri.Triangulation(x_n, y_n)
+ax1.tricontour(triang, masked_H_40_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["grey blue"])
+
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-for g, geo in enumerate(data.geometry):
-    smap.set_geometry(data.loc[g].geometry,
-                      linewidth=2,
-                      color=sns.xkcd_rgb["white"],
-                      alpha=0.3,
-                      crs=gv.proj)
 
 for g, geo in enumerate(shp_lake.geometry):
     smap.set_geometry(shp_lake.loc[g].geometry,
