@@ -203,7 +203,6 @@ params_all = conf.ConfigParser(path_tomls_folder_m[0])
 # Reading the model output
 outdir = params_all.io.diagnostics_dir
 phase_name_fwd = params_all.time.phase_name
-run_name = params_all.io.run_name
 phase_suffix = params_all.time.phase_suffix
 
 fwd_outdir_me = Path(outdir) / phase_name_fwd / phase_suffix
