@@ -197,6 +197,10 @@ assert shp_sel is not None
 shp_sel.crs = gv.proj.crs
 proj = pyproj.Proj('EPSG:3031')
 
+gdf = gpd.read_file(config['input_files']['grounding_line'])
+ase_ground = gdf[220:235]
+data = ase_ground.to_crs(proj.crs).reset_index()
+
 # Adding model gnd lines for year 9 and 40
 params_all = conf.ConfigParser(path_tomls_folder_m[0])
 
@@ -288,6 +292,7 @@ gs = gridspec.GridSpec(2, 3, wspace=0.35, hspace=0.35, width_ratios=[4, 4, 3], h
 ax0 = fig.add_subplot(gs[0:2, 0])
 
 ax0.set_aspect('equal')
+ax0.set_facecolor(sns.xkcd_rgb["ocean blue"])
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
@@ -298,7 +303,7 @@ c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
                     cmap=cmap_sen, extend="both")
 
 triang = tri.Triangulation(x_n, y_n)
-ax0.tricontour(triang, masked_H_10_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["grey blue"])
+ax0.tricontour(triang, masked_H_10_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["ocean blue"])
 
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
@@ -312,6 +317,12 @@ for g, geo in enumerate(shp_lake.geometry):
                       alpha=0.1,
                       facecolor='white', edgecolor='white',
                       crs=gv.proj)
+for g, geo in enumerate(data.geometry):
+    smap.set_geometry(data.loc[g].geometry,
+                      linewidth=2,
+                      color=sns.xkcd_rgb["white"],
+                      alpha=0.3, crs=gv.proj)
+
 
 if run_name == 'THW':
     for g, geo in enumerate(gnd_rig.geometry):
@@ -338,6 +349,7 @@ ax0.add_artist(at)
 
 ax1 = fig.add_subplot(gs[0:2, 1])
 ax1.set_aspect('equal')
+ax0.set_facecolor(sns.xkcd_rgb["ocean blue"])
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
@@ -346,7 +358,7 @@ c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
                     cmap=cmap_sen,
                     extend="both")
 triang = tri.Triangulation(x_n, y_n)
-ax1.tricontour(triang, masked_H_40_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["grey blue"])
+ax1.tricontour(triang, masked_H_40_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["ocean blue"])
 
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
@@ -360,6 +372,11 @@ for g, geo in enumerate(shp_lake.geometry):
                       alpha=0.1,
                       facecolor='white', edgecolor='white',
                       crs=gv.proj)
+for g, geo in enumerate(data.geometry):
+    smap.set_geometry(data.loc[g].geometry,
+                      linewidth=2,
+                      color=sns.xkcd_rgb["white"],
+                      alpha=0.3, crs=gv.proj)
 
 if run_name == 'THW':
     for g, geo in enumerate(gnd_rig.geometry):
