@@ -16,6 +16,8 @@ from matplotlib import rcParams
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colors import BoundaryNorm
+import netCDF4
 
 from fenics_ice import config as conf
 from fenics_ice import mesh as fice_mesh
@@ -55,6 +57,7 @@ if not os.path.exists(plot_path):
     os.makedirs(plot_path)
 
 from ficetools import utils_funcs, graphics, velocity
+from ficetools import mesh as meshtools
 
 main_run_path = os.path.join(MAIN_PATH, str(args.main_path_tomls))
 assert os.path.exists(main_run_path), "Provide the right path to tomls for the runs"
@@ -197,6 +200,27 @@ shp_lake = gpd.read_file(config['input_files']['thw_lake'])
 gv = salem.Grid(nxny=(370, 300), dxdy=(gv.dx, gv.dy),
                 x0y0=(-1559357, -299373), proj=proj)
 
+#Getting BedMachine and calculating hydro potential
+bedmac_file = os.path.join(MAIN_PATH, config['input_files']['bedmachine'])
+indata = netCDF4.Dataset(bedmac_file)
+
+bed, xx, yy = meshtools.slice_netcdf(indata,
+                                     'bed',
+                                     ase_bbox,
+                                     return_transform=False)
+
+surf, _, _ = meshtools.slice_netcdf(indata,
+                                    'surface',
+                                    ase_bbox,
+                                    return_transform=False)
+
+rhoi = 917.0          #Density of ice
+rhow = 1030.0         #Density of sea water
+
+coeff1 = rhoi/rhow
+coeff2 = (rhow-rhoi)/rhow
+
+sigma = coeff1*surf + coeff2*bed
 ########### Plotting ##############################################
 
 r=0.9
@@ -217,6 +241,21 @@ x_n, y_n = smap.grid.transform(x, y,
 c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
                     levels=levels,
                     cmap=cmap_sen, extend="both")
+
+x_m, y_m = smap.grid.transform(xx, yy,
+                               crs=gv.proj)
+
+levels_two = np.linspace(np.min(sigma), np.max(sigma), 30)
+cmap = plt.get_cmap('Greens_r')
+norm = BoundaryNorm(levels_two, ncolors=cmap.N, clip=True)
+
+contour_lines = ax0.contour(x_m, y_m, sigma,
+                            levels=levels_two, cmap=cmap, norm=norm,
+                            linewidth=1.0,
+                            alpha=0.5)
+
+
+
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -236,11 +275,11 @@ for g, geo in enumerate(gnd_rig.geometry):
                       color=sns.xkcd_rgb["black"],
                       alpha=0.3, crs=gv.proj)
 
-for g, geo in enumerate(df_press.geometry):
-    smap.set_geometry(df_press.loc[g].geometry,
-                      linewidth=1.0,
-                      color=sns.xkcd_rgb["grey"],
-                      alpha=0.5, crs=gv.proj)
+# for g, geo in enumerate(df_press.geometry):
+#     smap.set_geometry(df_press.loc[g].geometry,
+#                       linewidth=1.0,
+#                       color=sns.xkcd_rgb["grey"],
+#                       alpha=0.5, crs=gv.proj)
 
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)
@@ -267,6 +306,12 @@ c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
                     levels=levels,
                     cmap=cmap_sen,
                     extend="both")
+
+contour_lines = ax1.contour(x_m, y_m, sigma,
+                            levels=levels_two, cmap=cmap, norm=norm,
+                            linewidth=1.0,
+                            alpha=0.5)
+
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -286,11 +331,11 @@ for g, geo in enumerate(gnd_rig.geometry):
                       color=sns.xkcd_rgb["black"],
                       alpha=0.3, crs=gv.proj)
 
-for g, geo in enumerate(df_press.geometry):
-    smap.set_geometry(df_press.loc[g].geometry,
-                      linewidth=1.0,
-                      color=sns.xkcd_rgb["grey"],
-                      alpha=0.5, crs=gv.proj)
+# for g, geo in enumerate(df_press.geometry):
+#     smap.set_geometry(df_press.loc[g].geometry,
+#                       linewidth=1.0,
+#                       color=sns.xkcd_rgb["grey"],
+#                       alpha=0.5, crs=gv.proj)
 
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)
@@ -306,6 +351,14 @@ n_text = AnchoredText('year ' + str(t_last),
 ax1.add_artist(n_text)
 at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
+
+
+fig.subplots_adjust(right=0.8)
+cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
+                                   cmap=contour_lines.cmap),
+             cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
+
 
 plt.tight_layout()
 
