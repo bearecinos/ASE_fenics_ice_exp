@@ -349,7 +349,7 @@ ax0.add_artist(at)
 
 ax1 = fig.add_subplot(gs[0:2, 1])
 ax1.set_aspect('equal')
-ax0.set_facecolor(sns.xkcd_rgb["ocean blue"])
+ax1.set_facecolor(sns.xkcd_rgb["ocean blue"])
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
