@@ -228,7 +228,7 @@ r=0.9
 fig = plt.figure(figsize=(12.5*r, 6*r), constrained_layout=True)
 #fig.suptitle("Thwaites and Haynes")
 
-gs = gridspec.GridSpec(1, 2)
+gs = gridspec.GridSpec(1, 2, wspace=0.35)
 ax0 = fig.add_subplot(gs[0])
 
 
@@ -289,6 +289,12 @@ cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='', ticks=ticks,
                          format=ticker.FixedFormatter(format_ticker))
 cbar.set_label(label_math, fontsize=14)
+
+cbar_ax = divider.append_axes("right", size="5%", pad=0.5)
+fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
+                                   cmap=contour_lines.cmap),
+             cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
+
 n_text = AnchoredText('year ' + str(t_zero),
                       prop=dict(size=12),
                       frameon=True, loc='upper right')
@@ -353,8 +359,7 @@ at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
 
 
-fig.subplots_adjust(right=0.8)
-cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+cbar_ax = divider.append_axes("right", size="5%", pad=0.5)
 fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
                                    cmap=contour_lines.cmap),
              cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
