@@ -184,11 +184,13 @@ shp = gpd.read_file(config['input_files']['ice_boundaries'])
 shp_sel = None
 
 if run_name == 'THW':
-    shp_sel = shp.loc[[64, 138]]
+    shp_f = shp.loc[[64, 138]]
+    shp_sel = shp_f.dissolve(by='Regions', as_index=False)
 if run_name == 'PIG':
     shp_sel = shp.loc[[63]]
 if run_name == 'SPK':
-    shp_sel = shp.loc[[62, 137, 139]]
+    shp_f = shp.loc[[62, 137, 139]]
+    shp_sel = shp_f.dissolve(by='Regions', as_index=False)
 if run_name == 'ALL':
     shp_sel = shp.loc[[62, 63, 64, 137, 138, 139]]
 
@@ -258,7 +260,7 @@ gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 data_frame = pd.read_csv(os.path.join(plot_path,
                                       'results_linearity_test_BKP.csv'), index_col=0)
 
-label_lin = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
+label_lin = [r'$\Delta$ $(Q^{M}_{T}$ - $Q^{I}_{T})$',
              r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + \n' +
              r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
 
@@ -292,7 +294,7 @@ gs = gridspec.GridSpec(2, 3, wspace=0.35, hspace=0.35, width_ratios=[4, 4, 3], h
 ax0 = fig.add_subplot(gs[0:2, 0])
 
 ax0.set_aspect('equal')
-ax0.set_facecolor(sns.xkcd_rgb["ocean blue"])
+#ax0.set_facecolor(sns.xkcd_rgb["ocean blue"])
 divider = make_axes_locatable(ax0)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
@@ -349,7 +351,7 @@ ax0.add_artist(at)
 
 ax1 = fig.add_subplot(gs[0:2, 1])
 ax1.set_aspect('equal')
-ax1.set_facecolor(sns.xkcd_rgb["ocean blue"])
+#ax1.set_facecolor(sns.xkcd_rgb["ocean blue"])
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
