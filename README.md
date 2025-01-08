@@ -2,15 +2,13 @@
 
 This repository consist of several experiments with Fenics_ice over the Amundsen Basin glaciers.
 
-Note: this repository documentation is a work in progress 👷
-
 The code has been developed to:
 
 - Create a finite element mesh of the region of interest, where simulations will be carried out.
 - Generate the all input data (crop to the study domain) needed by Fenics_ice.
 - And to carry out model experiments
 
-Details of how to apply the fenics_ice code to a real domain can be found on this [wiki.](https://github.com/bearecinos/smith_glacier/wiki)
+Details of how to apply the fenics_ice code to a real domain can be found on this [wiki.](https://github.com/bearecinos/smith_glacier/wiki). We extensively utilise the `ficetools` module from `smith_glacier` repo, which can be accessed [here](https://github.com/bearecinos/smith_glacier/wiki/Usage-and-workflow#ficetools). Currently, `ficetools` is a collection of functions designed to assist with preprocessing and postprocessing model outputs. However, it is actively being developed into a standalone Python library.
 
 Due to several memory issues with `mpi4py` and `hdf5` explained in [here](https://github.com/EdiGlacUQ/fenics_ice/issues/117), we have fixed the fenics_ice environment for the Amundsen region.
 
@@ -21,9 +19,9 @@ Due to several memory issues with `mpi4py` and `hdf5` explained in [here](https:
 ~~~
 git clone https://github.com/EdiGlacUQ/fenics_ice.git
 git clone https://github.com/EdiGlacUQ/tlm_adjoint.git
+git clone https://github.com/bearecinos/smith_glacier.git 
 git clone https://github.com/bearecinos/ASE_fenics_ice_exp.git
 ~~~
-> **Note**: this repository is private at the moment so use ssh cloning for access 
 
 2. Create an environment using **ASE_fenics_ice_exp** `environment.yml` 
 ~~~
