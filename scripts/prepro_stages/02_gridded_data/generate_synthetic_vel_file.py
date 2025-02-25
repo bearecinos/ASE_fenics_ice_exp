@@ -152,11 +152,16 @@ assert sorted(yim_s) == sorted(ymm_s)
 vxss = (1-lamda)*vxmm_s + lamda*vxim_s
 vyss = (1-lamda)*vymm_s + lamda*vyim_s
 
+#STD should be interpolated to
+# $\sigma_{lamda} = \sqrt (1-lamda)^{2} \sigma^{2}_{M} + lamda^{2} \sigma^{2}_{I}) $
+vxss_std = np.sqrt((1 - lamda)**2 * vxmm_std_s**2 + lamda**2 * vxim_std_s**2)
+vyss_std = np.sqrt((1 - lamda)**2 * vymm_std_s**2 + lamda**2 * vyim_std_s**2)
+
 # Mask arrays and make sure nans are drop in both
 # Itslive and Measures
 xss_grid, yss_grid = np.meshgrid(xmm_s, ymm_s)
 
-mask_array = vxss*vxmm_std_s
+mask_array = vxss*vxss_std
 array_ma = np.ma.masked_invalid(mask_array)
 
 # get only the valid values for both mosaics
@@ -166,8 +171,8 @@ ysm_nona = yss_grid[~array_ma.mask].ravel()
 vxsm_nona = vxss[~array_ma.mask].ravel()
 vysm_nona = vyss[~array_ma.mask].ravel()
 
-stdvxsm_nona = vxmm_std_s[~array_ma.mask].ravel()
-stdvysm_nona = vymm_std_s[~array_ma.mask].ravel()
+stdvxsm_nona = vxss_std[~array_ma.mask].ravel()
+stdvysm_nona = vyss_std[~array_ma.mask].ravel()
 
 composite_dict_s = {'x_comp': xsm_nona,
                     'y_comp': ysm_nona,
