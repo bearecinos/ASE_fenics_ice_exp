@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_synthetic"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/06_vaf_partition/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/06_vaf_partition/diagnostics"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic/diagnostics"
 
 write_diagnostics = true
 
@@ -60,14 +60,14 @@ vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud_2014-error-factor-1E+0.h5
 
 [inversion]
 
-max_iter = 1000
+max_iter = 500
 #max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
 
 alpha_active = true
 beta_active = true
 
 # strong priors
-gamma_alpha = 708.12
+gamma_alpha = 10000.0
 delta_alpha = 1.40e-5
 gamma_beta = 16.28
 delta_beta = 1.62e-5
@@ -81,7 +81,7 @@ delta_beta_gnd = 1.62e-5
 #C0_beta**2 = 300.0
 #L0_beta = 1000.0
 
-ftol = 1e-10
+ftol = 1e-8
 gtol = 1e-12
 
 #ftol = 2.22e-09 # This default values fail in the new environment (Newton iteration does not converge)
