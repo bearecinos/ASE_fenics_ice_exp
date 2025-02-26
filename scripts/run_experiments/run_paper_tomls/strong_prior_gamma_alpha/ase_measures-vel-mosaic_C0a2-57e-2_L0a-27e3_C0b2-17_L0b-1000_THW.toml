@@ -1,10 +1,10 @@
 [io] #Directory specification
 
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
-run_name = "ase_synthetic"
+run_name = "ase_measures"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic/diagnostics"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/diagnostics"
 
 write_diagnostics = true
 
@@ -56,7 +56,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud-and-std_2014-error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_measures-comp_measures-cloud_2014-error-factor-1E+0.h5"
 
 [inversion]
 
@@ -74,9 +74,9 @@ delta_beta = 1.62e-5
 delta_beta_gnd = 1.62e-5
 
 # All rounded to 2 digits
-#C0_alpha = 2.8
-#C0_alpha**2 = 8.0
-#L0_alpha = 7100.0
+#C0_alpha (variance round to 1 in file name) 0.57
+#C0_alpha**0.5 (std deviation) 0.75
+#L0_alpha (length scale) 26726.12
 #C0_beta = 17.0
 #C0_beta**2 = 300.0
 #L0_beta = 1000.0
@@ -96,7 +96,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_synthetic_std_strong_priors_'
+phase_suffix = '_measures_'
 
 [ice_dynamics]
 
@@ -149,7 +149,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_synthetic_std_strong_priors_'
+phase_suffix = '_measures_mask_03_THW_'
 
 [eigendec]
 
@@ -161,21 +161,21 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_synthetic_std_strong_priors_'
+phase_suffix = '_measures_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_synthetic_std_strong_priors_'
-qoi_vaf_mask_code = 0
+phase_suffix = '_measures_mask_03_THW_'
+qoi_vaf_mask_code = 3
 qoi_apply_vaf_mask = true
-qoi_vaf_mask_usecode = false
+qoi_vaf_mask_usecode = true
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_synthetic_std_strong_priors_'
+phase_suffix = '_measures_mask_03_THW_'
 
 [melt]
 
@@ -187,11 +187,11 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_synthetic_std_strong_priors_'
+phase_suffix = '_measures_mask_03_THW_'
 sample_posterior = true
 num_eigenvals = 10
 
 [obs_sens]
 
-phase_suffix = '_synthetic_std_strong_priors_'
+phase_suffix = '_measures_mask_03_THW_'
 
