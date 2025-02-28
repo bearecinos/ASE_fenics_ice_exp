@@ -27,8 +27,29 @@ toml set --toml-path $1 io.input_dir "$input_run_inv"
 toml set --toml-path $1 io.output_dir "$run_inv_output_dir/output"
 toml set --toml-path $1 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
 
-echo $(date -u) "Run vel obs sens started" | mail -s "run vel obs sens started" beatriz.recinos@ed.ac.uk
-python $FENICS_ICE_BASE_DIR/runs/run_obs_sens_prop.py $1 |& tee $path_logs/log_vel_obs_sens.txt
-OUT=$(tail "$path_logs/log_vel_obs_sens.txt")
-echo $OUT | mail -s "run vel obs sens finished" beatriz.recinos@ed.ac.uk
+toml set --toml-path $2 io.input_dir "$input_run_inv"
+toml set --toml-path $2 io.output_dir "$run_inv_output_dir/output"
+toml set --toml-path $2 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
+
+toml set --toml-path $3 io.input_dir "$input_run_inv"
+toml set --toml-path $3 io.output_dir "$run_inv_output_dir/output"
+toml set --toml-path $3 io.diagnostics_dir "$run_inv_output_dir/diagnostics"
+
+echo $(date -u) "Run vel obs sens 1 started" | mail -s "run vel obs sens started" beatriz.recinos@ed.ac.uk
+python $FENICS_ICE_BASE_DIR/runs/run_obs_sens_prop.py $1 |& tee $path_logs/log_vel_obs_sens_1.txt
+OUT=$(tail "$path_logs/log_vel_obs_sens_1.txt")
+echo $OUT | mail -s "run vel obs sens 1 finished" beatriz.recinos@ed.ac.uk
+
+echo $(date -u) "Run vel obs sens 2 started" | mail -s "run vel obs sens started" beatriz.recinos@ed.ac.uk
+python $FENICS_ICE_BASE_DIR/runs/run_obs_sens_prop.py $2 |& tee $path_logs/log_vel_obs_sens_2.txt
+OUT=$(tail "$path_logs/log_vel_obs_sens_2.txt")
+echo $OUT | mail -s "run vel obs sens 2 finished" beatriz.recinos@ed.ac.uk
+
+echo $(date -u) "Run vel obs sens 3 started" | mail -s "run vel obs sens started" beatriz.recinos@ed.ac.uk
+python $FENICS_ICE_BASE_DIR/runs/run_obs_sens_prop.py $3 |& tee $path_logs/log_vel_obs_sens_3.txt
+OUT=$(tail "$path_logs/log_vel_obs_sens_3.txt")
+echo $OUT | mail -s "run vel obs sens 3 finished" beatriz.recinos@ed.ac.uk
+
+
+
 
