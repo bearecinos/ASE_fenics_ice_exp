@@ -231,7 +231,7 @@ d = {
 
 data_frame = pd.DataFrame(data=d)
 
-csv_f_name = 'results_SOA_linearity_test_'+ args.exp_name + '.csv'
+csv_f_name = 'results_linearity_test_SOA_'+ args.exp_name + '.csv'
 
 h_obs_path = data_frame.to_csv(os.path.join(plot_path,
                                             csv_f_name))
@@ -256,10 +256,10 @@ if args.plot:
     r = 1.4
 
     fig1 = plt.figure(figsize=(20 * r, 6 * r), constrained_layout=True)
-    spec = gridspec.GridSpec(1, 4, wspace=0.25, hspace=0.05)
+    spec = gridspec.GridSpec(1, 4, figure=fig1, wspace=0.25, hspace=0.05)
 
     ### dQ/dU and dQ/dV magnitude for year zero
-    ax0 = plt.subplot(spec[0])
+    ax0 = fig1.add_subplot(spec[0])
 
     p1, = ax0.plot(qoi_dict_m['x'],
                    qoi_dict_m['y'] - qoi_dict_il['y'],
@@ -279,7 +279,7 @@ if args.plot:
     ax0.add_artist(at)
 
     ### For SPK ####################################################################
-    ax1 = plt.subplot(spec[1])
+    ax1 = fig1.add_subplot(spec[1])
 
     p1, = ax1.plot(qoi_dict_m_SPK['x'],
                    qoi_dict_m_SPK['y'] - qoi_dict_il_SPK['y'],
@@ -295,7 +295,7 @@ if args.plot:
     ax1.add_artist(at)
 
     ### For PIG ####################################################################
-    ax2 = plt.subplot(spec[2])
+    ax2 = fig1.add_subplot(spec[2])
 
     p1, = ax2.plot(qoi_dict_m_PIG['x'],
                    qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y'],
@@ -310,7 +310,7 @@ if args.plot:
     ax2.add_artist(at)
 
     ### For THW ####################################################################
-    ax3 = plt.subplot(spec[3])
+    ax3 = fig1.add_subplot(spec[3])
 
     p1, = ax3.plot(qoi_dict_m_THW['x'],
                    qoi_dict_m_THW['y'] - qoi_dict_il_THW['y'],
@@ -334,7 +334,7 @@ if args.plot:
 
     plt.tight_layout()
 
-    file_plot_name = 'results_SOA_linearity_test_'+ args.exp_name + '.png'
+    file_plot_name = 'results_linearity_test_SOA_'+ args.exp_name + '.png'
 
     fig_save_path = os.path.join(plot_path, file_plot_name)
     plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
