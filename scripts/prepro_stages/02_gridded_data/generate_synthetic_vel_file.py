@@ -46,9 +46,6 @@ parser.add_argument("-year",
                       default= 2014,
                       help="if specify gives back vel "
                            "files corresponding that year")
-parser.add_argument("-error_factor",
-                    type=float, default=1.0,
-                    help="Enlarge error in observation by a factor")
 parser.add_argument("-vel_lambda",
                     type=float, default=0.01,
                     help="Lamda to interpolate between MEaSUREs and ITSLIVE")
@@ -71,7 +68,6 @@ ase_bbox = {}
 for key in config['data_input_extent'].keys():
     ase_bbox[key] = np.float64(config['data_input_extent'][key])
 
-ef = args.error_factor
 mu = 0.0
 sigma = 30.0
 year = args.year
@@ -113,8 +109,7 @@ assert '_' + str(year-1) + '_' + str(year) + \
 # 1) data itslive mosaic (dim)
 dim = xr.open_dataset(mosaic_itslive_file_path)
 
-vxim, vyim, std_vxim, std_vyim = vel_tools.process_itslive_netcdf(dim,
-                                                                      error_factor=ef)
+vxim, vyim, std_vxim, std_vyim = vel_tools.process_itslive_netcdf(dim)
 # section of the data
 vxim_s, xim_s, yim_s = vel_tools.crop_velocity_data_to_extend(vxim,
                                                               ase_bbox,
@@ -129,8 +124,8 @@ dmm = xr.open_dataset(mosaic_measures_file_path)
 
 vxmm = dmm.vx
 vymm = dmm.vy
-std_vxmm = dmm.std_vx * ef
-std_vymm = dmm.std_vy * ef
+std_vxmm = dmm.std_vx
+std_vymm = dmm.std_vy
 
 # Crop velocity data to the ase Glacier extend
 vxmm_s, xmm_s, ymm_s = vel_tools.crop_velocity_data_to_extend(vxmm,
@@ -150,13 +145,13 @@ assert sorted(yim_s) == sorted(ymm_s)
 #by:
 #$\hat{p}_\lambda = (1 - \lambda) \hat{p}_M + \lambda \hat{p}_I$
 
-vxss = (1-vel_lambda)*vxmm_s + vel_lambda*vxim_s
-vyss = (1-vel_lambda)*vymm_s + vel_lambda*vyim_s
+vxss = (1.0-vel_lambda)*vxmm_s + vel_lambda*vxim_s
+vyss = (1.0-vel_lambda)*vymm_s + vel_lambda*vyim_s
 
 #STD should be interpolated to
 # $\sigma_{lamda} = \sqrt (1-lamda)^{2} \sigma^{2}_{M} + lamda^{2} \sigma^{2}_{I}) $
-vxss_std = np.sqrt((1 - vel_lambda)**2 * vxmm_std_s**2 + vel_lambda**2 * vxim_std_s**2)
-vyss_std = np.sqrt((1 - vel_lambda)**2 * vymm_std_s**2 + vel_lambda**2 * vyim_std_s**2)
+vxss_std = np.sqrt((1.0 - vel_lambda)**2 * vxmm_std_s**2 + vel_lambda**2 * vxim_std_s**2)
+vyss_std = np.sqrt((1.0 - vel_lambda)**2 * vymm_std_s**2 + vel_lambda**2 * vyim_std_s**2)
 
 # Mask arrays and make sure nans are drop in both
 # Itslive and Measures
@@ -187,8 +182,8 @@ dcm = xr.open_dataset(cloud_measures_file_path)
 
 vxcm = dcm.VX
 vycm = dcm.VY
-std_vxcm = dcm.STDX * ef
-std_vycm = dcm.STDY * ef
+std_vxcm = dcm.STDX
+std_vycm = dcm.STDY
 
 # Crop velocity data to the ase Glacier extend
 vxcm_s, xcm_s, ycm_s = vel_tools.crop_velocity_data_to_extend(vxcm,
