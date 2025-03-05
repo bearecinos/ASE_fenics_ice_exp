@@ -41,11 +41,6 @@ mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_forward.py $2 |& tee $path_log
 OUT=$(tail "$path_logs/log_toml_fwd_two.txt")
 echo $OUT | mail -s "run fwd finish config 2" beatriz.recinos@ed.ac.uk
 
-echo $(date -u) "Run inversion stages started" | mail -s "run inv started" beatriz.recinos@ed.ac.uk
-mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_inv.py $3 |& tee $path_logs/log_toml_inv_three.txt
-OUT=$(tail "$path_logs/log_toml_inv_three.txt")
-echo $OUT | mail -s "run inv finish config 3" beatriz.recinos@ed.ac.uk
-
 echo $(date -u) "Run forward stages started" | mail -s "run fwd started" beatriz.recinos@ed.ac.uk
 mpirun -n $1 python $FENICS_ICE_BASE_DIR/runs/run_forward.py $3 |& tee $path_logs/log_toml_fwd_three.txt
 OUT=$(tail "$path_logs/log_toml_fwd_three.txt")
