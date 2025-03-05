@@ -157,7 +157,7 @@ vyss_std = np.sqrt((1.0 - vel_lambda)**2 * vymm_std_s**2 + vel_lambda**2 * vyim_
 # Itslive and Measures
 xss_grid, yss_grid = np.meshgrid(xmm_s, ymm_s)
 
-mask_array = vxss*vxss_std
+mask_array = vxim_s * vxmm_s * vxmm_std_s
 array_ma = np.ma.masked_invalid(mask_array)
 
 # get only the valid values for both mosaics
