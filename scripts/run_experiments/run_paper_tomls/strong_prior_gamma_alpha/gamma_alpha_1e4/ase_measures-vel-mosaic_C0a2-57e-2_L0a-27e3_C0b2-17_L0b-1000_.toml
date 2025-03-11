@@ -56,7 +56,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_measures-comp_measures-cloud_2014-error-factor-1E+0.h5"
+vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud_2014-lamda-0E+0.h5"
 
 [inversion]
 
@@ -69,7 +69,7 @@ beta_active = true
 # strong priors
 gamma_alpha = 10000.0
 delta_alpha = 1.40e-5
-gamma_beta = 16.28
+gamma_beta = 100.0
 delta_beta = 1.62e-5
 delta_beta_gnd = 1.62e-5
 
