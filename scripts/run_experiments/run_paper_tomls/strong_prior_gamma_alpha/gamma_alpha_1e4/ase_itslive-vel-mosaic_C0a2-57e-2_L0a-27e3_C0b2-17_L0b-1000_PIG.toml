@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_itslive"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/diagnostics"
+output_dir = ""
+diagnostics_dir = ""
 
 write_diagnostics = true
 
@@ -69,7 +69,7 @@ beta_active = true
 # strong priors
 gamma_alpha = 10000.0
 delta_alpha = 1.40e-5
-gamma_beta = 100.0
+gamma_beta = 16.28
 delta_beta = 1.62e-5
 delta_beta_gnd = 1.62e-5
 

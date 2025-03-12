@@ -281,8 +281,7 @@ if args.plot:
     ax3.add_artist(at)
 
     for ax in [ax0, ax1, ax2, ax3]:
-        ax.set_ylim(np.min(qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y']) - 0.5e12,
-                    np.max(qoi_dict_m['y'] - qoi_dict_il['y'] + 0.5e12))
+        ax.set_ylim(np.min(qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y']) - 0.5e12, 2.5e12)
         ax.grid(True)
 
     ax0.set_title('Full domain', loc='right')

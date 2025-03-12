@@ -329,7 +329,7 @@ if args.plot:
     ax3.set_title('Thwaites', loc='right')
 
     for ax in [ax0, ax1, ax2, ax3]:
-        ax.set_ylim(np.min(qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y']), np.max(dot_Vme_full_mask_intrp + dot_Ume_full_mask_intrp)+0.2e12)
+        ax.set_ylim(np.min(qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y']), 2.5e12)
         ax.grid(True)
 
     plt.tight_layout()
