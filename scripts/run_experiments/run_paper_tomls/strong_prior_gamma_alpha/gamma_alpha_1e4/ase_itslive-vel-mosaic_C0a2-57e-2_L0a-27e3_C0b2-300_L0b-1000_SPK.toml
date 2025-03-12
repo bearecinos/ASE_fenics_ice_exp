@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_itslive"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/diagnostics"
+output_dir = ""
+diagnostics_dir = ""
 
 write_diagnostics = true
 
@@ -60,8 +60,8 @@ vel_file = "ase_obs_vel_itslive-comp_itslive-cloud_2014-error-factor-1E+0.h5"
 
 [inversion]
 
-#max_iter = 1000
-max_iter = 500 # This default values fail in the new environment (Newton iteration does not converge)
+max_iter = 1000
+#max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
 
 alpha_active = true
 beta_active = true
@@ -81,7 +81,7 @@ delta_beta_gnd = 1.62e-5
 #C0_beta**2 = 300.0
 #L0_beta = 1000.0
 
-ftol = 1e-8
+ftol = 1e-10
 gtol = 1e-12
 
 #ftol = 2.22e-09 # This default values fail in the new environment (Newton iteration does not converge)

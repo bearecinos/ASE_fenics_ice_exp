@@ -69,7 +69,7 @@ beta_active = true
 # strong priors
 gamma_alpha = 10000.0
 delta_alpha = 1.40e-5
-gamma_beta = 16.28
+gamma_beta = 40.0
 delta_beta = 1.62e-5
 delta_beta_gnd = 1.62e-5
 
