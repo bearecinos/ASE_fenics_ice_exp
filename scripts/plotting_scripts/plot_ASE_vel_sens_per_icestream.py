@@ -42,6 +42,8 @@ parser.add_argument("-sub_plot_dir",
                     help="pass sub plot directory to store the plots")
 parser.add_argument("-sub_plot_name", type=str,
                     default="temp", help="pass filename")
+parser.add_argument("-csv_exp_name", type=str,
+                    default="temp", help="pass filename")
 
 args = parser.parse_args()
 config_file = args.conf
@@ -123,15 +125,19 @@ out_copy_me = utils_funcs.convert_vel_sens_output_into_functions(out_me,
                                                                  mesh_in)
 
 dQ_dU_14_ME = out_copy_me['dObsU'][n_last]
+dQ_dU_14_ME = np.nan_to_num(dQ_dU_14_ME, nan=0.0)
 dQ_dU_14_ME[dQ_dU_14_ME == -inf] = 0
 
 dQ_dV_14_ME = out_copy_me['dObsV'][n_last]
+dQ_dV_14_ME = np.nan_to_num(dQ_dV_14_ME, nan=0.0)
 dQ_dV_14_ME[dQ_dV_14_ME == -inf] = 0
 
 dQ_dU_3_ME = out_copy_me['dObsU'][n_zero]
+dQ_dU_3_ME = np.nan_to_num(dQ_dU_3_ME, nan=0.0)
 dQ_dU_3_ME[dQ_dU_3_ME == -inf] = 0
 
 dQ_dV_3_ME = out_copy_me['dObsV'][n_zero]
+dQ_dV_3_ME = np.nan_to_num(dQ_dV_3_ME, nan=0.0)
 dQ_dV_3_ME[dQ_dV_3_ME == -inf] = 0
 
 assert not any(np.isinf(dQ_dU_14_ME))
@@ -139,8 +145,12 @@ assert not any(np.isinf(dQ_dV_14_ME))
 assert not any(np.isinf(dQ_dU_3_ME))
 assert not any(np.isinf(dQ_dV_3_ME))
 
-mag_vector_14 = np.log10(np.sqrt(dQ_dU_14_ME ** 2 + dQ_dV_14_ME ** 2))
-mag_vector_3 = np.log10(np.sqrt(dQ_dU_3_ME ** 2 + dQ_dV_3_ME ** 2))
+epsilon = 1e-10  # Small value to prevent log10(0)
+mag_vector_14 = np.log10(np.sqrt(dQ_dU_14_ME ** 2 + dQ_dV_14_ME ** 2) + epsilon)
+mag_vector_3 = np.log10(np.sqrt(dQ_dU_3_ME ** 2 + dQ_dV_3_ME ** 2) + epsilon)
+
+assert np.all(np.isfinite(mag_vector_14)), "mag_vector_14 contains NaN or Inf!"
+assert np.all(np.isfinite(mag_vector_3)), "mag_vector_3 contains NaN or Inf!"
 
 # Read velocity file used for the inversion
 x = mesh_in.coordinates()[:, 0]
@@ -258,7 +268,7 @@ gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
 gnd_rig = gnd_line.to_crs(proj.crs).reset_index()
 
 data_frame = pd.read_csv(os.path.join(plot_path,
-                                      'results_linearity_test_BKP.csv'), index_col=0)
+                                      args.csv_exp_name), index_col=0)
 
 label_lin = [r'$\Delta$ $(Q^{M}_{T}$ - $Q^{I}_{T})$',
              r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + \n' +
