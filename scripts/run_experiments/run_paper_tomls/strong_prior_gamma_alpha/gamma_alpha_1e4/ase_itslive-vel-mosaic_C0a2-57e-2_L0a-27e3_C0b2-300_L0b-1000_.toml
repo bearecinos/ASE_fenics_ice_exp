@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_itslive"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = ""
-diagnostics_dir = ""
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/07_gamma_alpha_10000/diagnostics"
 
 write_diagnostics = true
 
@@ -60,7 +60,7 @@ vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud_2014-lamda-1E+0.h5"
 
 [inversion]
 
-max_iter = 1000
+max_iter = 500
 #max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
 
 alpha_active = true
@@ -69,7 +69,7 @@ beta_active = true
 # strong priors
 gamma_alpha = 10000.0
 delta_alpha = 1.40e-5
-gamma_beta = 16.28
+gamma_beta = 40.0
 delta_beta = 1.62e-5
 delta_beta_gnd = 1.62e-5
 
@@ -81,7 +81,7 @@ delta_beta_gnd = 1.62e-5
 #C0_beta**2 = 300.0
 #L0_beta = 1000.0
 
-ftol = 1e-10
+ftol = 1e-8
 gtol = 1e-12
 
 #ftol = 2.22e-09 # This default values fail in the new environment (Newton iteration does not converge)
@@ -123,15 +123,15 @@ nonlinear_solver = "newton"
 [momsolve.newton_params.newton_solver] #[gmres w/ ilu]
 linear_solver = "bicgstab" # gmres?  try direct too. [cg with icc]  [gmres, sor]
 preconditioner = "hypre_amg" # doesn't work so well on unstructured mesh?
-maximum_iterations = 25
-absolute_tolerance = 1.0e-7
-relative_tolerance = 1.0e-7
+maximum_iterations = 50
+absolute_tolerance = 1.0e-6
+relative_tolerance = 1.0e-6
 convergence_criterion = "incremental"
 error_on_nonconvergence = true
 [momsolve.newton_params.newton_solver.krylov_solver]
 divergence_limit = 1e20
 nonzero_initial_guess = false
-relative_tolerance = 1.0e-8
+relative_tolerance = 1.0e-6
 
 # #used for weertman sliding: (TODO -test)
 # [momsolve.newton_params.newton_solver.lu_solver]

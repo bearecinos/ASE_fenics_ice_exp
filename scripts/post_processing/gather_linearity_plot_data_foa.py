@@ -126,7 +126,8 @@ qoi_dict_il = graphics.get_data_for_sigma_path_from_toml(tomlf_i,
                                                          add_qoi_posterior=False)
 
 qoi_dict_m = graphics.get_data_for_sigma_path_from_toml(tomlf_m,
-                                                        main_dir_path=Path(MAIN_PATH))
+                                                        main_dir_path=Path(MAIN_PATH),
+                                                        add_qoi_posterior=False)
 
 # Get qoi_dic per catchment
 qoi_dict_il_SPK = graphics.get_data_for_sigma_path_from_toml(toml_SPK_il,
@@ -152,17 +153,21 @@ qoi_dict_m_THW = graphics.get_data_for_sigma_path_from_toml(toml_THW_me,
 print('We get x and sigma_t (years) to interpolate')
 print(qoi_dict_m.keys())
 
-dot_alpha_ALL = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_alpha_ALL)
-dot_beta_ALL = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_beta_ALL)
+run_length = params_me.time.run_length
+num_sens = params_me.time.num_sens
+t_sens = np.flip(np.linspace(run_length, 0, num_sens))
 
-dot_alpha_SPK = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_alpha_SPK)
-dot_beta_SPK = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_beta_SPK)
+dot_alpha_ALL = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_ALL)
+dot_beta_ALL = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_ALL)
 
-dot_alpha_PIG = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_alpha_PIG)
-dot_beta_PIG = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_beta_PIG)
+dot_alpha_SPK = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_SPK)
+dot_beta_SPK = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_SPK)
 
-dot_alpha_THW = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_alpha_THW)
-dot_beta_THW = np.interp(qoi_dict_m['x'], qoi_dict_m['sigma_t'], results_dot_beta_THW)
+dot_alpha_PIG = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_PIG)
+dot_beta_PIG = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_PIG)
+
+dot_alpha_THW = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_THW)
+dot_beta_THW = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_THW)
 
 # We save all the data to plot it later
 d = {'time': qoi_dict_m['x'],
