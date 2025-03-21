@@ -172,16 +172,16 @@ r = 0.8
 tick_options = {'axis': 'both', 'which': 'both', 'bottom': False,
                 'top': False, 'left': False, 'right': False, 'labelleft': False, 'labelbottom': False}
 
-minv = 3.5
-maxv = 6.5
+minv = 3.0
+maxv = 6.0
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 print(ticks)
 
 label_math = r'$\frac{\partial Q}{\partial\hat{p}}$'
-format_ticker = [r'3.5$\times 10^{10}$',
-                 r'5.0$\times 10^{10}$',
-                 r'6.5$\times 10^{10}$']
+format_ticker = [r'3.0$\times 10^{10}$',
+                 r'4.5$\times 10^{10}$',
+                 r'6.0$\times 10^{10}$']
 
 shp = gpd.read_file(config['input_files']['ice_boundaries'])
 shp_sel = shp.loc[[64, 138]]
@@ -372,8 +372,7 @@ fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
                                    cmap=contour_lines.cmap),
              cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
 
-
-plt.tight_layout()
+fig.set_constrained_layout(True)
 
 path_to_plot = os.path.join(str(plot_path), 'THW_zoomed_sub_hydro' + '.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
