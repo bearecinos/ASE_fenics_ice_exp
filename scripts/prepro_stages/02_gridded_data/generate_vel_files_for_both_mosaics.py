@@ -150,7 +150,7 @@ assert sorted(yim_s) == sorted(ymm_s)
 # Itslive and Measures
 xim_grid, yim_grid = np.meshgrid(xim_s, yim_s)
 
-mask_array = vxim_s
+mask_array = vxim_s * vxmm_s * vxmm_std_s
 array_ma = np.ma.masked_invalid(mask_array)
 
 # get only the valid values for both mosaics
@@ -160,9 +160,6 @@ vxim_nona = vxim_s[~array_ma.mask].ravel()
 vyim_nona = vyim_s[~array_ma.mask].ravel()
 stdvxim_nona = vxim_std_s[~array_ma.mask].ravel()
 stdvyim_nona = vyim_std_s[~array_ma.mask].ravel()
-
-mask_array = vxmm_s * vxmm_std_s
-array_ma = np.ma.masked_invalid(mask_array)
 
 xmm_nona = xim_grid[~array_ma.mask].ravel()
 ymm_nona = yim_grid[~array_ma.mask].ravel()

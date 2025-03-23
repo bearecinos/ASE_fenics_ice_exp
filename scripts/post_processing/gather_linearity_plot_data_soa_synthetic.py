@@ -29,7 +29,7 @@ parser.add_argument("-path_toml_dirs_m",
                     default="temp",
                     help="pass directory where measures "
                          "configurations are ran")
-parser.add_argument("-path_toml_dirs_i",
+parser.add_argument("-path_toml_dirs_s",
                     type=str,
                     default="temp",
                     help="pass directory where itslive or "
@@ -63,10 +63,11 @@ plot_path = os.path.join(MAIN_PATH, 'plots/'+ sub_plot_dir)
 if not os.path.exists(plot_path):
     os.makedirs(plot_path)
 
-from ficetools import graphics, utils_funcs
+from ficetools import utils_funcs, graphics, velocity
+from ficetools.backend import FunctionSpace, VectorFunctionSpace, Function, project
 
 folder_measures = args.path_toml_dirs_m
-folder_others = args.path_toml_dirs_i
+folder_others = args.path_toml_dirs_s
 
 run_path_other = os.path.join(MAIN_PATH,
                               folder_others)
@@ -106,19 +107,17 @@ params_il_SPK = conf.ConfigParser(toml_SPK_il)
 params_il_PIG = conf.ConfigParser(toml_PIG_il)
 params_il_THW = conf.ConfigParser(toml_THW_il)
 
-# Now we read forward runs results to get the sensitivities
-# and the dot products all together
-results_dot_alpha_ALL, results_dot_beta_ALL = utils_funcs.dot_product_per_parameter_pair(params_me=params_me,
-                                                                                         params_il=params_il)
+out_il = utils_funcs.get_vel_ob_sens_dict(params_il)
 
-results_dot_alpha_SPK, results_dot_beta_SPK = utils_funcs.dot_product_per_parameter_pair(params_me=params_me_SPK,
-                                                                                         params_il=params_il_SPK)
+out_il_SPK = utils_funcs.get_vel_ob_sens_dict(params_il_SPK)
+out_il_PIG = utils_funcs.get_vel_ob_sens_dict(params_il_PIG)
+out_il_THW = utils_funcs.get_vel_ob_sens_dict(params_il_THW)
 
-results_dot_alpha_PIG, results_dot_beta_PIG = utils_funcs.dot_product_per_parameter_pair(params_me=params_me_PIG,
-                                                                                         params_il=params_il_PIG)
+out_me = utils_funcs.get_vel_ob_sens_dict(params_me)
 
-results_dot_alpha_THW, results_dot_beta_THW = utils_funcs.dot_product_per_parameter_pair(params_me=params_me_THW,
-                                                                                         params_il=params_il_THW)
+out_me_SPK = utils_funcs.get_vel_ob_sens_dict(params_me_SPK)
+out_me_PIG = utils_funcs.get_vel_ob_sens_dict(params_me_PIG)
+out_me_THW = utils_funcs.get_vel_ob_sens_dict(params_me_THW)
 
 # Now we get the rest of the information for sigma Q plot
 qoi_dict_il = graphics.get_data_for_sigma_path_from_toml(tomlf_i,
@@ -126,8 +125,7 @@ qoi_dict_il = graphics.get_data_for_sigma_path_from_toml(tomlf_i,
                                                          add_qoi_posterior=False)
 
 qoi_dict_m = graphics.get_data_for_sigma_path_from_toml(tomlf_m,
-                                                        main_dir_path=Path(MAIN_PATH),
-                                                        add_qoi_posterior=False)
+                                                        main_dir_path=Path(MAIN_PATH))
 
 # Get qoi_dic per catchment
 qoi_dict_il_SPK = graphics.get_data_for_sigma_path_from_toml(toml_SPK_il,
@@ -140,8 +138,9 @@ qoi_dict_m_SPK = graphics.get_data_for_sigma_path_from_toml(toml_SPK_me,
 qoi_dict_il_PIG = graphics.get_data_for_sigma_path_from_toml(toml_PIG_il,
                                                              main_dir_path=Path(MAIN_PATH),
                                                              add_qoi_posterior=False)
-qoi_dict_m_PIG = graphics.get_data_for_sigma_path_from_toml(toml_PIG_me, main_dir_path=Path(MAIN_PATH),
-                                                           add_qoi_posterior=False)
+qoi_dict_m_PIG = graphics.get_data_for_sigma_path_from_toml(toml_PIG_me,
+                                                            main_dir_path=Path(MAIN_PATH),
+                                                            add_qoi_posterior=False)
 
 qoi_dict_il_THW = graphics.get_data_for_sigma_path_from_toml(toml_THW_il,
                                                              main_dir_path=Path(MAIN_PATH),
@@ -150,43 +149,85 @@ qoi_dict_m_THW = graphics.get_data_for_sigma_path_from_toml(toml_THW_me,
                                                             main_dir_path=Path(MAIN_PATH),
                                                             add_qoi_posterior=False)
 
-print('We get x and sigma_t (years) to interpolate')
-print(qoi_dict_m.keys())
+# Get time series
+t_sens = np.flip(np.linspace(params_il.time.run_length,
+                             0,
+                             params_il.time.num_sens))
 
-run_length = params_me.time.run_length
-num_sens = params_me.time.num_sens
-t_sens = np.flip(np.linspace(run_length, 0, num_sens))
+## Now for ITSLIVE and MEaSUREs
+all_dfs_full_mask, df_merge = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il,
+                                                                               dic_me=out_me,
+                                                                               return_df_merge=True)
 
-dot_alpha_ALL = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_ALL)
-dot_beta_ALL = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_ALL)
+all_dfs_measures_SPK = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_SPK, dic_me=out_me_SPK)
+all_dfs_measures_PIG = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_PIG, dic_me=out_me_PIG)
+all_dfs_measures_THW = velocity.merge_measures_and_itslive_vel_obs_sens(dic_il=out_il_THW, dic_me=out_me_THW)
 
-dot_alpha_SPK = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_SPK)
-dot_beta_SPK = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_SPK)
+add_std = False
+print(f"are you adding std instead of plotting velocities: {add_std}")
 
-dot_alpha_PIG = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_PIG)
-dot_beta_PIG = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_PIG)
+dot_Ume_full_mask, dot_Vme_full_mask = velocity.dot_product_per_pair(all_dfs_full_mask,
+                                                                     df_merge,
+                                                                     add_std=add_std)
+dot_Ume_SPK_mask, dot_Vme_SPK_mask = velocity.dot_product_per_pair(all_dfs_measures_SPK,
+                                                                   df_merge,
+                                                                   add_std=add_std)
+dot_Ume_PIG_mask, dot_Vme_PIG_mask = velocity.dot_product_per_pair(all_dfs_measures_PIG,
+                                                                   df_merge,
+                                                                   add_std=add_std)
+dot_Ume_THW_mask, dot_Vme_THW_mask = velocity.dot_product_per_pair(all_dfs_measures_THW,
+                                                                   df_merge,
+                                                                   add_std=add_std)
 
-dot_alpha_THW = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_THW)
-dot_beta_THW = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_THW)
+dot_Ume_full_mask_intrp = np.interp(qoi_dict_m['x'],
+                                    t_sens,
+                                    dot_Ume_full_mask)
+
+dot_Vme_full_mask_intrp = np.interp(qoi_dict_m['x'],
+                                    t_sens,
+                                    dot_Vme_full_mask)
+
+dot_Ume_SPK_mask_intrp = np.interp(qoi_dict_m['x'],
+                                   t_sens,
+                                   dot_Ume_SPK_mask)
+dot_Vme_SPK_mask_intrp = np.interp(qoi_dict_m['x'],
+                                   t_sens,
+                                   dot_Vme_SPK_mask)
+
+dot_Ume_PIG_mask_intrp = np.interp(qoi_dict_m['x'],
+                                   t_sens,
+                                   dot_Ume_PIG_mask)
+dot_Vme_PIG_mask_intrp = np.interp(qoi_dict_m['x'],
+                                   t_sens,
+                                   dot_Vme_PIG_mask)
+
+dot_Ume_THW_mask_intrp = np.interp(qoi_dict_m['x'],
+                                   t_sens,
+                                   dot_Ume_THW_mask)
+dot_Vme_THW_mask_intrp = np.interp(qoi_dict_m['x'],
+                                   t_sens,
+                                   dot_Vme_THW_mask)
 
 # We save all the data to plot it later
-d = {'time': qoi_dict_m['x'],
-     'delta_VAF_measures_all': qoi_dict_m['y'],
-     'delta_VAF_itslive_all': qoi_dict_il['y'],
-     'Dot_product_all': dot_alpha_ALL+dot_beta_ALL,
-     'delta_VAF_measures_PIG': qoi_dict_m_PIG['y'],
-     'delta_VAF_itslive_PIG': qoi_dict_il_PIG['y'],
-     'Dot_product_PIG': dot_alpha_PIG + dot_beta_PIG,
-     'delta_VAF_measures_SPK': qoi_dict_m_SPK['y'],
-     'delta_VAF_itslive_SPK': qoi_dict_il_SPK['y'],
-     'Dot_product_SPK': dot_alpha_SPK + dot_beta_SPK,
-     'delta_VAF_measures_THW': qoi_dict_m_THW['y'],
-     'delta_VAF_itslive_THW': qoi_dict_il_THW['y'],
-     'Dot_product_THW': dot_alpha_THW + dot_beta_THW}
+d = {
+    'time': qoi_dict_m['x'],
+    'delta_VAF_measures_all': qoi_dict_m['y'],
+    'delta_VAF_synthetic_all': qoi_dict_il['y'],
+    'Dot_product_all': dot_Vme_full_mask_intrp + dot_Ume_full_mask_intrp,
+    'delta_VAF_measures_PIG': qoi_dict_m_PIG['y'],
+    'delta_VAF_synthetic_PIG': qoi_dict_il_PIG['y'],
+    'Dot_product_PIG': dot_Vme_PIG_mask_intrp + dot_Ume_PIG_mask_intrp,
+    'delta_VAF_measures_SPK': qoi_dict_m_SPK['y'],
+    'delta_VAF_synthetic_SPK': qoi_dict_il_SPK['y'],
+    'Dot_product_SPK': dot_Vme_SPK_mask_intrp + dot_Ume_SPK_mask_intrp,
+    'delta_VAF_measures_THW': qoi_dict_m_THW['y'],
+    'delta_VAF_synthetic_THW': qoi_dict_il_THW['y'],
+    'Dot_product_THW': dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp
+     }
 
 data_frame = pd.DataFrame(data=d)
 
-csv_f_name = 'results_FOA_linearity_test_'+ args.exp_name + '.csv'
+csv_f_name = 'results_linearity_test_SOA_synthetic_'+ args.exp_name + '.csv'
 
 h_obs_path = data_frame.to_csv(os.path.join(plot_path,
                                             csv_f_name))
@@ -202,13 +243,9 @@ if args.plot:
     rcParams['axes.titlesize'] = 5
     sns.set_context('poster')
 
-    label = [r'$\Delta$ ($Q^{M}_{T}$ - $Q^{I}_{T}$)',
-             r'$\frac{\partial Q_{M}}{\partial \alpha_{M}} \cdot (\alpha_{M} - \alpha_{I})$ +' +
-             r'$\frac{\partial Q_{M}}{\partial \beta_{M}} \cdot (\beta_{M} - \beta_{I})$']
-
-    # label = [r'$\Delta$ ($Q^{M}_{T}$ - $Q^{S}_{T}$)',
-    #          r'$\frac{\partial Q_{M}}{\partial \alpha_{M}} \cdot (\alpha_{M} - \alpha_{S})$ +' +
-    #          r'$\frac{\partial Q_{M}}{\partial \beta_{M}} \cdot (\beta_{M} - \beta_{S})$']
+    label = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{S}_{T}$',
+             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{S})$' + ' + ' +
+             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{S})$']
 
     y_label = r'$\Delta$ $Q_{T}$ [$m^3$]'
 
@@ -217,20 +254,20 @@ if args.plot:
     fig1 = plt.figure(figsize=(20 * r, 6 * r), constrained_layout=True)
     spec = gridspec.GridSpec(1, 4, figure=fig1, wspace=0.25, hspace=0.05)
 
-    ### dQ/dalpha and dQ/dbeta magnitude for all mask
+    ### dQ/dU and dQ/dV magnitude for year zero
     ax0 = fig1.add_subplot(spec[0])
 
     p1, = ax0.plot(qoi_dict_m['x'],
                    qoi_dict_m['y'] - qoi_dict_il['y'],
                    linestyle='dashed', color=color_palette[3])
 
-    p2, = ax0.plot(qoi_dict_m['x'],
-                   dot_alpha_ALL + dot_beta_ALL,
-                   linestyle='dashed', color=color_palette[1])
+    p3, = ax0.plot(qoi_dict_m['x'],
+                   dot_Vme_full_mask_intrp + dot_Ume_full_mask_intrp,
+                   color=color_palette[2], label='', linewidth=3)
 
-    plt.legend(handles=[p1, p2],
+    plt.legend(handles=[p1, p3],
                labels=label,
-               frameon=True, fontsize=16, loc='lower left')  # , bbox_to_anchor=(3.0, -0.2))
+               frameon=True, fontsize=18, bbox_to_anchor=(3.0, -0.2))
 
     ax0.set_ylabel(y_label)
     ax0.set_xlabel('Time [yrs]')
@@ -242,11 +279,11 @@ if args.plot:
 
     p1, = ax1.plot(qoi_dict_m_SPK['x'],
                    qoi_dict_m_SPK['y'] - qoi_dict_il_SPK['y'],
-                   linestyle='dashed', color=color_palette[3])
+                  linestyle='dashed', color=color_palette[3])
 
-    p2, = ax1.plot(qoi_dict_m_SPK['x'],
-                   dot_alpha_SPK + dot_beta_SPK,
-                   linestyle='dashed', color=color_palette[1])
+    p3, = ax1.plot(qoi_dict_m_SPK['x'],
+                   dot_Vme_SPK_mask_intrp + dot_Ume_SPK_mask_intrp,
+                  color=color_palette[2], label='', linewidth=3)
 
     ax1.set_xlabel('Time [yrs]')
 
@@ -259,10 +296,9 @@ if args.plot:
     p1, = ax2.plot(qoi_dict_m_PIG['x'],
                    qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y'],
                    linestyle='dashed', color=color_palette[3])
-
-    p2, = ax2.plot(qoi_dict_m_PIG['x'],
-                   dot_alpha_PIG + dot_beta_PIG,
-                   linestyle='dashed', color=color_palette[1])
+    p3, = ax2.plot(qoi_dict_m_PIG['x'],
+                   dot_Vme_PIG_mask_intrp + dot_Ume_PIG_mask_intrp,
+                   color=color_palette[2], label='', linewidth=3)
 
     ax2.set_xlabel('Time [yrs]')
 
@@ -275,27 +311,26 @@ if args.plot:
     p1, = ax3.plot(qoi_dict_m_THW['x'],
                    qoi_dict_m_THW['y'] - qoi_dict_il_THW['y'],
                    linestyle='dashed', color=color_palette[3])
-
-    p2, = ax3.plot(qoi_dict_m_THW['x'],
-                   dot_alpha_THW + dot_beta_THW,
-                   linestyle='dashed', color=color_palette[1])
+    p3, = ax3.plot(qoi_dict_m_THW['x'],
+                   dot_Vme_THW_mask_intrp + dot_Ume_THW_mask_intrp,
+                   color=color_palette[2], label='', linewidth=3)
 
     ax3.set_xlabel('Time [yrs]')
-
     at = AnchoredText('d', prop=dict(size=16), frameon=True, loc='upper left')
     ax3.add_artist(at)
-
-    for ax in [ax0, ax1, ax2, ax3]:
-        ax.set_ylim(np.min(qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y']) - 0.5e12, 2.5e12)
-        ax.grid(True)
 
     ax0.set_title('Full domain', loc='right')
     ax1.set_title('Smith, Pope, Kohler', loc='right')
     ax2.set_title('Pine Island', loc='right')
     ax3.set_title('Thwaites', loc='right')
 
-    # plt.tight_layout()
-    file_plot_name = 'results_linearity_test_FOA_'+ args.exp_name +'.png'
+    for ax in [ax0, ax1, ax2, ax3]:
+        ax.set_ylim(np.min(qoi_dict_m_PIG['y'] - qoi_dict_il_PIG['y']), 2.5e12)
+        ax.grid(True)
+
+    plt.tight_layout()
+
+    file_plot_name = 'results_linearity_test_SOA_synthetic_'+ args.exp_name + '.png'
 
     fig_save_path = os.path.join(plot_path, file_plot_name)
     plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)

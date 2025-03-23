@@ -120,15 +120,19 @@ out_copy_me = utils_funcs.convert_vel_sens_output_into_functions(out_me,
                                                                  mesh_in)
 
 dQ_dU_14_ME = out_copy_me['dObsU'][n_last]
+dQ_dU_14_ME = np.nan_to_num(dQ_dU_14_ME, nan=0.0)
 dQ_dU_14_ME[dQ_dU_14_ME == -inf] = 0
 
 dQ_dV_14_ME = out_copy_me['dObsV'][n_last]
+dQ_dV_14_ME = np.nan_to_num(dQ_dV_14_ME, nan=0.0)
 dQ_dV_14_ME[dQ_dV_14_ME == -inf] = 0
 
 dQ_dU_3_ME = out_copy_me['dObsU'][n_zero]
+dQ_dU_3_ME = np.nan_to_num(dQ_dU_3_ME, nan=0.0)
 dQ_dU_3_ME[dQ_dU_3_ME == -inf] = 0
 
 dQ_dV_3_ME = out_copy_me['dObsV'][n_zero]
+dQ_dV_3_ME = np.nan_to_num(dQ_dV_3_ME, nan=0.0)
 dQ_dV_3_ME[dQ_dV_3_ME == -inf] = 0
 
 assert not any(np.isinf(dQ_dU_14_ME))
@@ -136,8 +140,12 @@ assert not any(np.isinf(dQ_dV_14_ME))
 assert not any(np.isinf(dQ_dU_3_ME))
 assert not any(np.isinf(dQ_dV_3_ME))
 
-mag_vector_14 = np.log10(np.sqrt(dQ_dU_14_ME ** 2 + dQ_dV_14_ME ** 2))
-mag_vector_3 = np.log10(np.sqrt(dQ_dU_3_ME ** 2 + dQ_dV_3_ME ** 2))
+epsilon = 1e-10  # Small value to prevent log10(0)
+mag_vector_14 = np.log10(np.sqrt(dQ_dU_14_ME ** 2 + dQ_dV_14_ME ** 2) + epsilon)
+mag_vector_3 = np.log10(np.sqrt(dQ_dU_3_ME ** 2 + dQ_dV_3_ME ** 2) + epsilon)
+
+assert np.all(np.isfinite(mag_vector_14)), "mag_vector_14 contains NaN or Inf!"
+assert np.all(np.isfinite(mag_vector_3)), "mag_vector_3 contains NaN or Inf!"
 
 # Read velocity file used for the inversion
 x = mesh_in.coordinates()[:, 0]
@@ -164,16 +172,16 @@ r = 0.8
 tick_options = {'axis': 'both', 'which': 'both', 'bottom': False,
                 'top': False, 'left': False, 'right': False, 'labelleft': False, 'labelbottom': False}
 
-minv = 3.5
-maxv = 6.5
+minv = 3.0
+maxv = 6.0
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
 print(ticks)
 
 label_math = r'$\frac{\partial Q}{\partial\hat{p}}$'
-format_ticker = [r'3.5$\times 10^{10}$',
-                 r'5.0$\times 10^{10}$',
-                 r'6.5$\times 10^{10}$']
+format_ticker = [r'3.0$\times 10^{10}$',
+                 r'4.5$\times 10^{10}$',
+                 r'6.0$\times 10^{10}$']
 
 shp = gpd.read_file(config['input_files']['ice_boundaries'])
 shp_sel = shp.loc[[64, 138]]
@@ -364,8 +372,7 @@ fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
                                    cmap=contour_lines.cmap),
              cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
 
-
-plt.tight_layout()
+fig.set_constrained_layout(True)
 
 path_to_plot = os.path.join(str(plot_path), 'THW_zoomed_sub_hydro' + '.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)

@@ -29,7 +29,7 @@ parser.add_argument("-path_toml_dirs_m",
                     default="temp",
                     help="pass directory where measures "
                          "configurations are ran")
-parser.add_argument("-path_toml_dirs_i",
+parser.add_argument("-path_toml_dirs_s",
                     type=str,
                     default="temp",
                     help="pass directory where itslive or "
@@ -66,7 +66,7 @@ if not os.path.exists(plot_path):
 from ficetools import graphics, utils_funcs
 
 folder_measures = args.path_toml_dirs_m
-folder_others = args.path_toml_dirs_i
+folder_others = args.path_toml_dirs_s
 
 run_path_other = os.path.join(MAIN_PATH,
                               folder_others)
@@ -126,8 +126,7 @@ qoi_dict_il = graphics.get_data_for_sigma_path_from_toml(tomlf_i,
                                                          add_qoi_posterior=False)
 
 qoi_dict_m = graphics.get_data_for_sigma_path_from_toml(tomlf_m,
-                                                        main_dir_path=Path(MAIN_PATH),
-                                                        add_qoi_posterior=False)
+                                                        main_dir_path=Path(MAIN_PATH))
 
 # Get qoi_dic per catchment
 qoi_dict_il_SPK = graphics.get_data_for_sigma_path_from_toml(toml_SPK_il,
@@ -170,23 +169,24 @@ dot_alpha_THW = np.interp(qoi_dict_m['x'], t_sens, results_dot_alpha_THW)
 dot_beta_THW = np.interp(qoi_dict_m['x'], t_sens, results_dot_beta_THW)
 
 # We save all the data to plot it later
+# We save all the data to plot it later
 d = {'time': qoi_dict_m['x'],
      'delta_VAF_measures_all': qoi_dict_m['y'],
-     'delta_VAF_itslive_all': qoi_dict_il['y'],
+     'delta_VAF_synthetic_all': qoi_dict_il['y'],
      'Dot_product_all': dot_alpha_ALL+dot_beta_ALL,
      'delta_VAF_measures_PIG': qoi_dict_m_PIG['y'],
-     'delta_VAF_itslive_PIG': qoi_dict_il_PIG['y'],
+     'delta_VAF_synthetic_PIG': qoi_dict_il_PIG['y'],
      'Dot_product_PIG': dot_alpha_PIG + dot_beta_PIG,
      'delta_VAF_measures_SPK': qoi_dict_m_SPK['y'],
-     'delta_VAF_itslive_SPK': qoi_dict_il_SPK['y'],
+     'delta_VAF_synthetic_SPK': qoi_dict_il_SPK['y'],
      'Dot_product_SPK': dot_alpha_SPK + dot_beta_SPK,
      'delta_VAF_measures_THW': qoi_dict_m_THW['y'],
-     'delta_VAF_itslive_THW': qoi_dict_il_THW['y'],
+     'delta_VAF_synthetic_THW': qoi_dict_il_THW['y'],
      'Dot_product_THW': dot_alpha_THW + dot_beta_THW}
 
 data_frame = pd.DataFrame(data=d)
 
-csv_f_name = 'results_FOA_linearity_test_'+ args.exp_name + '.csv'
+csv_f_name = 'results_FOA_linearity_test_synthetic_'+ args.exp_name + '.csv'
 
 h_obs_path = data_frame.to_csv(os.path.join(plot_path,
                                             csv_f_name))
@@ -202,13 +202,9 @@ if args.plot:
     rcParams['axes.titlesize'] = 5
     sns.set_context('poster')
 
-    label = [r'$\Delta$ ($Q^{M}_{T}$ - $Q^{I}_{T}$)',
-             r'$\frac{\partial Q_{M}}{\partial \alpha_{M}} \cdot (\alpha_{M} - \alpha_{I})$ +' +
-             r'$\frac{\partial Q_{M}}{\partial \beta_{M}} \cdot (\beta_{M} - \beta_{I})$']
-
-    # label = [r'$\Delta$ ($Q^{M}_{T}$ - $Q^{S}_{T}$)',
-    #          r'$\frac{\partial Q_{M}}{\partial \alpha_{M}} \cdot (\alpha_{M} - \alpha_{S})$ +' +
-    #          r'$\frac{\partial Q_{M}}{\partial \beta_{M}} \cdot (\beta_{M} - \beta_{S})$']
+    label = [r'$\Delta$ ($Q^{M}_{T}$ - $Q^{S}_{T}$)',
+             r'$\frac{\partial Q_{M}}{\partial \alpha_{M}} \cdot (\alpha_{M} - \alpha_{S})$ +' +
+             r'$\frac{\partial Q_{M}}{\partial \beta_{M}} \cdot (\beta_{M} - \beta_{S})$']
 
     y_label = r'$\Delta$ $Q_{T}$ [$m^3$]'
 
@@ -295,7 +291,7 @@ if args.plot:
     ax3.set_title('Thwaites', loc='right')
 
     # plt.tight_layout()
-    file_plot_name = 'results_linearity_test_FOA_'+ args.exp_name +'.png'
+    file_plot_name = 'results_linearity_test_FOA_synthetic_'+ args.exp_name +'.png'
 
     fig_save_path = os.path.join(plot_path, file_plot_name)
     plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)

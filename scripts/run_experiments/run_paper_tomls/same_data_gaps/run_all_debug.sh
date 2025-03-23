@@ -11,7 +11,7 @@ else
 fi
 
 # Create output directory for inversion output
-export run_inv_output_dir=$OUTPUT_DIR/08_synthetic
+export run_inv_output_dir=$OUTPUT_DIR/09_same_data_gaps
 if [ ! -d $run_inv_output_dir ]
 then
   echo "Creating run directory $run_inv_output_dir"
@@ -20,7 +20,7 @@ else
   echo "Directory is $run_inv_output_dir already exist"
 fi
 
-path_logs=$RUN_CONFIG_DIR/run_paper_tomls/run_synthetic_vel
+path_logs=$RUN_CONFIG_DIR/run_paper_tomls/same_data_gaps
 echo "Logs will be store here:" $path_logs
 
 toml set --toml-path $2 io.input_dir "$input_run_inv"

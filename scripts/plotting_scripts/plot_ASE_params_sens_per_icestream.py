@@ -164,7 +164,7 @@ label_alpha = r'$\frac{\delta Q}{\delta \alpha^{2}}$'
 label_beta = r'$\frac{\delta Q}{\delta \beta^{2}}$'
 
 minv = 0.0
-maxv = 5.0
+maxv = 2.0
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
 
@@ -293,7 +293,8 @@ ax1.add_artist(n_text)
 at = AnchoredText('b', prop=dict(size=18), frameon=True, loc='upper left')
 ax1.add_artist(at)
 
-plt.tight_layout()
+fig1.set_constrained_layout(True)
+#plt.tight_layout()
 
 path_to_plot = os.path.join(str(plot_path), str(run_name) + '_alpha_params_sens_.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
@@ -356,6 +357,7 @@ ax1.add_artist(n_text)
 at = AnchoredText('b', prop=dict(size=18), frameon=True, loc='upper left')
 ax1.add_artist(at)
 
-plt.tight_layout()
+#plt.tight_layout()
+fig1.set_constrained_layout(True)
 path_to_plot = os.path.join(str(plot_path), str(run_name) + '_beta_params_sens_.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
