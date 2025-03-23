@@ -56,7 +56,7 @@ flow_bc = "calving"
 
 [obs]
 
-vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud_2014-lamda-1E+0.h5"
+vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud_2014-lamda-1E-2.h5"
 
 [inversion]
 
@@ -76,10 +76,10 @@ delta_beta_gnd = 1.62e-5
 # All rounded to 2 digits
 #C0_alpha (variance round to 1 in file name) 0.57
 #C0_alpha**0.5 (std deviation) 0.75
-#L0_alpha (length scale) 26726.12
-#C0_beta = 17.0
-#C0_beta**2 = 300.0
-#L0_beta = 1000.0
+#L0_alpha (length scale) 27000.0
+#C0_beta = 301.73
+#C0_beta**2 = 17.37
+#L0_beta = 1002.46
 
 ftol = 1e-10
 gtol = 1e-12
@@ -96,7 +96,7 @@ initial_guess_alpha = 2.0
 
 use_cloud_point_velocities = false
 
-phase_suffix = '_synthetic_1_'
+phase_suffix = '_synthetic_1e-2_'
 
 [ice_dynamics]
 
@@ -149,7 +149,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_synthetic_1_mask_02_PIG_'
+phase_suffix = '_synthetic_1e-2_mask_03_THW_'
 
 [eigendec]
 
@@ -161,13 +161,13 @@ misfit_only = true
 precondition_by = "prior" #prior by default
 #eigenvalue_thresh = 1.0e-1
 
-phase_suffix = '_synthetic_1_'
+phase_suffix = '_synthetic_1e-2_'
 
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_synthetic_1_mask_02_PIG_'
-qoi_vaf_mask_code = 2
+phase_suffix = '_synthetic_1e-2_mask_03_THW_'
+qoi_vaf_mask_code = 3
 qoi_apply_vaf_mask = true
 qoi_vaf_mask_usecode = true
 
@@ -175,7 +175,7 @@ qoi_vaf_mask_usecode = true
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_synthetic_1_mask_02_PIG_'
+phase_suffix = '_synthetic_1e-2_mask_03_THW_'
 
 [melt]
 
@@ -187,11 +187,11 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_synthetic_1_mask_02_PIG_'
+phase_suffix = '_synthetic_1e-2_mask_03_THW_'
 sample_posterior = true
 num_eigenvals = 10
 
 [obs_sens]
 
-phase_suffix = '_synthetic_1_mask_02_PIG_'
+phase_suffix = '_synthetic_1e-2_mask_03_THW_'
 
