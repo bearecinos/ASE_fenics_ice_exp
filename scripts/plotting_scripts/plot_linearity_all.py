@@ -17,6 +17,10 @@ parser.add_argument("-conf",
                     type=str,
                     default="../../../config.ini",
                     help="pass config file")
+parser.add_argument("-sub_plot_dir",
+                    type=str,
+                    default="temp",
+                    help="pass sub plot directory to store csv file with output")
 
 args = parser.parse_args()
 config_file = args.conf
