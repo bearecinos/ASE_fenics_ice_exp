@@ -138,25 +138,46 @@ dot_product_sin = dsoa_syn['Dot_product_all']
 axes[2, 0].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
 axes[2, 0].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
 axes[2, 0].set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
+axes[2, 0].set_xlabel('Years')
 
 delta_qoi_sin = dsoa_syn['delta_VAF_measures_PIG'] - dsoa_syn['delta_VAF_synthetic_PIG']
 dot_product_sin = dsoa_syn['Dot_product_PIG']
 axes[2, 1].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
 axes[2, 1].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
+axes[2, 1].set_xlabel('Years')
 
 delta_qoi_sin = dsoa_syn['delta_VAF_measures_THW'] - dsoa_syn['delta_VAF_synthetic_THW']
 dot_product_sin = dsoa_syn['Dot_product_THW']
 axes[2, 2].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
 axes[2, 2].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
+axes[2, 2].set_xlabel('Years')
 
 delta_qoi_sin = dsoa_syn['delta_VAF_measures_SPK'] - dsoa_syn['delta_VAF_synthetic_SPK']
 dot_product_sin = dsoa_syn['Dot_product_SPK']
 p1, = axes[2, 3].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
 p2, = axes[2, 3].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
+axes[2, 3].set_xlabel('Years')
 
 axes[2, 3].legend(handles=[p1, p2],
                   labels=label_soa_syn,
                   frameon=True, fontsize=14, loc='upper left')
+
+# Hide axis labels and ticks except bottom row and rightmost column
+for row in range(3):
+    for col in range(4):
+        ax = axes[row, col]
+
+        # Remove x-axis labels and ticks unless on bottom row
+        if row != 2:
+            ax.set_xlabel('')
+            ax.set_xticklabels([])
+            ax.set_xticks([])
+
+        # Remove y-axis labels and ticks unless on rightmost column
+        if col != 0:
+            ax.set_ylabel('')
+            ax.set_yticklabels([])
+            ax.set_yticks([])
 
 # Apply axis settings to all
 for ax in axes.flat:
@@ -165,8 +186,6 @@ for ax in axes.flat:
     ax.set_xticks(xticks)
     ax.set_yticks(yticks)
     ax.grid(True)
-    ax.set_xlabel('Years')
-
 
 file_plot_name = 'results_linearity_ALL.png'
 
