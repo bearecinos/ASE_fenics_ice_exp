@@ -192,14 +192,14 @@ smap = salem.Map(gv, countries=False)
 
 x_n, y_n = smap.grid.transform(x, y,
                               crs=gv.proj)
-smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
-smap.set_scale_bar(length=100000)
 minv = 0
 maxv = 3000
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
 c = ax0.tricontourf(x_n, y_n, t, U_itlive, levels = levels, cmap='viridis', extend="both")
-smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -217,7 +217,8 @@ cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
 
 c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap='viridis', extend="both")
-smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -241,10 +242,16 @@ maxv = 40
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
 c = ax2.tricontourf(x_n, y_n, t, alpha_v_il, levels=levels, cmap=cmap_params_alpha, extend="both")
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_cmap(cmap_params_alpha)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
+for g, geo in enumerate(data.geometry):
+    smap.set_geometry(data.loc[g].geometry,
+                      linewidth=2.0,
+                      color=sns.xkcd_rgb["black"], crs=gv.proj)
 smap.visualize(ax=ax2, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='Sliding parameter \n [m$^{-1/6}$ yr$^{1/6}$ Pa$^{1/2}$]')
@@ -263,6 +270,8 @@ maxv = 800
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
 c = ax3.tricontourf(x_n, y_n, t, beta_v_il, levels=levels, cmap=cmap_params_bglen, extend="both")
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_cmap(cmap_params_bglen)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
