@@ -8,6 +8,7 @@ from numpy import inf
 from configobj import ConfigObj
 import seaborn as sns
 import geopandas as gpd
+import xarray as xr
 import pandas as pd
 import pyproj
 from pathlib import Path
@@ -44,6 +45,9 @@ parser.add_argument("-sub_plot_name", type=str,
                     default="temp", help="pass filename")
 parser.add_argument("-csv_exp_name", type=str,
                     default="temp", help="pass filename")
+parser.add_argument("-save_regrid_output", action="store_true",
+                    help="If this is specify we "
+                         "regrid the model output and save a netcdf for the given num_sens.")
 
 args = parser.parse_args()
 config_file = args.conf
@@ -170,6 +174,98 @@ proj_gnd = pyproj.Proj('EPSG:3031')
 gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),
                 x0y0=(-1702500.0, 500.0), proj=proj_gnd)
 
+bedmachine = config['input_files']['bedmachine']
+dm = xr.open_dataset(bedmachine)
+mask_bm = dm.mask
+mask_bm_ase = velocity.crop_velocity_data_to_extend(mask_bm,
+                                                    ase_bbox,
+                                                    return_xarray=True)
+new_outputf = 'vel_obs_sens_regrid_' + run_name + str(n_zero) + '_' + str(n_last) + '.nc'
+
+if args.save_regrid_output:
+    mag_vector_3_regrid, grid_x, grid_y = utils_funcs.re_grid_model_output(x, y,
+                                                                           mag_vector_3,
+                                                                           resolution=240,
+                                                                           mask_xarray=mask_bm_ase,
+                                                                           return_points=True)
+
+    mag_vector_14_regrid = utils_funcs.re_grid_model_output(x, y,
+                                                            mag_vector_14,
+                                                            resolution=240,
+                                                            mask_xarray=mask_bm_ase)
+
+    dQ_dU_3_ME_regrid = utils_funcs.re_grid_model_output(x, y,
+                                                         dQ_dU_3_ME,
+                                                         resolution=240,
+                                                         mask_xarray=mask_bm_ase)
+    dQ_dV_3_ME_regrid = utils_funcs.re_grid_model_output(x, y,
+                                                         dQ_dV_3_ME,
+                                                         resolution=240,
+                                                         mask_xarray=mask_bm_ase)
+
+    dQ_dU_14_ME_regrid = utils_funcs.re_grid_model_output(x, y,
+                                                          dQ_dU_14_ME,
+                                                          resolution=240,
+                                                          mask_xarray=mask_bm_ase)
+
+    dQ_dV_14_ME_regrid = utils_funcs.re_grid_model_output(x, y,
+                                                          dQ_dV_14_ME,
+                                                          resolution=240,
+                                                          mask_xarray=mask_bm_ase)
+
+    with velocity.ncDataset(os.path.join(plot_path, new_outputf), 'w', format="NETCDF4") as nc:
+        nc.author = 'B.M Recinos'
+        nc.author_info = 'The University of Edinburgh'
+        nc.proj4 = proj_gnd.srs  # full Proj4 string
+        nc.epsg = 'EPSG:3031'  # optional identifier
+
+        x_dim = nc.createDimension('x', len(grid_x[0, :]))  # latitude axis
+        y_dim = nc.createDimension('y', len(grid_y[:, 0]))
+
+        v = nc.createVariable('x', 'f4', ('x',))
+        v.units = 'm'
+        v.long_name = 'x coordinates'
+        v[:] = grid_x[0, :]
+
+        v = nc.createVariable('y', 'f4', ('y',))
+        v.units = 'm'
+        v.long_name = 'y coordinates'
+        v[:] = grid_y[:, 0]
+
+        start = n_sens[0]
+        end = n_sens[-1]
+
+        v = nc.createVariable('dQ_dU_' + str(start), 'f4', ('y', 'x'))
+        v.units = 'm'
+        v.long_name = 'dQ/dU ' + str(start)
+        v[:] = dQ_dU_3_ME_regrid
+
+        v = nc.createVariable('dQ_dV_' + str(start), 'f4', ('y', 'x'))
+        v.units = 'm'
+        v.long_name = 'dQ/dV ' + str(start)
+        v[:] = dQ_dV_3_ME_regrid
+
+        v = nc.createVariable('dQ_dU_' + str(end), 'f4', ('y', 'x'))
+        v.units = 'm'
+        v.long_name = 'dQ/dU ' + str(end)
+        v[:] = dQ_dU_14_ME_regrid
+
+        v = nc.createVariable('dQ_dV_' + str(end), 'f4', ('y', 'x'))
+        v.units = 'm'
+        v.long_name = 'dQ/dV ' + str(end)
+        v[:] = dQ_dV_14_ME_regrid
+
+        v = nc.createVariable('dQ_dM_' + str(start), 'f4', ('y', 'x'))
+        v.units = 'm'
+        v.long_name = 'dQ/dObs magnitude as log(10)' + str(end)
+        v[:] = mag_vector_3_regrid
+
+        v = nc.createVariable('dQ_dM_' + str(end), 'f4', ('y', 'x'))
+        v.units = 'm'
+        v.long_name = 'dQ/dObs magnitude as log(10) ' + str(end)
+        v[:] = mag_vector_14_regrid
+
+
 rcParams['axes.labelsize'] = 14
 rcParams['xtick.labelsize'] = 14
 rcParams['ytick.labelsize'] = 14
@@ -213,54 +309,8 @@ gdf = gpd.read_file(config['input_files']['grounding_line'])
 ase_ground = gdf[220:235]
 data = ase_ground.to_crs(proj.crs).reset_index()
 
-# Adding model gnd lines for year 9 and 40
-params_all = conf.ConfigParser(path_tomls_folder_m[0])
-
-# Reading the model output
-outdir = params_all.io.diagnostics_dir
-phase_name_fwd = params_all.time.phase_name
-phase_suffix = params_all.time.phase_suffix
-
-fwd_outdir_me = Path(outdir) / phase_name_fwd / phase_suffix
-
-file_H_time10 = "_".join((params_all.io.run_name + phase_suffix, 'H_timestep_240.xml'))
-file_H_time40 = "_".join((params_all.io.run_name + phase_suffix, 'H_timestep_960.xml'))
-
-xmlfile_H_10 = fwd_outdir_me / file_H_time10
-xmlfile_H_40 = fwd_outdir_me / file_H_time40
-
-assert xmlfile_H_10.is_file(), "File not found"
-assert xmlfile_H_40.is_file(), "File not found"
-
-# Compute the function spaces from the Mesh
-H_10 = Function(M, str(xmlfile_H_10))
-H_10_vertex = H_10.compute_vertex_values(mesh_in)
-
-H_40 = Function(M, str(xmlfile_H_40))
-H_40_vertex = H_40.compute_vertex_values(mesh_in)
-
-# Reading the sensitivity output
-phase_name_inversion = params_all.inversion.phase_name
-inv_outdir_me = Path(outdir) / phase_name_inversion / phase_suffix
-bed_file = "_".join((params_all.io.run_name + phase_suffix, 'bed.xml'))
-
-bed_file_fullpath = inv_outdir_me / bed_file
-assert bed_file_fullpath.is_file(), "File not found"
-
-Q = mdl.Q
-bed_func = Function(Q, str(bed_file_fullpath))
-bed_v = bed_func.compute_vertex_values(mesh_in)
-
-rhoi = 917.0          #Density of ice
-rhow = 1030.0         #Density of sea water
-
-H_10_AF = H_10_vertex + bed_v*(rhow/rhoi)
-mask = H_10_AF > 0.0  # Example value to filter
-masked_H_10_AF = np.ma.array(H_10_AF, mask=mask)
-
-H_40_AF = H_40_vertex + bed_v*(rhow/rhoi)
-mask_40 = H_40_AF > 0.0
-masked_H_40_AF = np.ma.array(H_40_AF, mask=mask_40)
+model_gnd_10 = gpd.read_file(config['input_files']['model_gl_10'])
+model_gnd_40 = gpd.read_file(config['input_files']['model_gl_40'])
 
 # We add the lakes and Rignot 2024 grounding line indicating seawater intrusions
 shp_lake = gpd.read_file(config['input_files']['thw_lake'])
@@ -314,9 +364,6 @@ c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
                     levels=levels,
                     cmap=cmap_sen, extend="both")
 
-triang = tri.Triangulation(x_n, y_n)
-ax0.tricontour(triang, masked_H_10_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["ocean blue"])
-
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
@@ -335,6 +382,11 @@ for g, geo in enumerate(data.geometry):
                       color=sns.xkcd_rgb["white"],
                       alpha=0.3, crs=gv.proj)
 
+for g, geo in enumerate(model_gnd_10.geometry):
+    smap.set_geometry(model_gnd_10.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["ocean blue"],
+                      crs=gv.proj)
 
 if run_name == 'THW':
     for g, geo in enumerate(gnd_rig.geometry):
@@ -369,8 +421,6 @@ c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
                     levels=levels,
                     cmap=cmap_sen,
                     extend="both")
-triang = tri.Triangulation(x_n, y_n)
-ax1.tricontour(triang, masked_H_40_AF.mask, linewidths=1.0, colors=sns.xkcd_rgb["ocean blue"])
 
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
@@ -389,6 +439,12 @@ for g, geo in enumerate(data.geometry):
                       linewidth=2,
                       color=sns.xkcd_rgb["white"],
                       alpha=0.3, crs=gv.proj)
+for g, geo in enumerate(model_gnd_40.geometry):
+    smap.set_geometry(model_gnd_40.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["ocean blue"],
+                      crs=gv.proj)
+
 
 if run_name == 'THW':
     for g, geo in enumerate(gnd_rig.geometry):
