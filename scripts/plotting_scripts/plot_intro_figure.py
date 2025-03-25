@@ -172,8 +172,10 @@ rcParams['xtick.labelsize'] = 18
 rcParams['ytick.labelsize'] = 18
 rcParams['axes.titlesize'] = 18
 
-cmap_vel=sns.diverging_palette(220, 20, as_cmap=True)
-cmap_params_alpha = colormaps.get_cmap('YlOrBr')
+cmap_vel=sns.color_palette("Spectral_r", as_cmap=True)
+#cmap_params_alpha = colormaps.get_cmap('YlOrBr')
+cmap_params_alpha = colormaps.get_cmap('RdYlBu_r')
+#cmap_params_bglen = colormaps.get_cmap('cubehelix')
 cmap_params_bglen = colormaps.get_cmap('YlGnBu')
 
 # Now plotting
@@ -193,17 +195,17 @@ smap = salem.Map(gv, countries=False)
 x_n, y_n = smap.grid.transform(x, y,
                               crs=gv.proj)
 minv = 0
-maxv = 3000
+maxv = 800
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
-c = ax0.tricontourf(x_n, y_n, t, U_itlive, levels = levels, cmap='viridis', extend="both")
+c = ax0.tricontourf(x_n, y_n, t, U_itlive, levels = levels, cmap=cmap_vel, extend="both")
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                               linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
-smap.set_cmap('viridis')
+smap.set_cmap(cmap_vel)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='speed [m. $yr^{-1}$]')
@@ -216,13 +218,13 @@ divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
 
-c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap='viridis', extend="both")
+c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap=cmap_vel, extend="both")
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                               linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
-smap.set_cmap('viridis')
+smap.set_cmap(cmap_vel)
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='speed [m. $yr^{-1}$]')
@@ -282,8 +284,8 @@ cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
 at = AnchoredText('d', prop=dict(size=18), frameon=True, loc='upper right')
 ax3.add_artist(at)
 
-ax1.title.set_text(r'Model speed')
-ax2.title.set_text(r'Observed speed')
+ax0.title.set_text(r'Model speed')
+ax1.title.set_text(r'Observed speed MEaSUREs')
 ax2.title.set_text(r'$\alpha_{MEaSUREs}$')
 ax3.title.set_text(r'$\beta_{MEaSUREs}$')
 
