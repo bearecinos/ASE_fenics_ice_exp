@@ -182,8 +182,8 @@ r=1.2
 tick_options = {'axis':'both','which':'both','bottom':False,
      'top':False,'left':False,'right':False,'labelleft':False, 'labelbottom':False}
 
-fig1 = plt.figure(figsize=(16*r, 6*r))#, constrained_layout=True)
-spec = gridspec.GridSpec(1, 2, wspace=0.05)
+fig1 = plt.figure(figsize=(10*r, 12*r))#, constrained_layout=True)
+spec = gridspec.GridSpec(2, 2, wspace=0.05, hspace=0.3)
 
 ax0 = plt.subplot(spec[0])
 divider = make_axes_locatable(ax0)
@@ -216,7 +216,7 @@ divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
 
-c = ax1.tricontourf(x_n, y_n, t, uv_obs_live, levels = levels, cmap='viridis', extend="both")
+c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap='viridis', extend="both")
 smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
@@ -284,6 +284,7 @@ plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
 
 if args.plot_domain:
     basins = sns.color_palette("Spectral_r")
+    cmap_vel=sns.color_palette("Spectral_r", as_cmap=True)
     # Now plotting next figure
     r=1.2
 
@@ -320,7 +321,7 @@ if args.plot_domain:
     maxv = 800
     levels = np.linspace(minv,maxv,200)
     ticks = np.linspace(minv,maxv,3)
-    c = ax1.tricontourf(x_n, y_n, t, uv_obs_live, levels = levels, cmap=cmap_vel, extend="both")
+    c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap=cmap_vel, extend="both")
     smap.set_vmin(minv)
     smap.set_vmax(maxv)
     smap.set_extend('both')
