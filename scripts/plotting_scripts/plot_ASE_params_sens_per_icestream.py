@@ -194,6 +194,9 @@ shp_lake = gpd.read_file(config['input_files']['thw_lake'])
 gnd_line = gpd.read_file(config['input_files']['rignot_thw'])
 gnd_rig = gnd_line.to_crs(proj_gnd.crs).reset_index()
 
+model_gnd_10 = gpd.read_file(config['input_files']['model_gl_10'])
+model_gnd_40 = gpd.read_file(config['input_files']['model_gl_40'])
+
 ## ALPHA PLOT #####################################################
 fig1 = plt.figure(figsize=(10*r, 10*r))#, constrained_layout=True)
 spec = gridspec.GridSpec(1, 2, wspace=0.1, hspace=0.3)
@@ -230,6 +233,12 @@ for g, geo in enumerate(shp_lake.geometry):
                       linewidth=1.0,
                       alpha=0.1,
                       facecolor='white', edgecolor='white',
+                      crs=gv.proj)
+
+for g, geo in enumerate(model_gnd_10.geometry):
+    smap.set_geometry(model_gnd_10.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["ocean blue"],
                       crs=gv.proj)
 
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
@@ -280,6 +289,12 @@ for g, geo in enumerate(shp_lake.geometry):
                       facecolor='white', edgecolor='white',
                       crs=gv.proj)
 
+for g, geo in enumerate(model_gnd_40.geometry):
+    smap.set_geometry(model_gnd_40.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["ocean blue"],
+                      crs=gv.proj)
+
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
@@ -318,6 +333,19 @@ smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=1.0, edgecolor=sns.xkcd_rgb["grey"])
+
+for g, geo in enumerate(data.geometry):
+    smap.set_geometry(data.loc[g].geometry,
+                      linewidth=2,
+                      color=sns.xkcd_rgb["white"],
+                      alpha=0.3, crs=gv.proj)
+
+for g, geo in enumerate(model_gnd_10.geometry):
+    smap.set_geometry(model_gnd_10.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["ocean blue"],
+                      crs=gv.proj)
+
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
@@ -344,6 +372,19 @@ smap.set_vmax(maxv)
 smap.set_extend('both')
 smap.set_cmap(cmap_sen)
 smap.set_shapefile(shp_sel, linewidth=1.0, edgecolor=sns.xkcd_rgb["grey"])
+
+for g, geo in enumerate(data.geometry):
+    smap.set_geometry(data.loc[g].geometry,
+                      linewidth=2,
+                      color=sns.xkcd_rgb["white"],
+                      alpha=0.3, crs=gv.proj)
+
+for g, geo in enumerate(model_gnd_40.geometry):
+    smap.set_geometry(model_gnd_40.loc[g].geometry,
+                      linewidth=1.0,
+                      color=sns.xkcd_rgb["ocean blue"],
+                      crs=gv.proj)
+
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
                           linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
