@@ -201,14 +201,14 @@ r = 0.9
 color_palette = sns.color_palette("deep")
 
 # Create figure and axes in a 2x4 grid
-fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(14 * r, 6 * r))
+fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(14 * r, 6 * r), gridspec_kw={'hspace': 0.5})
 
 ax0 = axes[0, 0]
 pigx = pig_sens_14.x.data
 pigy = pig_sens_14.y.data
 x = pig_sens_14.points
 distance_pig = cumulative_centerline_distance(pigx, pigy)
-tick_positions = np.arange(0, len(x), 500)
+tick_positions = np.arange(0, len(x), 1000)
 tick_labels = [np.round(distance_pig[i], decimals=0) for i in tick_positions]
 pig_sens_14.plot(ax=ax0, label='')
 pig_sens_3.plot(ax=ax0, label='')
@@ -225,7 +225,7 @@ thwx = thw_sens_14.x.data
 thwy = thw_sens_14.y.data
 distance_thw = cumulative_centerline_distance(thwx, thwy)
 x = thw_sens_14.points
-tick_positions = np.arange(0, len(x), 600)
+tick_positions = np.arange(0, len(x), 1000)
 tick_labels = [np.round(distance_thw[i], decimals=0) for i in tick_positions]
 thw_sens_14.plot(ax=ax1, label='')
 thw_sens_3.plot(ax=ax1, label='')
@@ -293,7 +293,7 @@ x = kohler_sens_14.points
 kohlerx = kohler_sens_14.x.data
 kohlery = kohler_sens_14.y.data
 distance_kohler = cumulative_centerline_distance(kohlerx, kohlery)
-tick_positions = np.arange(0, len(x), 200)
+tick_positions = np.arange(0, len(x), 500)
 tick_labels = [np.round(distance_kohler[i], decimals=0) for i in tick_positions]
 kohler_sens_14.plot(ax=ax5, label=label_year40)
 kohler_sens_3.plot(ax=ax5, label=label_year10)
