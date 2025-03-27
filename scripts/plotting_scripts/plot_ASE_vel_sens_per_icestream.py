@@ -257,7 +257,7 @@ if args.save_regrid_output:
 
         v = nc.createVariable('dQ_dM_' + str(start), 'f4', ('y', 'x'))
         v.units = 'm'
-        v.long_name = 'dQ/dObs magnitude as log(10)' + str(end)
+        v.long_name = 'dQ/dObs magnitude as log(10)' + str(start)
         v[:] = mag_vector_3_regrid
 
         v = nc.createVariable('dQ_dM_' + str(end), 'f4', ('y', 'x'))
