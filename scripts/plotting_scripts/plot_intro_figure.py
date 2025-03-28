@@ -2,6 +2,7 @@ import sys
 import salem
 import pyproj
 import xarray as xr
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
@@ -27,7 +28,7 @@ parser.add_argument("-conf",
                     type=str,
                     default="../../../config.ini",
                     help="pass config file")
-parser.add_argument("-toml_path_i",
+parser.add_argument("-toml_path",
                     type=str,
                     default="",
                     help="pass .toml file")
@@ -35,6 +36,14 @@ parser.add_argument("-sub_plot_dir",
                     type=str,
                     default="temp",
                     help="pass sub plot directory to store the plots")
+parser.add_argument("-plot_name",
+                    type=str,
+                    default="temp",
+                    help="pass plot name e.g. measures")
+parser.add_argument("-plot_domain",
+                    action="store_true",
+                    help="If this is specify "
+                         "the we make a plot too.")
 
 args = parser.parse_args()
 config_file = args.conf
@@ -54,7 +63,7 @@ if not os.path.exists(plot_path):
 from ficetools import utils_funcs, graphics, velocity
 from ficetools.backend import FunctionSpace, VectorFunctionSpace, Function, project
 
-toml_config1 = args.toml_path_i
+toml_config1 = args.toml_path
 
 params_il = conf.ConfigParser(toml_config1)
 
@@ -135,25 +144,38 @@ alpha_v_il = alpha_ilp.compute_vertex_values(mesh_in)
 beta_ilp = project(beta_il, M)
 beta_v_il = beta_ilp.compute_vertex_values(mesh_in)
 
-vel_obs = config['input_files']['measures_cloud']
-
+vel_obs = utils_funcs.find_measures_file(2013,
+                                         config['input_files']['measures_cloud'])
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
 
-# Any measures should do ... 
-full_vel_path = os.path.join(vel_obs, 'Antarctica_ice_velocity_2013_2014_1km_v01.nc')
-print(full_vel_path)
+gv = velocity.define_salem_grid_from_measures(vel_obs, ase_bbox)
 
-gv = velocity.define_salem_grid_from_measures(full_vel_path, ase_bbox)
+# Right Projection! TODO: We need to add this to every plot!
+proj_gnd = pyproj.Proj('EPSG:3031')
+gv = salem.Grid(nxny=(520, 710), dxdy=(gv.dx, gv.dy),
+                x0y0=(-1702500.0, 500.0), proj=proj_gnd)
+
+# Gathering all the shapefiles
+shp = gpd.read_file(config['input_files']['ice_boundaries'])
+shp_sel = shp.loc[[62, 63, 64, 138, 137, 138, 139]]
+shp_sel.crs = gv.proj.crs
+
+# Grounding line for other icestreams
+gdf = gpd.read_file(config['input_files']['grounding_line'])
+ase_ground = gdf[220:235]
+data = ase_ground.to_crs(proj_gnd.crs).reset_index()
 
 rcParams['axes.labelsize'] = 18
 rcParams['xtick.labelsize'] = 18
 rcParams['ytick.labelsize'] = 18
 rcParams['axes.titlesize'] = 18
 
-cmap_vel=sns.diverging_palette(220, 20, as_cmap=True)
-cmap_params_alpha = colormaps.get_cmap('YlOrBr')
+cmap_vel=sns.color_palette("Spectral_r", as_cmap=True)
+#cmap_params_alpha = colormaps.get_cmap('YlOrBr')
+cmap_params_alpha = colormaps.get_cmap('RdYlBu_r')
+#cmap_params_bglen = colormaps.get_cmap('cubehelix')
 cmap_params_bglen = colormaps.get_cmap('YlGnBu')
 
 # Now plotting
@@ -162,20 +184,31 @@ r=1.2
 tick_options = {'axis':'both','which':'both','bottom':False,
      'top':False,'left':False,'right':False,'labelleft':False, 'labelbottom':False}
 
-fig1 = plt.figure(figsize=(16*r, 6*r))#, constrained_layout=True)
-spec = gridspec.GridSpec(1, 3, wspace=0.05)
+fig1 = plt.figure(figsize=(10*r, 12*r))#, constrained_layout=True)
+spec = gridspec.GridSpec(2, 2, wspace=0.05, hspace=0.3)
 
 ax0 = plt.subplot(spec[0])
-ax0.set_aspect('equal')
-
+divider = make_axes_locatable(ax0)
+cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
 
 x_n, y_n = smap.grid.transform(x, y,
                               crs=gv.proj)
-smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
-smap.set_scale_bar(length=100000)
-c = ax0.triplot(x_n, y_n, t, color=sns.xkcd_rgb["black"], lw=0.2)
+minv = 0
+maxv = 800
+levels = np.linspace(minv,maxv,200)
+ticks = np.linspace(minv,maxv,3)
+c = ax0.tricontourf(x_n, y_n, t, U_itlive, levels = levels, cmap=cmap_vel, extend="both")
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
+smap.set_vmin(minv)
+smap.set_vmax(maxv)
+smap.set_extend('both')
+smap.set_cmap(cmap_vel)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
+cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
+                         label='speed [m. $yr^{-1}$]')
 at = AnchoredText('a', prop=dict(size=18), frameon=True, loc='upper left')
 ax0.add_artist(at)
 
@@ -184,19 +217,17 @@ ax1 = plt.subplot(spec[1])
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
-minv = 0
-maxv = 3000
-levels = np.linspace(minv,maxv,200)
-ticks = np.linspace(minv,maxv,3)
-c = ax1.tricontourf(x_n, y_n, t, U_itlive, levels = levels, cmap='viridis', extend="both")
-smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
+
+c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap=cmap_vel, extend="both")
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
-smap.set_cmap('viridis')
+smap.set_cmap(cmap_vel)
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
-                         label='model velocity [m. $yr^{-1}$]')
+                         label='speed [m. $yr^{-1}$]')
 at = AnchoredText('b', prop=dict(size=18), frameon=True, loc='upper right')
 ax1.add_artist(at)
 
@@ -206,59 +237,32 @@ ax2.set_aspect('equal')
 divider = make_axes_locatable(ax2)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
-minv = -150
-maxv = 150
-levels = np.linspace(minv,maxv,200)
-ticks = np.linspace(minv,maxv,3)
-c = ax2.tricontourf(x_n, y_n, t, uv_live-U_itlive, levels = levels, cmap=cmap_vel, extend="both")
-smap.set_lonlat_contours(xinterval=2.0, yinterval=1.0, add_tick_labels=True, linewidths=1.5)
-smap.set_vmin(minv)
-smap.set_vmax(maxv)
-smap.set_extend('both')
-smap.set_cmap(cmap_vel)
-smap.visualize(ax=ax2, orientation='horizontal', addcbar=False)
-cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
-                         label='velocity differences [m. $yr^{-1}$]')
-at = AnchoredText('c', prop=dict(size=18), frameon=True, loc='upper right')
-ax2.add_artist(at)
-
-ax0.title.set_text('FEniCS_ice model domain')
-ax1.title.set_text('FEniCS_ice initial velocity')
-ax2.title.set_text('MEaSUREs - Model velocities')
-
-plt.tight_layout()
-plt.savefig(os.path.join(plot_path, 'ase_model_obs_velocities.png'),
-            bbox_inches='tight', dpi=150)
-
-
-fig2 = plt.figure(figsize=(8*r, 6*r))#, constrained_layout=True)
-spec = gridspec.GridSpec(1, 2, wspace=0.05, hspace=0.3)
-
-ax0 = plt.subplot(spec[0])
-ax0.set_aspect('equal')
-divider = make_axes_locatable(ax0)
-cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gv, countries=False)
 x_n, y_n = smap.grid.transform(x, y,
                               crs=gv.proj)
 minv = 0
 maxv = 40
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
-c = ax0.tricontourf(x_n, y_n, t, alpha_v_il, levels=levels, cmap=cmap_params_alpha, extend="both")
+c = ax2.tricontourf(x_n, y_n, t, alpha_v_il, levels=levels, cmap=cmap_params_alpha, extend="both")
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_cmap(cmap_params_alpha)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
-smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
+for g, geo in enumerate(data.geometry):
+    smap.set_geometry(data.loc[g].geometry,
+                      linewidth=2.0,
+                      color=sns.xkcd_rgb["black"], crs=gv.proj)
+smap.visualize(ax=ax2, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='Sliding parameter \n [m$^{-1/6}$ yr$^{1/6}$ Pa$^{1/2}$]')
-at = AnchoredText('a', prop=dict(size=18), frameon=True, loc='upper right')
-ax0.add_artist(at)
+at = AnchoredText('c', prop=dict(size=18), frameon=True, loc='upper right')
+ax2.add_artist(at)
 
-ax1 = plt.subplot(spec[1])
-ax1.set_aspect('equal')
-divider = make_axes_locatable(ax1)
+ax3 = plt.subplot(spec[3])
+ax3.set_aspect('equal')
+divider = make_axes_locatable(ax3)
 cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
 x_n, y_n = smap.grid.transform(x, y,
@@ -267,21 +271,89 @@ minv = 400
 maxv = 800
 levels = np.linspace(minv,maxv,200)
 ticks = np.linspace(minv,maxv,3)
-c = ax1.tricontourf(x_n, y_n, t, beta_v_il, levels=levels, cmap=cmap_params_bglen, extend="both")
+c = ax3.tricontourf(x_n, y_n, t, beta_v_il, levels=levels, cmap=cmap_params_bglen, extend="both")
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_cmap(cmap_params_bglen)
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
 smap.set_extend('both')
-smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
+smap.visualize(ax=ax3, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
                          label='Ice stiffness parameter \n [Pa$^{1/2}$. yr$^{1/6}$]')
-at = AnchoredText('b', prop=dict(size=18), frameon=True, loc='upper right')
-ax1.add_artist(at)
+at = AnchoredText('d', prop=dict(size=18), frameon=True, loc='upper right')
+ax3.add_artist(at)
+
+ax0.title.set_text(r'Model speed')
+ax1.title.set_text(r'Observed speed MEaSUREs')
+ax2.title.set_text(r'$\alpha_{MEaSUREs}$')
+ax3.title.set_text(r'$\beta_{MEaSUREs}$')
+
+fig1.set_constrained_layout(True)
+path_to_plot = os.path.join(str(plot_path), 'ase_inversion' + args.plot_name +  '.png')
+plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
+
+if args.plot_domain:
+    basins = sns.color_palette("Spectral_r")
+    cmap_vel=sns.color_palette("Spectral_r", as_cmap=True)
+    # Now plotting next figure
+    r=1.2
+
+    fig1 = plt.figure(figsize=(8*r, 7*r))#, constrained_layout=True)
+    spec = gridspec.GridSpec(1, 2, wspace=0.25, hspace=0.05)
+
+    ax0 = plt.subplot(spec[0])
+    ax0.set_aspect('equal')
+    smap = salem.Map(gv, countries=False)
+    x_n, y_n = smap.grid.transform(x, y,
+                                  crs=gv.proj)
+
+    smap.set_shapefile(shp_sel.loc[[63]], linewidth=2, edgecolor=basins[0], facecolor=basins[0], alpha=0.5)
+    smap.set_shapefile(shp_sel.loc[[64, 138]], linewidth=2, edgecolor=basins[1], facecolor=basins[1], alpha=0.5)
+    smap.set_shapefile(shp_sel.loc[[62, 137, 139]], linewidth=2, edgecolor=basins[2], facecolor=basins[2], alpha=0.5)
+    smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
+    smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
+
+    ax0.triplot(x_n, y_n, trim.triangles, '-', color='black', lw=0.2)
+    smap.visualize(ax=ax0, orientation='horizontal', addcbar=True)
+    at = AnchoredText('a', prop=dict(size=18), frameon=True, loc='upper left')
+    ax0.add_artist(at)
 
 
-ax0.title.set_text(r'$\alpha_{MEaSUREs}$')
-ax1.title.set_text(r'$\beta_{MEaSUREs}$')
+    ax1 = plt.subplot(spec[1])
+    ax1.set_aspect('equal')
+    divider = make_axes_locatable(ax1)
+    cax = divider.append_axes("bottom", size="5%", pad=0.5)
+    smap = salem.Map(gv, countries=False)
+    x_n, y_n = smap.grid.transform(x, y,
+                                  crs=gv.proj)
+    minv = 0
+    maxv = 800
+    levels = np.linspace(minv,maxv,200)
+    ticks = np.linspace(minv,maxv,3)
+    c = ax1.tricontourf(x_n, y_n, t, uv_live, levels = levels, cmap=cmap_vel, extend="both")
+    smap.set_vmin(minv)
+    smap.set_vmax(maxv)
+    smap.set_extend('both')
+    smap.set_cmap(cmap_vel)
 
-plt.tight_layout()
-plt.savefig(os.path.join(plot_path, 'ase_inversion.png'),
-            bbox_inches='tight', dpi=150)
+    for g, geo in enumerate(data.geometry):
+        smap.set_geometry(data.loc[g].geometry,
+                          linewidth=2.0,
+                          color=sns.xkcd_rgb["black"], crs=gv.proj)
+
+    smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                              linestyles='-', colors='grey', add_tick_labels=False)
+    smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
+    cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
+                             label='Velocity [m/yr]')
+    at = AnchoredText('b', prop=dict(size=18), frameon=True, loc='upper left')
+    ax1.add_artist(at)
+
+    ax0.title.set_text('Model domain')
+    ax1.title.set_text('MEaSUREsv2 average 1996-2016')
+
+    fig1.set_constrained_layout(True)
+    path_to_plot = os.path.join(str(plot_path), 'ase_input_data.png')
+    plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
