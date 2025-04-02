@@ -111,10 +111,10 @@ t_stat_40, p_val_40 = ttest_ind(lake_vals_nonan_40, nonlake_vals_nonan_40, equal
 print(f"T-test: t year 40 = {t_stat_40:.2f}, p = {p_val_40:.2e}")
 
 t_stat_10, p_val_10 = ttest_ind(lake_vals_nonan_10, nonlake_vals_nonan_10, equal_var=False)
-print(f"T-test: t year 10 = {t_stat_10:.2f}, p = {p_val_10:.2e}")
+print(f"T-test: t year 9 = {t_stat_10:.2f}, p = {p_val_10:.2e}")
 
 t_test_40 = f"T-test year 40: = {t_stat_40:.2f}, \n p = {p_val_40:.2e}"
-t_test_10 = f"T-test year 10: = {t_stat_10:.2f}, \n p = {p_val_10:.2e}"
+t_test_10 = f"T-test year 9: = {t_stat_10:.2f}, \n p = {p_val_10:.2e}"
 
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
@@ -127,7 +127,7 @@ ax.hist(lake_vals_nonan_10, bins=50, alpha=0.5, label="Lake", density=True)
 ax.legend(loc='upper left')
 ax.set_xlabel(r'log(10) $\frac{\partial Q}{\partial\hat{p}}$' + '\n'+ r'($m^2$ . yr)')
 ax.set_ylabel("Density")
-ax.set_title("Sensitivity distribution at year 10")
+ax.set_title("Sensitivity distribution at year 9")
 #ax.set_xlim(0, np.percentile(nonlake_vals_nonan_10, 99))
 at = AnchoredText(t_test_10, prop=dict(size=10), frameon=True, loc='lower left')
 ax.add_artist(at)
