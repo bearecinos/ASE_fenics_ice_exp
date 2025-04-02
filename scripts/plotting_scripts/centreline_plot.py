@@ -191,8 +191,8 @@ mask_kohler_3, mask_kohler_14 = utils_funcs.interp_model_mask_to_centreline(mode
                                                                             years=years,
                                                                             step=step)
 
-label_year10 = 'Year 9 '+ r'$\frac{\partial Q}{\partial\hat{p}}$'
-label_year40 = 'Year 40 '+ r'$\frac{\partial Q}{\partial\hat{p}}$'
+label_year10 = 'Year 9'
+label_year40 = 'Year 40'
 
 label_floating_10 = 'Floating part Year 9'
 label_floating_40 = 'Floating part Year 40'
@@ -261,15 +261,18 @@ popey = pope_sens_14.y.data
 distance_pope = cumulative_centerline_distance(popex, popey)
 tick_positions = np.arange(0, len(x), 100)
 tick_labels = [np.round(distance_pope[i], decimals=0) for i in tick_positions]
-pope_sens_14.plot(ax=ax3, label='')
-pope_sens_3.plot(ax=ax3, label='')
-ax3.fill_between(x, pope_sens_3, where=(mask_pope_3 == 0.0),  facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label='')
-ax3.fill_between(x, pope_sens_14, where=(mask_pope_14 == 0.0), color='gray', alpha=0.5, label='')
+pope_sens_14.plot(ax=ax3, label=label_year40)
+pope_sens_3.plot(ax=ax3, label=label_year10)
+ax3.fill_between(x, pope_sens_3, where=(mask_pope_3 == 0.0), 
+        facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label=label_floating_10)
+ax3.fill_between(x, pope_sens_14, where=(mask_pope_14 == 0.0), 
+        color='gray', alpha=0.5, label=label_floating_40)
 ax3.set_xticks(tick_positions)
 ax3.set_xticklabels(tick_labels)
 at = AnchoredText('d', prop=dict(size=12), frameon=True, loc='lower left')
 ax3.add_artist(at)
 ax3.set_title('Pope', fontsize=12)
+ax3.legend(loc='lower right', prop=dict(size=9))
 
 ax4 = axes[1, 1]
 x = smith_sens_14.points
@@ -307,7 +310,7 @@ at = AnchoredText('f', prop=dict(size=12), frameon=True, loc='lower left')
 ax5.add_artist(at)
 ax5.set_title('Kohler west', fontsize=12)
 
-ax5.legend(loc='lower right')
+#ax5.legend(loc='lower right')
 
 for row in range(2):
     for col in range(3):
