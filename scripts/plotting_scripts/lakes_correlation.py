@@ -147,3 +147,12 @@ file_plot_name = 'lakes_spatial_stats.png'
 
 fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
+
+
+fig, axs = plt.subplots(1, 1, figsize=(5, 5))
+plt.imshow(interp_mask, origin="lower")
+plt.colorbar(ax=axs)
+file_plot_name = 'mask_of_lake_area.png'
+
+fig_save_path = os.path.join(plot_path, file_plot_name)
+plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
