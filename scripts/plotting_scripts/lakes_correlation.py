@@ -3,19 +3,13 @@ import os
 import argparse
 import numpy as np
 from configobj import ConfigObj
-import seaborn as sns
 import geopandas as gpd
 import xarray as xr
 import rioxarray as rio
-from scipy.interpolate import RegularGridInterpolator
 from scipy.interpolate import griddata
 from scipy.stats import ttest_ind
-from scipy.stats import pearsonr
-
-from shapely.geometry import LineString
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
-from matplotlib.ticker import FormatStrFormatter
 
 # Load configuration file for more order in paths
 parser = argparse.ArgumentParser()
