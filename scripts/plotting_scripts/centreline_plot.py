@@ -191,6 +191,15 @@ mask_kohler_3, mask_kohler_14 = utils_funcs.interp_model_mask_to_centreline(mode
                                                                             years=years,
                                                                             step=step)
 
+# Reading more shapefiles and netcdf needed
+file_name_all = 'vel_obs_sens_regrid_ALL3_14.nc'
+dv_sens = xr.open_dataset(os.path.join(plot_path, file_name_all))
+
+model_gnd_10 = gpd.read_file(config['input_files']['model_gl_10'])
+model_gnd_40 = gpd.read_file(config['input_files']['model_gl_40'])
+
+shp_lake = gpd.read_file(config['input_files']['thw_lake'])
+
 label_year10 = 'Year 9'
 label_year40 = 'Year 40'
 
@@ -378,6 +387,51 @@ smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=axes, orientation='horizontal', addcbar=False)
 
 file_plot_name = 'centrelines_map.png'
+
+fig_save_path = os.path.join(plot_path, file_plot_name)
+plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
+
+### Making a centreline map with sensitivity output instead
+minv = 3.0
+maxv = 6.0
+levels = np.linspace(minv, maxv, 200)
+ticks = np.linspace(minv, maxv, 3)
+
+
+fig, axes = plt.subplots(figsize=(6, 8))
+smap = salem.Map(gv, countries=False)
+x_n, y_n = smap.grid.transform(dv_sens.x, dv_sens.y,
+                               crs=gv.proj)
+c = axes.contourf(x_n, y_n, dv_sens.dQ_dM_14.data, levels=levels, extend="both")
+
+smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["white"])
+
+smap.set_shapefile(pig, linewidth=2)
+smap.set_shapefile(thw, linewidth=2)
+smap.set_shapefile(hay, linewidth=2)
+smap.set_shapefile(pope, linewidth=2)
+smap.set_shapefile(smith, linewidth=2)
+smap.set_shapefile(kohler, linewidth=2)
+
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=0.5,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gv.proj)
+
+for g, geo in enumerate(model_gnd_40.geometry):
+    smap.set_geometry(model_gnd_40.loc[g].geometry,
+                      linewidth=2,
+                      color=sns.xkcd_rgb["grey"],
+                      crs=gv.proj)
+
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
+smap.visualize(ax=axes, orientation='horizontal', addcbar=False)
+
+file_plot_name = 'centrelines_map_with_sens.png'
 
 fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
