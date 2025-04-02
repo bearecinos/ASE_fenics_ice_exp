@@ -122,7 +122,7 @@ fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 # Pick a specific Axes to plot on, say top-left (0, 0)
 ax = axs[0]
 ax.hist(nonlake_vals_nonan_10, bins=50, alpha=0.5, label="Surroundings", density=True)
-ax.hist(lake_vals_nonan_10, bins=50, alpha=0.5, label="Lake", density=True)
+ax.hist(lake_vals_nonan_10, bins=50, alpha=0.5, label="Subglacial lakes", density=True)
 
 ax.legend(loc='upper left')
 ax.set_xlabel(r'log(10) $\frac{\partial Q}{\partial\hat{p}}$' + '\n'+ r'($m^2$ . yr)')
@@ -134,7 +134,7 @@ ax.add_artist(at)
 
 ax = axs[1]
 ax.hist(nonlake_vals_nonan_40, bins=50, alpha=0.5, label="Surroundings", density=True)
-ax.hist(lake_vals_nonan_40, bins=50, alpha=0.5, label="Lake", density=True)
+ax.hist(lake_vals_nonan_40, bins=50, alpha=0.5, label="Subglacial lakes", density=True)
 #ax.set_xlim(0, np.percentile(nonlake_vals_nonan_40, 99))
 ax.legend(loc='upper left')
 ax.set_xlabel(r'log(10) $\frac{\partial Q}{\partial\hat{p}}$' + '\n'+ r'($m^2$ . yr)')
