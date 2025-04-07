@@ -5,3 +5,4 @@ input_data
 scripts/run_experiments/run_trial_inversion/tomls_for_debug/backup.toml
 log_*
 plots
+/home/brecinos/ASE_fenics_ice_exp/scripts/run_experiments/run_paper_tomls/run_synthetic_vel
