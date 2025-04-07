@@ -5,4 +5,6 @@ input_data
 scripts/run_experiments/run_trial_inversion/tomls_for_debug/backup.toml
 log_*
 plots
-/home/brecinos/ASE_fenics_ice_exp/scripts/run_experiments/run_paper_tomls/run_synthetic_vel
+scripts/run_experiments/run_paper_tomls/run_synthetic_vel
+scripts/post_processing/gather_linearity_plot_data_foa_synthetic.py
+scripts/post_processing/gather_linearity_plot_data_soa_synthetic.py
