@@ -191,8 +191,17 @@ mask_kohler_3, mask_kohler_14 = utils_funcs.interp_model_mask_to_centreline(mode
                                                                             years=years,
                                                                             step=step)
 
-label_year10 = 'Year 9 '+ r'$\frac{\partial Q}{\partial\hat{p}}$'
-label_year40 = 'Year 40 '+ r'$\frac{\partial Q}{\partial\hat{p}}$'
+# Reading more shapefiles and netcdf needed
+file_name_all = 'vel_obs_sens_regrid_ALL3_14.nc'
+dv_sens = xr.open_dataset(os.path.join(plot_path, file_name_all))
+
+model_gnd_10 = gpd.read_file(config['input_files']['model_gl_10'])
+model_gnd_40 = gpd.read_file(config['input_files']['model_gl_40'])
+
+shp_lake = gpd.read_file(config['input_files']['thw_lake'])
+
+label_year10 = 'Year 9'
+label_year40 = 'Year 40'
 
 label_floating_10 = 'Floating part Year 9'
 label_floating_40 = 'Floating part Year 40'
@@ -206,16 +215,14 @@ fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(14 * r, 6 * r), gridspec_kw=
 ax0 = axes[0, 0]
 pigx = pig_sens_14.x.data
 pigy = pig_sens_14.y.data
-x = pig_sens_14.points
-distance_pig = cumulative_centerline_distance(pigx, pigy)
-tick_positions = np.arange(0, len(x), 1000)
-tick_labels = [np.round(distance_pig[i], decimals=0) for i in tick_positions]
-pig_sens_14.plot(ax=ax0, label='')
-pig_sens_3.plot(ax=ax0, label='')
-ax0.fill_between(x, pig_sens_3, where=(mask_pig_3 == 0.0),  facecolor='none', edgecolor='gray', hatch='///', alpha=0.5, label='')
-ax0.fill_between(x, pig_sens_14, where=(mask_pig_14 == 0.0), color='gray', alpha=0.5, label='')
-ax0.set_xticks(tick_positions)
-ax0.set_xticklabels(tick_labels)
+distance_pig = cumulative_centerline_distance(pigx, pigy)/1000
+
+ax0.plot(distance_pig, pig_sens_3.data, label='')
+ax0.fill_between(distance_pig, pig_sens_3.data, where=(mask_pig_3.data == 0.0),
+                 facecolor='none', edgecolor='gray', hatch='///', alpha=0.5, label='')
+ax0.plot(distance_pig, pig_sens_14.data, label='')
+ax0.fill_between(distance_pig, pig_sens_14.data, where=(mask_pig_14.data == 0.0),
+                 color='gray', alpha=0.5, label='')
 at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
 ax0.add_artist(at)
 ax0.set_title('Pine Island', fontsize=12)
@@ -223,16 +230,13 @@ ax0.set_title('Pine Island', fontsize=12)
 ax1 = axes[0, 1]
 thwx = thw_sens_14.x.data
 thwy = thw_sens_14.y.data
-distance_thw = cumulative_centerline_distance(thwx, thwy)
-x = thw_sens_14.points
-tick_positions = np.arange(0, len(x), 1000)
-tick_labels = [np.round(distance_thw[i], decimals=0) for i in tick_positions]
-thw_sens_14.plot(ax=ax1, label='')
-thw_sens_3.plot(ax=ax1, label='')
-ax1.fill_between(x, thw_sens_3, where=(mask_thw_3 == 0.0),  facecolor='none', edgecolor='gray', hatch='///', alpha=0.5, label='')
-ax1.fill_between(x, thw_sens_14, where=(mask_thw_14 == 0.0), color='gray', alpha=0.5, label='')
-ax1.set_xticks(tick_positions)
-ax1.set_xticklabels(tick_labels)
+distance_thw = cumulative_centerline_distance(thwx, thwy)/1000
+ax1.plot(distance_thw, thw_sens_3.data, label='')
+ax1.fill_between(distance_thw, thw_sens_3.data, where=(mask_thw_3.data == 0.0),
+                 facecolor='none', edgecolor='gray', hatch='///', alpha=0.5, label='')
+ax1.plot(distance_thw, thw_sens_14.data, label='')
+ax1.fill_between(distance_thw, thw_sens_14.data, where=(mask_thw_14.data == 0.0),
+                 color='gray', alpha=0.5, label='')
 at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
 ax1.set_title('Thwaites', fontsize=12)
@@ -240,80 +244,67 @@ ax1.set_title('Thwaites', fontsize=12)
 ax2 = axes[0, 2]
 hayx = hay_sens_14.x.data
 hayy = hay_sens_14.y.data
-distance_hay = cumulative_centerline_distance(hayx, hayy)
-x = hay_sens_14.points
-tick_positions = np.arange(0, len(x), 300)
-tick_labels = [np.round(distance_hay[i], decimals=0) for i in tick_positions]
-hay_sens_14.plot(ax=ax2, label='')
-hay_sens_3.plot(ax=ax2, label='')
-ax2.fill_between(x, hay_sens_3, where=(mask_hay_3 == 0.0),  facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label='')
-ax2.fill_between(x, hay_sens_14, where=(mask_hay_14 == 0.0), color='gray', alpha=0.5, label='')
-ax2.set_xticks(tick_positions)
-ax2.set_xticklabels(tick_labels)
+distance_hay = cumulative_centerline_distance(hayx, hayy)/1000
+ax2.plot(distance_hay, hay_sens_3.data, label='')
+ax2.fill_between(distance_hay, hay_sens_3.data, where=(mask_hay_3.data == 0.0),
+                 facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label='')
+ax2.plot(distance_hay, hay_sens_14.data, label='')
+ax2.fill_between(distance_hay, hay_sens_14.data, where=(mask_hay_14.data == 0.0),
+                 color='gray', alpha=0.5, label='')
 at = AnchoredText('c', prop=dict(size=12), frameon=True, loc='lower left')
 ax2.add_artist(at)
 ax2.set_title('Haynes', fontsize=12)
 
 ax3 = axes[1, 0]
-x = pope_sens_14.points
 popex = pope_sens_14.x.data
 popey = pope_sens_14.y.data
-distance_pope = cumulative_centerline_distance(popex, popey)
-tick_positions = np.arange(0, len(x), 100)
-tick_labels = [np.round(distance_pope[i], decimals=0) for i in tick_positions]
-pope_sens_14.plot(ax=ax3, label='')
-pope_sens_3.plot(ax=ax3, label='')
-ax3.fill_between(x, pope_sens_3, where=(mask_pope_3 == 0.0),  facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label='')
-ax3.fill_between(x, pope_sens_14, where=(mask_pope_14 == 0.0), color='gray', alpha=0.5, label='')
-ax3.set_xticks(tick_positions)
-ax3.set_xticklabels(tick_labels)
+distance_pope = cumulative_centerline_distance(popex, popey)/1000
+ax3.plot(distance_pope, pope_sens_3.data, label=label_year10)
+ax3.fill_between(distance_pope, pope_sens_3.data, where=(mask_pope_3.data == 0.0),
+                 facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label=label_floating_10)
+ax3.plot(distance_pope, pope_sens_14.data, label=label_year40)
+ax3.fill_between(distance_pope, pope_sens_14.data, where=(mask_pope_14.data == 0.0),
+                 color='gray', alpha=0.5, label=label_floating_40)
 at = AnchoredText('d', prop=dict(size=12), frameon=True, loc='lower left')
 ax3.add_artist(at)
 ax3.set_title('Pope', fontsize=12)
+ax3.legend(loc='lower right', prop=dict(size=9))
 
 ax4 = axes[1, 1]
-x = smith_sens_14.points
 smithx = smith_sens_14.x.data
 smithy = smith_sens_14.y.data
-distance_smith = cumulative_centerline_distance(smithx, smithy)
-tick_positions = np.arange(0, len(x), 200)
-tick_labels = [np.round(distance_smith[i], decimals=0) for i in tick_positions]
-smith_sens_14.plot(ax=ax4, label='')
-smith_sens_3.plot(ax=ax4, label='')
-ax4.fill_between(x, smith_sens_3, where=(mask_smith_3 == 0.0),  facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label='')
-ax4.fill_between(x, smith_sens_14, where=(mask_smith_14 == 0.0), color='gray', alpha=0.5, label='')
-ax4.set_xticks(tick_positions)
-ax4.set_xticklabels(tick_labels)
+distance_smith = cumulative_centerline_distance(smithx, smithy)/1000
+ax4.plot(distance_smith, smith_sens_3.data, label='')
+ax4.fill_between(distance_smith, smith_sens_3.data, where=(mask_smith_3.data == 0.0),
+                 facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label='')
+ax4.plot(distance_smith, smith_sens_14.data, label='')
+ax4.fill_between(distance_smith, smith_sens_14.data, where=(mask_smith_14.data == 0.0),
+                 color='gray', alpha=0.5, label='')
 at = AnchoredText('e', prop=dict(size=12), frameon=True, loc='lower left')
 ax4.add_artist(at)
 ax4.set_title('Smith east', fontsize=12)
 
 ax5 = axes[1, 2]
-x = kohler_sens_14.points
 kohlerx = kohler_sens_14.x.data
 kohlery = kohler_sens_14.y.data
-distance_kohler = cumulative_centerline_distance(kohlerx, kohlery)
-tick_positions = np.arange(0, len(x), 500)
-tick_labels = [np.round(distance_kohler[i], decimals=0) for i in tick_positions]
-kohler_sens_14.plot(ax=ax5, label=label_year40)
-kohler_sens_3.plot(ax=ax5, label=label_year10)
-ax5.fill_between(x, kohler_sens_3, where=(mask_kohler_3 == 0.0),  facecolor='none',
-                 edgecolor='gray', hatch='///', alpha=0.3, label=label_floating_10)
-ax5.fill_between(x, kohler_sens_14, where=(mask_kohler_14 == 0.0), color='gray',
-                 alpha=0.5, label=label_floating_40)
-ax5.set_xticks(tick_positions)
-ax5.set_xticklabels(tick_labels)
+distance_kohler = cumulative_centerline_distance(kohlerx, kohlery)/1000
+ax5.plot(distance_kohler, kohler_sens_3.data, label=label_year10)
+ax5.fill_between(distance_kohler, kohler_sens_3.data, where=(mask_kohler_3.data == 0.0), 
+                 facecolor='none', edgecolor='gray', hatch='///', alpha=0.3, label=label_floating_10)
+ax5.plot(distance_kohler, kohler_sens_14.data, label=label_year40)
+ax5.fill_between(distance_kohler, kohler_sens_14.data, where=(mask_kohler_14.data == 0.0), 
+                 color='gray', alpha=0.5, label=label_floating_40)
 at = AnchoredText('f', prop=dict(size=12), frameon=True, loc='lower left')
 ax5.add_artist(at)
 ax5.set_title('Kohler west', fontsize=12)
 
-ax5.legend(loc='lower right')
+#ax5.legend(loc='lower right')
 
 for row in range(2):
     for col in range(3):
         ax = axes[row, col]
         ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
-        ax.set_xlabel('Distance (m)')
+        ax.set_xlabel('Distance (km)')
         ax.set_ylabel(r'log(10) $\frac{\partial Q}{\partial\hat{p}}$', rotation=360, fontsize=12, labelpad=40)
         if col != 0:
             ax.set_ylabel('')
@@ -375,6 +366,51 @@ smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=axes, orientation='horizontal', addcbar=False)
 
 file_plot_name = 'centrelines_map.png'
+
+fig_save_path = os.path.join(plot_path, file_plot_name)
+plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
+
+### Making a centreline map with sensitivity output instead
+minv = 3.0
+maxv = 6.0
+levels = np.linspace(minv, maxv, 200)
+ticks = np.linspace(minv, maxv, 3)
+
+
+fig, axes = plt.subplots(figsize=(6, 8))
+smap = salem.Map(gv, countries=False)
+x_n, y_n = smap.grid.transform(dv_sens.x, dv_sens.y,
+                               crs=gv.proj)
+c = axes.contourf(x_n, y_n, dv_sens.dQ_dM_14.data, levels=levels, extend="both")
+
+smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["white"])
+
+smap.set_shapefile(pig, linewidth=2)
+smap.set_shapefile(thw, linewidth=2)
+smap.set_shapefile(hay, linewidth=2)
+smap.set_shapefile(pope, linewidth=2)
+smap.set_shapefile(smith, linewidth=2)
+smap.set_shapefile(kohler, linewidth=2)
+
+for g, geo in enumerate(shp_lake.geometry):
+    smap.set_geometry(shp_lake.loc[g].geometry,
+                      linewidth=0.5,
+                      alpha=0.1,
+                      facecolor='white', edgecolor='white',
+                      crs=gv.proj)
+
+for g, geo in enumerate(model_gnd_40.geometry):
+    smap.set_geometry(model_gnd_40.loc[g].geometry,
+                      linewidth=2,
+                      color=sns.xkcd_rgb["grey"],
+                      crs=gv.proj)
+
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
+                          linestyles='-', colors='grey', add_tick_labels=False)
+smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
+smap.visualize(ax=axes, orientation='horizontal', addcbar=False)
+
+file_plot_name = 'centrelines_map_with_sens.png'
 
 fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)

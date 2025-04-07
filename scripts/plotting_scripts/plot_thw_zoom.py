@@ -254,7 +254,8 @@ x_m, y_m = smap.grid.transform(xx, yy,
                                crs=gv.proj)
 
 levels_two = np.linspace(np.min(sigma), np.max(sigma), 30)
-cmap = plt.get_cmap('Greens_r')
+cmap = plt.get_cmap('winter_r')
+
 norm = BoundaryNorm(levels_two, ncolors=cmap.N, clip=True)
 
 contour_lines = ax0.contour(x_m, y_m, sigma,
@@ -299,6 +300,7 @@ cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
 cbar.set_label(label_math, fontsize=14)
 
 cbar_ax = divider.append_axes("right", size="5%", pad=0.5)
+
 fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
                                    cmap=contour_lines.cmap),
              cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')

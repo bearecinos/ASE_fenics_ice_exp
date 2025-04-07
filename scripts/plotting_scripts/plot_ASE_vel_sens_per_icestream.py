@@ -469,6 +469,8 @@ ax1.add_artist(at)
 
 
 ax2 = fig.add_subplot(gs[2])
+xlim = (0, 40)
+ylim = (0, 1.5e12)
 p1, = ax2.plot(data_frame['time'].values,
                data_frame['delta_VAF_measures_'+run_name].values - data_frame['delta_VAF_itslive_'+run_name].values,
                linestyle='dashed', color=color_palette[3])
@@ -478,6 +480,8 @@ p3, = ax2.plot(data_frame['time'].values,
 plt.legend(handles=[p1, p3],
            labels=label_lin,
            frameon=True, fontsize=9, loc='upper left')
+ax2.set_ylim(ylim)
+ax2.set_xlim(xlim)
 ax2.set_ylabel(y_label_lin)
 ax2.set_xlabel('Time [yrs]')
 at = AnchoredText('c', prop=dict(size=12), frameon=True, loc='lower right')

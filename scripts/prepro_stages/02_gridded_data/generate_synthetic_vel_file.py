@@ -150,8 +150,10 @@ vyss = (1.0-vel_lambda)*vymm_s + vel_lambda*vyim_s
 
 #STD should be interpolated to
 # $\sigma_{lamda} = \sqrt (1-lamda)^{2} \sigma^{2}_{M} + lamda^{2} \sigma^{2}_{I}) $
-vxss_std = np.sqrt((1.0 - vel_lambda)**2 * vxmm_std_s**2 + vel_lambda**2 * vxim_std_s**2)
-vyss_std = np.sqrt((1.0 - vel_lambda)**2 * vymm_std_s**2 + vel_lambda**2 * vyim_std_s**2)
+#vxss_std = np.sqrt((1.0 - vel_lambda)**2 * vxmm_std_s**2 + vel_lambda**2 * vxim_std_s**2)
+#vyss_std = np.sqrt((1.0 - vel_lambda)**2 * vymm_std_s**2 + vel_lambda**2 * vyim_std_s**2)
+vxss_std = vxmm_std_s
+vyss_std = vymm_std_s
 
 # Mask arrays and make sure nans are drop in both
 # Itslive and Measures

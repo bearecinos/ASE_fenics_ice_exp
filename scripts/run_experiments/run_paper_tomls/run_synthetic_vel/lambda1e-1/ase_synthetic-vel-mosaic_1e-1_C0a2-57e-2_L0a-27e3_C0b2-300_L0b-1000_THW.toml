@@ -3,8 +3,8 @@
 #gamma_alpha =/= 1e6 (discrete cost func) but equivalent to initial test case
 run_name = "ase_synthetic"
 input_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/input_data/input_run_workflow_test"
-output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic_two/output"
-diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic_two/diagnostics"
+output_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic/output"
+diagnostics_dir = "/scratch/local/brecinos/ASE_fenics_ice_exp/output/08_synthetic/diagnostics"
 
 write_diagnostics = true
 
@@ -149,7 +149,7 @@ num_sens = 15 #TODO rename
 
 save_frequency = 5
 
-phase_suffix = '_synthetic_1e-1_'
+phase_suffix = '_synthetic_1e-1_mask_03_THW_'
 
 [eigendec]
 
@@ -166,16 +166,16 @@ phase_suffix = '_synthetic_1e-1_'
 [errorprop]
 
 qoi = 'vaf'
-phase_suffix = '_synthetic_1e-1_'
-qoi_vaf_mask_code = 0
+phase_suffix = '_synthetic_1e-1_mask_03_THW_'
+qoi_vaf_mask_code = 3
 qoi_apply_vaf_mask = true
-qoi_vaf_mask_usecode = false
+qoi_vaf_mask_usecode = true
 
 [invsigma]
 
 patch_downscale = 0.1
 # npatches = 100
-phase_suffix = '_synthetic_1e-1_'
+phase_suffix = '_synthetic_1e-1_mask_03_THW_'
 
 [melt]
 
@@ -187,11 +187,11 @@ sample_size = 2
 sample_alpha = true
 sample_beta = true
 phase_name = 'sample'
-phase_suffix = '_synthetic_1e-1_'
+phase_suffix = '_synthetic_1e-1_mask_03_THW_'
 sample_posterior = true
 num_eigenvals = 10
 
 [obs_sens]
 
-phase_suffix = '_synthetic_1e-1_'
+phase_suffix = '_synthetic_1e-1_mask_03_THW_'
 
