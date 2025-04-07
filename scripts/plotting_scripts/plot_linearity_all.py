@@ -36,9 +36,20 @@ if not os.path.exists(plot_path):
 
 sens_file_paths = glob.glob(os.path.join(plot_path, "*.csv"))
 
-dfoa = pd.read_csv(sens_file_paths[1])
-dsoa = pd.read_csv(sens_file_paths[2])
-dsoa_syn = pd.read_csv(sens_file_paths[-1])
+path_foa = 'results_FOA_linearity_test_gamma_alpha_1e4_same_gaps.csv'
+path_soa = 'results_linearity_test_SOA_gamma_alpha_1e4_same_gaps.csv'
+
+for path in sens_file_paths:
+    if os.path.basename(path) == path_foa:
+        path_foa = path
+    if os.path.basename(path) == path_soa:
+        path_soa = path
+
+assert 'results_FOA_linearity_test_gamma_alpha_1e4_same_gaps.csv' in path_foa
+dfoa = pd.read_csv(path_foa)
+
+assert 'results_linearity_test_SOA_gamma_alpha_1e4_same_gaps.csv' in path_soa
+dsoa = pd.read_csv(path_soa)
 
 rcParams['axes.labelsize'] = 16
 rcParams['xtick.labelsize'] = 16
@@ -56,15 +67,11 @@ label_soa = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{I}_{T}$',
              r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{I})$' + ' + ' + '\n' +
              r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{I})$']
 
-label_soa_syn = [r'$\Delta$ $Q^{M}_{T}$ - $Q^{S}_{T}$',
-             r'$\frac{\partial Q_{M}}{\partial U_{M}} \cdot (u_{M} - u_{S})$' + ' + ' + '\n' +
-             r'$\frac{\partial Q_{M}}{\partial V_{M}} \cdot (v_{M} - v_{S})$']
-
 r = 0.9
 color_palette = sns.color_palette("deep")
 
 # Create figure and axes in a 2x4 grid
-fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(16 * r, 12 * r))
+fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(17 * r,  8 * r))
 
 # Axis limits
 xlim = (0, 40)
@@ -81,28 +88,36 @@ axes[0, 0].plot(dfoa['time'], delta_qoi, linestyle='dashed', color=color_palette
 axes[0, 0].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 0].set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
 axes[0, 0].set_title('Full domain \n', fontsize=16)
+axes[0, 0].set_ylim(ylim)
+axes[0, 0].set_yticks(yticks)
 
 delta_qoi = dfoa['delta_VAF_measures_PIG'] - dfoa['delta_VAF_itslive_PIG']
 dot_product = dfoa['Dot_product_PIG']
 axes[0, 1].plot(dfoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 axes[0, 1].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 1].set_title('Pine Island basin \n', fontsize=16)
+axes[0, 1].set_ylim(ylim)
+axes[0, 1].set_yticks(yticks)
 
 delta_qoi = dfoa['delta_VAF_measures_THW'] - dfoa['delta_VAF_itslive_THW']
 dot_product = dfoa['Dot_product_THW']
 axes[0, 2].plot(dfoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 axes[0, 2].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 2].set_title('Thwaites and \n Haynes basins', fontsize=16)
+axes[0, 2].set_ylim(ylim)
+axes[0, 2].set_yticks(yticks)
 
 delta_qoi = dfoa['delta_VAF_measures_SPK'] - dfoa['delta_VAF_itslive_SPK']
 dot_product = dfoa['Dot_product_SPK']
 p1, = axes[0, 3].plot(dfoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 p2, = axes[0, 3].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 3].set_title('Smith, Pope and \n Kohler basins', fontsize=16)
+axes[0, 3].set_ylim(ylim)
+axes[0, 3].set_yticks(yticks)
 
 axes[0, 3].legend(handles=[p1, p2],
-                  labels=label_foa,
-                  frameon=True, fontsize=14, loc='upper left')
+               labels=label_foa,
+               frameon=True, fontsize=14, loc='upper left')
 
 ## SOA ################# plots ###################
 
@@ -111,81 +126,47 @@ dot_product = dsoa['Dot_product_all']
 axes[1, 0].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 axes[1, 0].plot(dsoa['time'], dot_product, color=color_palette[2])
 axes[1, 0].set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
+axes[1, 0].set_ylim(ylim)
+axes[1, 0].set_yticks(yticks)
 
 delta_qoi = dsoa['delta_VAF_measures_PIG'] - dsoa['delta_VAF_itslive_PIG']
 dot_product = dsoa['Dot_product_PIG']
 axes[1, 1].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 axes[1, 1].plot(dsoa['time'], dot_product, color=color_palette[2])
+axes[1, 1].set_ylim(ylim)
+axes[1, 1].set_yticks(yticks)
 
 delta_qoi = dsoa['delta_VAF_measures_THW'] - dsoa['delta_VAF_itslive_THW']
 dot_product = dsoa['Dot_product_THW']
 axes[1, 2].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 axes[1, 2].plot(dsoa['time'], dot_product, color=color_palette[2])
+axes[1, 2].set_ylim(ylim)
+axes[1, 2].set_yticks(yticks)
 
 delta_qoi = dsoa['delta_VAF_measures_SPK'] - dsoa['delta_VAF_itslive_SPK']
 dot_product = dsoa['Dot_product_SPK']
 p1, = axes[1, 3].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
 p2, = axes[1, 3].plot(dsoa['time'], dot_product, color=color_palette[2])
+axes[1, 3].set_ylim(ylim)
+axes[1, 3].set_yticks(yticks)
 
 axes[1, 3].legend(handles=[p1, p2],
-                  labels=label_soa,
-                  frameon=True, fontsize=14, loc='upper left')
+               labels=label_soa,
+               frameon=True, fontsize=14, loc='upper left')
 
-###################### synthetic ###############################################
 
-delta_qoi_sin = dsoa_syn['delta_VAF_measures_all'] - dsoa_syn['delta_VAF_synthetic_all']
-dot_product_sin = dsoa_syn['Dot_product_all']
-axes[2, 0].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
-axes[2, 0].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
-axes[2, 0].set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
-axes[2, 0].set_xlabel('Years')
-
-delta_qoi_sin = dsoa_syn['delta_VAF_measures_PIG'] - dsoa_syn['delta_VAF_synthetic_PIG']
-dot_product_sin = dsoa_syn['Dot_product_PIG']
-axes[2, 1].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
-axes[2, 1].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
-axes[2, 1].set_xlabel('Years')
-
-delta_qoi_sin = dsoa_syn['delta_VAF_measures_THW'] - dsoa_syn['delta_VAF_synthetic_THW']
-dot_product_sin = dsoa_syn['Dot_product_THW']
-axes[2, 2].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
-axes[2, 2].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
-axes[2, 2].set_xlabel('Years')
-
-delta_qoi_sin = dsoa_syn['delta_VAF_measures_SPK'] - dsoa_syn['delta_VAF_synthetic_SPK']
-dot_product_sin = dsoa_syn['Dot_product_SPK']
-p1, = axes[2, 3].plot(dsoa['time'], delta_qoi_sin, linestyle='dashed', color='black')
-p2, = axes[2, 3].plot(dsoa['time'], dot_product_sin, color=color_palette[4])
-axes[2, 3].set_xlabel('Years')
-
-axes[2, 3].legend(handles=[p1, p2],
-                  labels=label_soa_syn,
-                  frameon=True, fontsize=14, loc='upper left')
-
-# Hide axis labels and ticks except bottom row and rightmost column
-for row in range(3):
+for row in range(2):
     for col in range(4):
         ax = axes[row, col]
-
-        # Remove x-axis labels and ticks unless on bottom row
-        if row != 2:
+        if row == 0:
             ax.set_xlabel('')
-            ax.set_xticklabels([])
-            ax.set_xticks([])
-
-        # Remove y-axis labels and ticks unless on rightmost column
-        if col != 0:
-            ax.set_ylabel('')
-            ax.set_yticklabels([])
-            ax.set_yticks([])
-
-# Apply axis settings to all
-for ax in axes.flat:
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.set_xticks(xticks)
-    ax.set_yticks(yticks)
-    ax.grid(True)
+            ax.set_xticklabels('')
+            ax.set_xticks(xticks)
+            ax.grid(True)
+        else:
+            ax.set_xlabel('Years')
+            ax.set_xticks(xticks)
+            ax.grid(True)
 
 file_plot_name = 'results_linearity_ALL.png'
 

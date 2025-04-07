@@ -469,21 +469,26 @@ ax1.add_artist(at)
 
 
 ax2 = fig.add_subplot(gs[2])
+# Axis limits
 xlim = (0, 40)
-ylim = (0, 1.5e12)
-p1, = ax2.plot(data_frame['time'].values,
-               data_frame['delta_VAF_measures_'+run_name].values - data_frame['delta_VAF_itslive_'+run_name].values,
-               linestyle='dashed', color=color_palette[3])
-p3, = ax2.plot(data_frame['time'].values,
-               data_frame['Dot_product_'+run_name].values,
-               color=color_palette[2], label='', linewidth=3)
-plt.legend(handles=[p1, p3],
-           labels=label_lin,
-           frameon=True, fontsize=9, loc='upper left')
+ylim = (-0.5e12, 1.5e12)
+# Axis ticks
+xticks = np.arange(0, 41, 10)
+yticks = np.arange(-0.5e12, 1.5e12, 0.5e12)
+
+# Plot manually on each axis (replace with your own data)
+delta_qoi = data_frame['delta_VAF_measures_'+run_name] - data_frame['delta_VAF_itslive_'+run_name]
+dot_product = data_frame['Dot_product_'+run_name]
+p1, = ax2.plot(data_frame['time'], delta_qoi, linestyle='dashed', color=color_palette[3])
+p2, = ax2.plot(data_frame['time'], dot_product, color=color_palette[1])
 ax2.set_ylim(ylim)
-ax2.set_xlim(xlim)
-ax2.set_ylabel(y_label_lin)
-ax2.set_xlabel('Time [yrs]')
+ax2.set_yticks(yticks)
+ax2.set_xlabel('Time (yrs)')
+ax2.set_xticks(xticks)
+ax2.grid(True)
+ax2.legend(handles=[p1, p2],
+               labels=label_lin,
+               frameon=True, fontsize=14, loc='upper left')
 at = AnchoredText('c', prop=dict(size=12), frameon=True, loc='lower right')
 ax2.add_artist(at)
 
