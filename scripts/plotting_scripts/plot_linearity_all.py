@@ -5,7 +5,7 @@ import os
 import numpy as np
 import glob
 import pandas as pd
-
+from matplotlib.offsetbox import AnchoredText
 import matplotlib.ticker as ticker
 from matplotlib import rcParams
 from configobj import ConfigObj
@@ -90,6 +90,8 @@ axes[0, 0].set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
 axes[0, 0].set_title('Full domain \n', fontsize=16)
 axes[0, 0].set_ylim(ylim)
 axes[0, 0].set_yticks(yticks)
+at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower right')
+axes[0, 0].add_artist(at)
 
 delta_qoi = dfoa['delta_VAF_measures_PIG'] - dfoa['delta_VAF_itslive_PIG']
 dot_product = dfoa['Dot_product_PIG']
@@ -98,6 +100,8 @@ axes[0, 1].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 1].set_title('Pine Island basin \n', fontsize=16)
 axes[0, 1].set_ylim(ylim)
 axes[0, 1].set_yticks(yticks)
+at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower right')
+axes[0, 1].add_artist(at)
 
 delta_qoi = dfoa['delta_VAF_measures_THW'] - dfoa['delta_VAF_itslive_THW']
 dot_product = dfoa['Dot_product_THW']
@@ -106,6 +110,8 @@ axes[0, 2].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 2].set_title('Thwaites and \n Haynes basins', fontsize=16)
 axes[0, 2].set_ylim(ylim)
 axes[0, 2].set_yticks(yticks)
+at = AnchoredText('c', prop=dict(size=12), frameon=True, loc='lower right')
+axes[0, 2].add_artist(at)
 
 delta_qoi = dfoa['delta_VAF_measures_SPK'] - dfoa['delta_VAF_itslive_SPK']
 dot_product = dfoa['Dot_product_SPK']
@@ -114,6 +120,8 @@ p2, = axes[0, 3].plot(dfoa['time'], dot_product, color=color_palette[1])
 axes[0, 3].set_title('Smith, Pope and \n Kohler basins', fontsize=16)
 axes[0, 3].set_ylim(ylim)
 axes[0, 3].set_yticks(yticks)
+at = AnchoredText('d', prop=dict(size=12), frameon=True, loc='lower right')
+axes[0, 3].add_artist(at)
 
 axes[0, 3].legend(handles=[p1, p2],
                labels=label_foa,
@@ -128,6 +136,8 @@ axes[1, 0].plot(dsoa['time'], dot_product, color=color_palette[2])
 axes[1, 0].set_ylabel(r'$\Delta$ $Q_{T}$ [$m^3$]')
 axes[1, 0].set_ylim(ylim)
 axes[1, 0].set_yticks(yticks)
+at = AnchoredText('e', prop=dict(size=12), frameon=True, loc='lower right')
+axes[1, 0].add_artist(at)
 
 delta_qoi = dsoa['delta_VAF_measures_PIG'] - dsoa['delta_VAF_itslive_PIG']
 dot_product = dsoa['Dot_product_PIG']
@@ -135,6 +145,8 @@ axes[1, 1].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_palette
 axes[1, 1].plot(dsoa['time'], dot_product, color=color_palette[2])
 axes[1, 1].set_ylim(ylim)
 axes[1, 1].set_yticks(yticks)
+at = AnchoredText('f', prop=dict(size=12), frameon=True, loc='lower right')
+axes[1, 1].add_artist(at)
 
 delta_qoi = dsoa['delta_VAF_measures_THW'] - dsoa['delta_VAF_itslive_THW']
 dot_product = dsoa['Dot_product_THW']
@@ -142,6 +154,8 @@ axes[1, 2].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_palette
 axes[1, 2].plot(dsoa['time'], dot_product, color=color_palette[2])
 axes[1, 2].set_ylim(ylim)
 axes[1, 2].set_yticks(yticks)
+at = AnchoredText('g', prop=dict(size=12), frameon=True, loc='lower right')
+axes[1, 2].add_artist(at)
 
 delta_qoi = dsoa['delta_VAF_measures_SPK'] - dsoa['delta_VAF_itslive_SPK']
 dot_product = dsoa['Dot_product_SPK']
@@ -149,24 +163,28 @@ p1, = axes[1, 3].plot(dsoa['time'], delta_qoi, linestyle='dashed', color=color_p
 p2, = axes[1, 3].plot(dsoa['time'], dot_product, color=color_palette[2])
 axes[1, 3].set_ylim(ylim)
 axes[1, 3].set_yticks(yticks)
+at = AnchoredText('h', prop=dict(size=12), frameon=True, loc='lower right')
+axes[1, 3].add_artist(at)
 
 axes[1, 3].legend(handles=[p1, p2],
                labels=label_soa,
                frameon=True, fontsize=14, loc='upper left')
 
-
 for row in range(2):
     for col in range(4):
         ax = axes[row, col]
+        ax.grid(True)
+        ax.set_xticks(xticks)
+
+        # X-axis control
         if row == 0:
-            ax.set_xlabel('')
-            ax.set_xticklabels('')
-            ax.set_xticks(xticks)
-            ax.grid(True)
+            ax.set_xticklabels([])  # Ticks only, no labels
         else:
-            ax.set_xlabel('Years')
-            ax.set_xticks(xticks)
-            ax.grid(True)
+            ax.set_xlabel('Time [yrs]')
+
+        # Y-axis control
+        if col != 0:
+            ax.set_yticklabels([])  # Hide Y-axis labels but keep ticks
 
 file_plot_name = 'results_linearity_ALL.png'
 
