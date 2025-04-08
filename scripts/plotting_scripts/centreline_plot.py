@@ -392,7 +392,7 @@ cax = divider.append_axes("bottom", size="5%", pad=0.5)
 smap = salem.Map(gv, countries=False)
 x_n, y_n = smap.grid.transform(dv_sens.x, dv_sens.y,
                                crs=gv.proj)
-c = axes.contourf(x_n, y_n, dv_sens.dQ_dM_14.data, levels=levels, extend="both")
+c = axes.contourf(x_n, y_n, dv_sens.dQ_dM_14.data, levels=levels, cmap=cmap_sen, extend="both")
 
 smap.set_vmin(minv)
 smap.set_vmax(maxv)
