@@ -64,6 +64,10 @@ parser.add_argument("-sub_plot_dir",
                     type=str,
                     default="temp",
                     help="pass sub plot directory to store csv file with output")
+parser.add_argument("-add_diff_as_std",
+                    action="store_true",
+                    help="If this is specify the std is replace "
+                         "by the diff between datasets")
 
 args = parser.parse_args()
 config_file = args.conf
@@ -81,10 +85,41 @@ plot_path = os.path.join(MAIN_PATH, 'plots/'+ sub_plot_dir)
 if not os.path.exists(plot_path):
     os.makedirs(plot_path)
 
-dmm = xr.open_dataset(config['input_files']['measures_comp_interp'])
 ase_bbox = {}
 for key in config['mesh_extent'].keys():
     ase_bbox[key] = np.float64(config['mesh_extent'][key])
+
+path_itslive_main = config['input_files']['itslive']
+file_names = os.listdir(path_itslive_main)
+
+paths_itslive = []
+for f in file_names:
+    paths_itslive.append(os.path.join(path_itslive_main, f))
+
+paths_itslive = sorted(paths_itslive)
+print(paths_itslive)
+
+mosaic_itslive_file_path = paths_itslive[0]
+assert '_0000.nc' in mosaic_itslive_file_path
+
+### Get ITS_LIVE mosaic data
+# 1) data itslive mosaic (dim)
+dim = xr.open_dataset(mosaic_itslive_file_path)
+
+vxim, vyim, std_vxim, std_vyim = velocity.process_itslive_netcdf(dim)
+# section of the data
+vxim_s = velocity.crop_velocity_data_to_extend(vxim,
+                                               ase_bbox,
+                                               return_xarray=True)
+
+xim_s = vxim_s.x.data
+yim_s = vxim_s.y.data
+
+vyim_s = velocity.crop_velocity_data_to_extend(vyim, ase_bbox, return_xarray=True)
+vxim_std_s = velocity.crop_velocity_data_to_extend(std_vxim, ase_bbox, return_xarray=True)
+vyim_std_s = velocity.crop_velocity_data_to_extend(std_vyim, ase_bbox, return_xarray=True)
+
+dmm = xr.open_dataset(config['input_files']['measures_comp_interp'])
 
 vxmm = dmm.vx
 vymm = dmm.vy
@@ -92,13 +127,22 @@ std_vxmm = dmm.std_vx
 std_vymm = dmm.std_vy
 
 # Crop velocity data to the ase Glacier extend
-vxmm_s, xmm_s, ymm_s = velocity.crop_velocity_data_to_extend(vxmm,
-                                                              ase_bbox,
-                                                              return_coords=True)
+vxmm_s = velocity.crop_velocity_data_to_extend(vxmm,
+                                               ase_bbox,
+                                               return_xarray=True)
+xmm_s = vxmm_s.x.data
+ymm_s = vxmm_s.y.data
 
-vymm_s = velocity.crop_velocity_data_to_extend(vymm, ase_bbox)
+vymm_s = velocity.crop_velocity_data_to_extend(vymm, ase_bbox, return_xarray=True)
 vxmm_std_s = velocity.crop_velocity_data_to_extend(std_vxmm, ase_bbox, return_xarray=True)
 vymm_std_s = velocity.crop_velocity_data_to_extend(std_vymm, ase_bbox, return_xarray=True)
+
+if args.add_diff_as_std:
+    vxmm_std_s = np.abs(vxmm_s - vxim_s)
+    vymm_std_s = np.abs(vymm_s - vyim_s)
+else:
+    vxmm_std_s = vxmm_std_s
+    vymm_std_s = vymm_std_s
 
 # Flip STD arrays so  they can be multiply by dQ/dobs
 vxmm_std_s = vxmm_std_s.isel(y=slice(None, None, -1))
@@ -303,7 +347,10 @@ ax1.add_artist(n_text)
 at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
 ax1.add_artist(at)
 
-file_plot_name = 'uncertainty_proxy.png'
+if args.add_diff_as_std:
+    file_plot_name = 'uncertainty_proxy_diff.png'
+else:
+    file_plot_name = 'uncertainty_proxy.png'
 
 fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
