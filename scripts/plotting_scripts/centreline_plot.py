@@ -9,6 +9,8 @@ import seaborn as sns
 import geopandas as gpd
 import xarray as xr
 import pyproj
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.ticker as ticker
 
 from shapely.geometry import LineString
 import matplotlib.pyplot as plt
@@ -375,13 +377,27 @@ minv = 3.0
 maxv = 6.0
 levels = np.linspace(minv, maxv, 200)
 ticks = np.linspace(minv, maxv, 3)
+cmap_sen = sns.color_palette("magma", as_cmap=True)
 
+label_math = r'$\frac{\partial Q}{\partial\hat{p}}$ (m$^2$ . yr)'
+format_ticker = [r'3$\times 10^{10}$',
+                 r'4.5$\times 10^{10}$',
+                 r'6$\times 10^{10}$']
 
 fig, axes = plt.subplots(figsize=(6, 8))
+
+divider = make_axes_locatable(axes)
+cax = divider.append_axes("bottom", size="5%", pad=0.5)
+
 smap = salem.Map(gv, countries=False)
 x_n, y_n = smap.grid.transform(dv_sens.x, dv_sens.y,
                                crs=gv.proj)
-c = axes.contourf(x_n, y_n, dv_sens.dQ_dM_14.data, levels=levels, extend="both")
+c = axes.contourf(x_n, y_n, dv_sens.dQ_dM_14.data, levels=levels, cmap=cmap_sen, extend="both")
+
+smap.set_vmin(minv)
+smap.set_vmax(maxv)
+smap.set_extend('both')
+smap.set_cmap(cmap_sen)
 
 smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["white"])
 
@@ -409,6 +425,16 @@ smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, line
                           linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=axes, orientation='horizontal', addcbar=False)
+cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
+                         label='', ticks=ticks,
+                         format=ticker.FixedFormatter(format_ticker))
+cbar.set_label(label_math, fontsize=14)
+n_text = AnchoredText('year ' + str(40),
+                      prop=dict(size=12),
+                      frameon=True, loc='upper right')
+axes.add_artist(n_text)
+at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
+axes.add_artist(at)
 
 file_plot_name = 'centrelines_map_with_sens.png'
 
