@@ -104,6 +104,6 @@ for N in 3; do
  echo "Order Beta = $orderbeta" >> res${N}_${alpha_scale}_${beta_scale}.txt
 
 done
-done
+#done
 
 
