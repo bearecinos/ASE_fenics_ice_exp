@@ -8,3 +8,7 @@ plots
 scripts/run_experiments/run_paper_tomls/run_synthetic_vel
 scripts/post_processing/gather_linearity_plot_data_foa_synthetic.py
 scripts/post_processing/gather_linearity_plot_data_soa_synthetic.py
+scripts/post_processing/taylor_test_ase/err*
+scripts/post_processing/taylor_test_ase/new_toml.toml
+scripts/post_processing/taylor_test_ase/out*
+scripts/post_processing/taylor_test_ase/res*
