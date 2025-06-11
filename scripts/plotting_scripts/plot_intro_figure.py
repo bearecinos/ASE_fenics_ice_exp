@@ -286,8 +286,8 @@ ax3.add_artist(at)
 
 ax0.title.set_text(r'Model speed')
 ax1.title.set_text(r'Observed speed MEaSUREs')
-ax2.title.set_text(r'$\alpha_{MEaSUREs}$')
-ax3.title.set_text(r'$\beta_{MEaSUREs}$')
+ax2.title.set_text(r'$\alpha_{MEaSUREs}$' + '\n' + r'$\gamma_{\alpha} = 1.0 \times 10^{4}$')
+ax3.title.set_text(r'$\beta_{MEaSUREs}$' + '\n' + r'$\gamma_{\beta} = 4.0 \times 10^{1}$')
 
 fig1.set_constrained_layout(True)
 path_to_plot = os.path.join(str(plot_path), 'ase_inversion' + args.plot_name +  '.png')
@@ -355,5 +355,5 @@ if args.plot_domain:
     ax1.title.set_text('MEaSUREsv2 average 1996-2016')
 
     fig1.set_constrained_layout(True)
-    path_to_plot = os.path.join(str(plot_path), 'ase_input_data.png')
+    path_to_plot = os.path.join(str(plot_path), 'ase_input_data_measures.png')
     plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
