@@ -60,7 +60,7 @@ vel_file = "ase_obs_vel_synthetic-comp_synthetic-cloud_2014-lamda-0E+0.h5"
 
 [inversion]
 
-max_iter = 1000
+max_iter = 2000
 #max_iter = 200 # This default values fail in the new environment (Newton iteration does not converge)
 
 alpha_active = true
