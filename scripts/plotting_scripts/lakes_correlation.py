@@ -10,6 +10,7 @@ from scipy.interpolate import griddata
 from scipy.stats import ttest_ind
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
 # Load configuration file for more order in paths
 parser = argparse.ArgumentParser()
@@ -111,30 +112,32 @@ t_stat_40, p_val_40 = ttest_ind(lake_vals_nonan_40, nonlake_vals_nonan_40, equal
 print(f"T-test: t year 40 = {t_stat_40:.2f}, p = {p_val_40:.2e}")
 
 t_stat_10, p_val_10 = ttest_ind(lake_vals_nonan_10, nonlake_vals_nonan_10, equal_var=False)
-print(f"T-test: t year 9 = {t_stat_10:.2f}, p = {p_val_10:.2e}")
+print(f"T-test: t year 10 = {t_stat_10:.2f}, p = {p_val_10:.2e}")
 
 t_test_40 = f"T-test year 40: = {t_stat_40:.2f}, \n p = {p_val_40:.2e}"
-t_test_10 = f"T-test year 9: = {t_stat_10:.2f}, \n p = {p_val_10:.2e}"
+t_test_10 = f"T-test year 10: = {t_stat_10:.2f}, \n p = {p_val_10:.2e}"
 
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
 # Pick a specific Axes to plot on, say top-left (0, 0)
 ax = axs[0]
-ax.hist(nonlake_vals_nonan_10, bins=50, alpha=0.5, label="Surroundings", density=True)
 ax.hist(lake_vals_nonan_10, bins=50, alpha=0.5, label="Subglacial lakes", density=True)
+ax.hist(nonlake_vals_nonan_10, bins=50, alpha=0.5, label="Surroundings", density=True)
+#ax.hist(lake_vals_nonan_10, bins=50, alpha=0.5, label="Subglacial lakes", density=True)
 
 ax.legend(loc='upper left')
 ax.set_xlabel(r'log(10) $\frac{\partial Q}{\partial\hat{p}}$' + '\n'+ r'($m^2$ . yr)')
 ax.set_ylabel("Density")
-ax.set_title("Sensitivity distribution at year 9")
+ax.set_title("Sensitivity distribution at year 10")
 #ax.set_xlim(0, np.percentile(nonlake_vals_nonan_10, 99))
 at = AnchoredText(t_test_10, prop=dict(size=10), frameon=True, loc='lower left')
 ax.add_artist(at)
 
 ax = axs[1]
-ax.hist(nonlake_vals_nonan_40, bins=50, alpha=0.5, label="Surroundings", density=True)
 ax.hist(lake_vals_nonan_40, bins=50, alpha=0.5, label="Subglacial lakes", density=True)
+ax.hist(nonlake_vals_nonan_40, bins=50, alpha=0.5, label="Surroundings", density=True)
+#ax.hist(lake_vals_nonan_40, bins=50, alpha=0.5, label="Subglacial lakes", density=True)
 #ax.set_xlim(0, np.percentile(nonlake_vals_nonan_40, 99))
 ax.legend(loc='upper left')
 ax.set_xlabel(r'log(10) $\frac{\partial Q}{\partial\hat{p}}$' + '\n'+ r'($m^2$ . yr)')
@@ -148,10 +151,15 @@ file_plot_name = 'lakes_spatial_stats.png'
 fig_save_path = os.path.join(plot_path, file_plot_name)
 plt.savefig(fig_save_path, bbox_inches='tight', dpi=150)
 
+# Custom 2-color colormap (match histogram colors if known)
+lake_color = "#85add5"       # blue for lakes
+surrounding_color = "#f4b06a"  # orange for surroundings
+cmap = ListedColormap([surrounding_color, lake_color])
+norm = BoundaryNorm([0, 0.5, 1], cmap.N)  # binary: 0 and 1
 
 fig, axs = plt.subplots(1, 1, figsize=(5, 5))
-plt.imshow(interp_mask, origin="lower")
-plt.colorbar(ax=axs)
+plt.imshow(interp_mask, origin="lower", cmap=cmap, norm=norm)
+plt.colorbar(ax=ax, ticks=[0.25, 0.75])
 file_plot_name = 'mask_of_lake_area.png'
 
 fig_save_path = os.path.join(plot_path, file_plot_name)
