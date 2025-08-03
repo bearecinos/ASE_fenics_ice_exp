@@ -232,7 +232,7 @@ sigma = coeff1*surf + coeff2*bed
 ########### Plotting ##############################################
 r = 0.9
 
-fig = plt.figure(figsize=(14*r, 10*r), constrained_layout=True)
+fig = plt.figure(figsize=(25*r, 12*r), constrained_layout=True)
 gs = gridspec.GridSpec(2, 2, wspace=0.25, hspace=0.25)
 
 # Shared setup
@@ -294,7 +294,7 @@ ax2.set_aspect('equal')
 div2 = make_axes_locatable(ax2)
 cax2 = div2.append_axes("bottom", size="5%", pad=0.5)
 smap = plot_background(ax2, mag_vector_3)
-contour_lines = ax2.contour(x_m, y_m, sigma, levels=levels_two, cmap=cmap_sigma, norm=norm_sigma, linewidth=1.0, alpha=0.5)
+contour_lines = ax2.contour(x_m, y_m, sigma, levels=levels_two, cmap=cmap_sigma, norm=norm_sigma, linewidth=1.0)
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5, linestyles='-', colors='grey', add_tick_labels=False)
 smap.visualize(ax=ax2, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax2, orientation="horizontal", label='', ticks=ticks, format=ticker.FixedFormatter(format_ticker))
@@ -309,7 +309,7 @@ ax3.set_aspect('equal')
 div3 = make_axes_locatable(ax3)
 cax3 = div3.append_axes("bottom", size="5%", pad=0.5)
 smap = plot_background(ax3, mag_vector_14)
-contour_lines = ax3.contour(x_m, y_m, sigma, levels=levels_two, cmap=cmap_sigma, norm=norm_sigma, linewidth=1.0, alpha=0.5)
+contour_lines = ax3.contour(x_m, y_m, sigma, levels=levels_two, cmap=cmap_sigma, norm=norm_sigma, linewidth=1.0)
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5, linestyles='-', colors='grey', add_tick_labels=False)
 smap.visualize(ax=ax3, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax3, orientation="horizontal", label='', ticks=ticks, format=ticker.FixedFormatter(format_ticker))
