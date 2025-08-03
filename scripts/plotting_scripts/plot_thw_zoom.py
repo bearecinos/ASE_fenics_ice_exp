@@ -230,151 +230,84 @@ coeff2 = (rhow-rhoi)/rhow
 
 sigma = coeff1*surf + coeff2*bed
 ########### Plotting ##############################################
+r = 0.9
 
-r=0.9
+fig = plt.figure(figsize=(14*r, 10*r), constrained_layout=True)
+gs = gridspec.GridSpec(2, 2, wspace=0.25, hspace=0.25)
 
-fig = plt.figure(figsize=(12.5*r, 6*r), constrained_layout=True)
-#fig.suptitle("Thwaites and Haynes")
-
-gs = gridspec.GridSpec(1, 2, wspace=0.35)
-ax0 = fig.add_subplot(gs[0])
-
-
-ax0.set_aspect('equal')
-divider = make_axes_locatable(ax0)
-cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gv, countries=False)
-x_n, y_n = smap.grid.transform(x, y,
-                               crs=gv.proj)
-c = ax0.tricontourf(x_n, y_n, t, mag_vector_3,
-                    levels=levels,
-                    cmap=cmap_sen, extend="both")
-
-x_m, y_m = smap.grid.transform(xx, yy,
-                               crs=gv.proj)
-
+# Shared setup
+x_n, y_n = salem.Map(gv).grid.transform(x, y, crs=gv.proj)
+x_m, y_m = salem.Map(gv).grid.transform(xx, yy, crs=gv.proj)
 levels_two = np.linspace(np.min(sigma), np.max(sigma), 30)
-cmap = plt.get_cmap('winter_r')
+cmap_sigma = plt.get_cmap('winter_r')
+norm_sigma = BoundaryNorm(levels_two, ncolors=cmap_sigma.N, clip=True)
 
-norm = BoundaryNorm(levels_two, ncolors=cmap.N, clip=True)
+# Helper to create tricontourf background
+def plot_background(ax, vector_data):
+    smap = salem.Map(gv, countries=False)
+    tric = ax.tricontourf(x_n, y_n, t, vector_data, levels=levels, cmap=cmap_sen, extend="both")
+    smap.set_vmin(minv)
+    smap.set_vmax(maxv)
+    smap.set_extend('both')
+    smap.set_cmap(cmap_sen)
+    smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
+    return smap
 
-contour_lines = ax0.contour(x_m, y_m, sigma,
-                            levels=levels_two, cmap=cmap, norm=norm,
-                            linewidth=1.0,
-                            alpha=0.5)
-
-
-
-smap.set_vmin(minv)
-smap.set_vmax(maxv)
-smap.set_extend('both')
-smap.set_cmap(cmap_sen)
-smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-
-for g, geo in enumerate(shp_lake.geometry):
-    smap.set_geometry(shp_lake.loc[g].geometry,
-                      linewidth=0.5,
-                      alpha=0.1,
-                      facecolor='white', edgecolor='white',
-                      crs=gv.proj)
-
-for g, geo in enumerate(gnd_rig.geometry):
-    smap.set_geometry(gnd_rig.loc[g].geometry,
-                      linewidth=1.0,
-                      color=sns.xkcd_rgb["black"],
-                      alpha=0.3, crs=gv.proj)
-
-# for g, geo in enumerate(df_press.geometry):
-#     smap.set_geometry(df_press.loc[g].geometry,
-#                       linewidth=1.0,
-#                       color=sns.xkcd_rgb["grey"],
-#                       alpha=0.5, crs=gv.proj)
-
-smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
-                          linestyles='-', colors='grey', add_tick_labels=False)
+# Panel A
+ax0 = fig.add_subplot(gs[0, 0])
+ax0.set_aspect('equal')
+div0 = make_axes_locatable(ax0)
+cax0 = div0.append_axes("bottom", size="5%", pad=0.5)
+smap = plot_background(ax0, mag_vector_3)
+for g in range(len(shp_lake)):
+    smap.set_geometry(shp_lake.loc[g].geometry, linewidth=0.5, alpha=0.1, facecolor='white', edgecolor='white', crs=gv.proj)
+for g in range(len(gnd_rig)):
+    smap.set_geometry(gnd_rig.loc[g].geometry, linewidth=1.0, color=sns.xkcd_rgb["black"], alpha=0.3, crs=gv.proj)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5, linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
-cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
-                         label='', ticks=ticks,
-                         format=ticker.FixedFormatter(format_ticker))
+cbar = smap.colorbarbase(cax=cax0, orientation="horizontal", label='', ticks=ticks, format=ticker.FixedFormatter(format_ticker))
 cbar.set_label(label_math, fontsize=14)
+ax0.add_artist(AnchoredText('year ' + str(t_zero), prop=dict(size=12), frameon=True, loc='upper right'))
+ax0.add_artist(AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left'))
 
-cbar_ax = divider.append_axes("right", size="5%", pad=0.5)
-
-fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
-                                   cmap=contour_lines.cmap),
-             cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
-
-n_text = AnchoredText('year ' + str(t_zero),
-                      prop=dict(size=12),
-                      frameon=True, loc='upper right')
-ax0.add_artist(n_text)
-at = AnchoredText('a', prop=dict(size=12), frameon=True, loc='lower left')
-ax0.add_artist(at)
-
-
-ax1 = fig.add_subplot(gs[1])
+# Panel B
+ax1 = fig.add_subplot(gs[0, 1])
 ax1.set_aspect('equal')
-divider = make_axes_locatable(ax1)
-cax = divider.append_axes("bottom", size="5%", pad=0.5)
-smap = salem.Map(gv, countries=False)
-c = ax1.tricontourf(x_n, y_n, t, mag_vector_14,
-                    levels=levels,
-                    cmap=cmap_sen,
-                    extend="both")
-
-contour_lines = ax1.contour(x_m, y_m, sigma,
-                            levels=levels_two, cmap=cmap, norm=norm,
-                            linewidth=1.0,
-                            alpha=0.5)
-
-smap.set_vmin(minv)
-smap.set_vmax(maxv)
-smap.set_extend('both')
-smap.set_cmap(cmap_sen)
-smap.set_shapefile(shp_sel, linewidth=2, edgecolor=sns.xkcd_rgb["grey"])
-
-for g, geo in enumerate(shp_lake.geometry):
-    smap.set_geometry(shp_lake.loc[g].geometry,
-                      linewidth=0.5,
-                      alpha=0.1,
-                      facecolor='white', edgecolor='white',
-                      crs=gv.proj)
-
-for g, geo in enumerate(gnd_rig.geometry):
-    smap.set_geometry(gnd_rig.loc[g].geometry,
-                      linewidth=1.0,
-                      color=sns.xkcd_rgb["black"],
-                      alpha=0.3, crs=gv.proj)
-
-# for g, geo in enumerate(df_press.geometry):
-#     smap.set_geometry(df_press.loc[g].geometry,
-#                       linewidth=1.0,
-#                       color=sns.xkcd_rgb["grey"],
-#                       alpha=0.5, crs=gv.proj)
-
-smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5,
-                          linestyles='-', colors='grey', add_tick_labels=False)
-
+div1 = make_axes_locatable(ax1)
+cax1 = div1.append_axes("bottom", size="5%", pad=0.5)
+smap = plot_background(ax1, mag_vector_14)
+for g in range(len(shp_lake)):
+    smap.set_geometry(shp_lake.loc[g].geometry, linewidth=0.5, alpha=0.1, facecolor='white', edgecolor='white', crs=gv.proj)
+for g in range(len(gnd_rig)):
+    smap.set_geometry(gnd_rig.loc[g].geometry, linewidth=1.0, color=sns.xkcd_rgb["black"], alpha=0.3, crs=gv.proj)
+smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5, linestyles='-', colors='grey', add_tick_labels=False)
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
-cbar = smap.colorbarbase(cax=cax, orientation="horizontal",
-                         label='', ticks=ticks,
-                         format=ticker.FixedFormatter(format_ticker))
+cbar = smap.colorbarbase(cax=cax1, orientation="horizontal", label='', ticks=ticks, format=ticker.FixedFormatter(format_ticker))
 cbar.set_label(label_math, fontsize=14)
-n_text = AnchoredText('year ' + str(t_last),
-                      prop=dict(size=12),
-                      frameon=True, loc='upper right')
-ax1.add_artist(n_text)
-at = AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left')
-ax1.add_artist(at)
+ax1.add_artist(AnchoredText('year ' + str(t_last), prop=dict(size=12), frameon=True, loc='upper right'))
+ax1.add_artist(AnchoredText('b', prop=dict(size=12), frameon=True, loc='lower left'))
 
+# Panel C
+ax2 = fig.add_subplot(gs[1, 0])
+ax2.set_aspect('equal')
+div2 = make_axes_locatable(ax2)
+cax2 = div2.append_axes("bottom", size="5%", pad=0.5)
+plot_background(ax2, mag_vector_3)
+contour_lines = ax2.contour(x_m, y_m, sigma, levels=levels_two, cmap=cmap_sigma, norm=norm_sigma, linewidth=1.0, alpha=0.5)
+fig.colorbar(plt.cm.ScalarMappable(norm=norm_sigma, cmap=cmap_sigma), ax=ax2, shrink=0.6, label='hydraulic head (m)')
+ax2.add_artist(AnchoredText('c', prop=dict(size=12), frameon=True, loc='lower left'))
 
-cbar_ax = divider.append_axes("right", size="5%", pad=0.5)
-fig.colorbar(plt.cm.ScalarMappable(norm=contour_lines.norm,
-                                   cmap=contour_lines.cmap),
-             cax=cbar_ax, shrink=0.1, label='hydraulic head (m)')
+# Panel D
+ax3 = fig.add_subplot(gs[1, 1])
+ax3.set_aspect('equal')
+div3 = make_axes_locatable(ax3)
+cax3 = div3.append_axes("bottom", size="5%", pad=0.5)
+plot_background(ax3, mag_vector_14)
+contour_lines = ax3.contour(x_m, y_m, sigma, levels=levels_two, cmap=cmap_sigma, norm=norm_sigma, linewidth=1.0, alpha=0.5)
+fig.colorbar(plt.cm.ScalarMappable(norm=norm_sigma, cmap=cmap_sigma), ax=ax3, shrink=0.6, label='hydraulic head (m)')
+ax3.add_artist(AnchoredText('d', prop=dict(size=12), frameon=True, loc='lower left'))
 
 fig.set_constrained_layout(True)
-
-path_to_plot = os.path.join(str(plot_path), 'THW_zoomed_sub_hydro' + '.png')
+path_to_plot = os.path.join(str(plot_path), 'THW_zoomed_sub_hydro.png')
 plt.savefig(path_to_plot, bbox_inches='tight', dpi=150)
