@@ -262,7 +262,7 @@ smap = plot_background(ax0, mag_vector_3)
 for g in range(len(shp_lake)):
     smap.set_geometry(shp_lake.loc[g].geometry, linewidth=0.5, alpha=0.1, facecolor='white', edgecolor='white', crs=gv.proj)
 for g in range(len(gnd_rig)):
-    smap.set_geometry(gnd_rig.loc[g].geometry, linewidth=1.0, color=sns.xkcd_rgb["black"], alpha=0.3, crs=gv.proj)
+    smap.set_geometry(gnd_rig.loc[g].geometry, linewidth=1.0, color=sns.xkcd_rgb["blue"], alpha=0.3, crs=gv.proj)
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5, linestyles='-', colors='grey', add_tick_labels=False)
 smap.set_scale_bar(location=(0.87, 0.04), add_bbox=True)
 smap.visualize(ax=ax0, orientation='horizontal', addcbar=False)
@@ -280,7 +280,7 @@ smap = plot_background(ax1, mag_vector_14)
 for g in range(len(shp_lake)):
     smap.set_geometry(shp_lake.loc[g].geometry, linewidth=0.5, alpha=0.1, facecolor='white', edgecolor='white', crs=gv.proj)
 for g in range(len(gnd_rig)):
-    smap.set_geometry(gnd_rig.loc[g].geometry, linewidth=1.0, color=sns.xkcd_rgb["black"], alpha=0.3, crs=gv.proj)
+    smap.set_geometry(gnd_rig.loc[g].geometry, linewidth=1.0, color=sns.xkcd_rgb["blue"], alpha=0.3, crs=gv.proj)
 smap.set_lonlat_contours(add_ytick_labels=False, xinterval=10, yinterval=2, linewidths=1.5, linestyles='-', colors='grey', add_tick_labels=False)
 smap.visualize(ax=ax1, orientation='horizontal', addcbar=False)
 cbar = smap.colorbarbase(cax=cax1, orientation="horizontal", label='', ticks=ticks, format=ticker.FixedFormatter(format_ticker))
